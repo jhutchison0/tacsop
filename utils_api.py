@@ -3,6 +3,8 @@
 Created on Fri Feb  4 10:58:24 2022
 
 @author: johnk
+
+https://docs.python-requests.org/en/latest/
 """
 
 # %% Packages

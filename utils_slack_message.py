@@ -12,24 +12,35 @@ conda activate base
 # pip install slack_sdk
 # conda install -c conda-forge slack-sdk
 """
+# %% Packages
 
+import logging
 import os
-from slack import WebClient
+import sys
 
-client = WebClient(token=os.environ["SLACK_API_TOKEN"])
-# ID of channel you want to post message to
-# right click on channel, open channel details, "about" tab, at bottom
-channel_id = "C032UV1S69G"  
+from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
 
+# %% Set up logger
+logging.basicConfig(level=logging.DEBUG)
+# Verify it works
+
+# %% Post to channel
+# log handler #1 publish status update
+# log handler #2 captures an API error to record locally
+
+client = WebClient(token=os.environ['slack_bot_token'])
 try:
-    # Call the conversations.list method using the WebClient
-    result = client.chat_postMessage(
-        channel=channel_id,
-        text="Hello world!"
-        # You could also use a blocks[] array to send richer content
-    )
-    # Print result, which includes information about the message (like TS)
-    print(result)
-
+    response = client.chat_postMessage(channel='C032UV1S69G', text="Hello world!")
+    assert response["message"]["text"] == "Hello world!"
 except SlackApiError as e:
-    print(f"Error: {e}")
+    # You will get a SlackApiError if "ok" is False
+    assert e.response["ok"] is False
+    assert e.response["error"]  # str like 'invalid_auth', 'channel_not_found'
+    print(f"Got an error: {e.response['error']}")
+
+# %% Error
+
+
+
+

@@ -63,5 +63,12 @@ print(wod.get_text())
 client = WebClient(token=os.environ['slack_bot_token'])
 response = client.chat_postMessage(channel='C032X2CMSPL', text=f"WOD for today, {id_tomorrow}")
 response = client.chat_postMessage(channel='C032X2CMSPL', text=wod.get_text())
+# response = client.chat_postMessage(channel='C032X2CMSPL', \
+
+#     blocks={
+#         "type": "section",
+#         "text": {"type": "mrkdwn", "text": wod.}
+#     }
+# )
 
 # %% Error

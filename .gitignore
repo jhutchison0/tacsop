@@ -1,3 +1,16 @@
-# Pycache
+# System level cache and checkpoints
 
+.ipynb_checkpoints/
+.spyproject/
+.vs/
 __pycache__/
+
+# Program data and outputs
+
+archive/
+data/
+outputs/
+
+# Exceptions (for use case/consideration)
+# */*.json
+# */*.ps1

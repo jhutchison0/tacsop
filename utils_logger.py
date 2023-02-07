@@ -35,15 +35,17 @@ import os
 # NOTSET	 0	
 # =============================================================================
 
+# %% Variables
+name_logger = "get_wod_logger"
 
+path_home = os.getcwd()
+path_log = path_home + "\logs"
+file_name = path_log + f"\\{name_logger}"
 
 # %% Logger
 
-path_home = os.getcwd()
-path_log = path_home + "\outputs"
-file_name = path_log + "\cet_record"
 # create logger
-logger = logging.getLogger(name="cet_logger")
+logger = logging.getLogger(name=name_logger)
 if (logger.hasHandlers()):
     logger.handlers.clear()
 logger.setLevel(logging.DEBUG)

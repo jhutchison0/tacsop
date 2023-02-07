@@ -78,8 +78,8 @@ def table_save(d, file_name, keep_index=False):
         worksheet.set_column(0, max_col - 1, 18)
 
     # Close the Pandas Excel writer and output the Excel file.
-    writer.save()
-    # writer.close()
+    # writer.save()
+    writer.close()
     return
 
 

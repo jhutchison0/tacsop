@@ -9,9 +9,12 @@ Created on 1 Oct 2020
 # %% Packages
 
 import datetime
+
 # import json
 import logging
 import os
+import pathlib
+
 # import pandas as pd
 # import sys
 # import time
@@ -21,68 +24,77 @@ import os
 
 # =============================================================================
 # Level     Numeric value	    When it's Used
-# CRITICAL  50	A serious error, indicating that the program itself may be 
+# CRITICAL  50	A serious error, indicating that the program itself may be
 #                     unable to continue running.
-# ERROR	    40	Due to a more serious problem, the software has not been 
+# ERROR	    40	Due to a more serious problem, the software has not been
 #                     able to perform some function.
-# WARNING	30	An indication that something unexpected happened, or 
-#                     indicative of some problem in the near future 
-#                     (e.g. ‘disk space low’). The software is still 
+# WARNING	30	An indication that something unexpected happened, or
+#                     indicative of some problem in the near future
+#                     (e.g. ‘disk space low’). The software is still
 #                     working as expected.
 # INFO	    20	Confirmation that things are working as expected.
-# DEBUG	    10	Detailed information, typically of interest only 
+# DEBUG	    10	Detailed information, typically of interest only
 #                     when diagnosing problems.
-# NOTSET	 0	
+# NOTSET	 0
 # =============================================================================
 
-# %% Variables
-name_logger = "get_wod_logger"
 
-path_home = os.getcwd()
-path_log = path_home + "\logs"
-file_name = path_log + f"\\{name_logger}"
+# %% Variables
+
+# modify path to utils and data based off cwd (run as utils or fema_cria)
+if pathlib.Path.cwd().stem == "fps_server":
+    path_utils = pathlib.Path("utils/")
+    path_data = pathlib.Path("data/")
+    path_out = pathlib.Path("output/")
+
+elif pathlib.Path.cwd().stem == "utils":
+    path_utils = pathlib.Path.cwd()
+    path_data = pathlib.Path("../data/")
+    path_out = pathlib.Path("../output/")
+
+elif pathlib.Path.cwd().stem == "fps":
+    path_local = pathlib.Path("fps_server/")
+    path_utils = pathlib.Path(path_local / "utils/")
+    path_data = pathlib.Path(path_local / "data/")
+    path_out = pathlib.Path(path_local / "output/")
+
 
 # %% Logger
+# Create one logger:
+#     - track detailed information of issues; but overwrite
 
 # create logger
-logger = logging.getLogger(name=name_logger)
-if (logger.hasHandlers()):
+# logger = logging.getLogger(name=__name__)
+logger = logging.getLogger(name=__name__)
+if logger.hasHandlers():
     logger.handlers.clear()
 logger.setLevel(logging.DEBUG)
-logger.propagate = True
+logger.propagate = False
 
-# Timed rotating File Handler
-# filename is 'string.log' with '%Y-%m-%d_%H-%M-%S' appended to end
+# create file handler which logs even debug messages
 
-# for Sunday rollover, need to 'discover' most recent Sunday
-today = datetime.date.today()
-# datetime returns 0 for Monday; shift index to 0 on Sunday
-# Mon = 0,..., Sun = 6 --> Mon = 0,..Sat = 6
-weekday_shift = (today.weekday() + 1) % 7
-sunday = today - datetime.timedelta(weekday_shift)
-# Append weekday to filename
-file_name_weekly = file_name + "_" + str(sunday) + ".log"
-# create a light and detailed handler
-# rotate records on Sunday, W6
+file_name = "fps_server.log"
+fh = logging.FileHandler(path_out / file_name, mode="w")
+fh.setLevel(logging.DEBUG)
 
-fh_record = logging.FileHandler(filename=file_name_weekly,
-                                mode="a")
-#fh_record = logging.FileHandler('cluster_method_record.log',mode = 'a')
-fh_record.setLevel(logging.INFO)
-fh_issues = logging.FileHandler(file_name + "_issues.log", mode="w")
-fh_issues.setLevel(logging.DEBUG)
+# create console handler and set level to debug
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
 
 # create formatter
-formatter = logging.Formatter(fmt="%(asctime)s - %(name)s - "\
-                              "%(levelname)s - %(message)s",
-                              datefmt='%Y/%m/%d %H:%M:%S')
+formatter = logging.Formatter(
+    fmt="%(asctime)s - %(module)s - " "%(levelname)s - %(message)s",
+    datefmt="%Y/%m/%d %H:%M:%S",
+)
+# add formatter to ch_issues
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
 
-# add formatter to both handlers
-fh_record.setFormatter(formatter)
-fh_issues.setFormatter(formatter)
+# add ch_issues to logger
+logger.addHandler(fh)
+logger.addHandler(ch)
+logger.info("issues logger ready")
 
-# add ch to logger
-logger.addHandler(fh_record)
-logger.addHandler(fh_issues)
-
-logger.debug('how about now, or now?')
+# troubleshooting
+# loggers = [logging.getLogger()]  # get the root logger
+# loggers = loggers + [logging.getLogger(name) for name in logging.root.manager.loggerDict]

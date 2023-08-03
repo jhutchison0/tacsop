@@ -1,12 +1,13 @@
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3.11
 # -*- coding: utf-8 -*-
 """
-Created on 1 Oct 2020
+Updated on 2 Aug 2023
 
 
 """
 
 # %% Packages
+""" Third party and local imports """
 
 import datetime
 
@@ -19,8 +20,12 @@ import pathlib
 # import sys
 # import time
 
+# Local import
+from utils_references import paths
+
 
 # %% Notes
+""" Notes from the docs on logger levels """
 
 # =============================================================================
 # Level     Numeric value	    When it's Used
@@ -40,31 +45,15 @@ import pathlib
 
 
 # %% Variables
+""" Set script (global) variables """
 
-# modify path to utils and data based off cwd (run as utils or fema_cria)
-if pathlib.Path.cwd().stem == "fps_server":
-    path_utils = pathlib.Path("utils/")
-    path_data = pathlib.Path("data/")
-    path_out = pathlib.Path("output/")
-
-elif pathlib.Path.cwd().stem == "utils":
-    path_utils = pathlib.Path.cwd()
-    path_data = pathlib.Path("../data/")
-    path_out = pathlib.Path("../output/")
-
-elif pathlib.Path.cwd().stem == "fps":
-    path_local = pathlib.Path("fps_server/")
-    path_utils = pathlib.Path(path_local / "utils/")
-    path_data = pathlib.Path(path_local / "data/")
-    path_out = pathlib.Path(path_local / "output/")
+path_out = paths["logs"]
 
 
 # %% Logger
-# Create one logger:
-#     - track detailed information of issues; but overwrite
+""" Create and customize logger """
 
 # create logger
-# logger = logging.getLogger(name=__name__)
 logger = logging.getLogger(name=__name__)
 if logger.hasHandlers():
     logger.handlers.clear()
@@ -73,9 +62,27 @@ logger.propagate = False
 
 # create file handler which logs even debug messages
 
-file_name = "fps_server.log"
-fh = logging.FileHandler(path_out / file_name, mode="w")
-fh.setLevel(logging.DEBUG)
+file_name = "daily_wod"
+
+# Timed rotating File Handler
+# filename is 'string.log' with '%Y-%m-%d_%H-%M-%S' appended to end
+
+# for Sunday rollover, need to identify most recent Sunday
+today = datetime.date.today()
+# datetime returns 0 for Monday; shift index to 0 on Sunday
+# Mon = 0,..., Sun = 6 --> Mon = 0,..Sat = 6
+weekday_shift = (today.weekday() + 1) % 7
+sunday = today - datetime.timedelta(weekday_shift)
+# Append weekday to filename
+file_name_weekly = f"{file_name}_{sunday}"
+# create a light and detailed handler
+# rotate records on Sunday, W6
+
+fh_record = logging.FileHandler(filename=path_out / f"{file_name_weekly}.log", mode="a")
+fh_record.setLevel(logging.INFO)
+
+fh_issues = logging.FileHandler(path_out / f"{file_name}.log", mode="w")
+fh_issues.setLevel(logging.DEBUG)
 
 # create console handler and set level to debug
 ch = logging.StreamHandler()
@@ -86,15 +93,31 @@ formatter = logging.Formatter(
     fmt="%(asctime)s - %(module)s - " "%(levelname)s - %(message)s",
     datefmt="%Y/%m/%d %H:%M:%S",
 )
+
 # add formatter to ch_issues
-fh.setFormatter(formatter)
+fh_record.setFormatter(formatter)
+fh_issues.setFormatter(formatter)
 ch.setFormatter(formatter)
 
 # add ch_issues to logger
-logger.addHandler(fh)
+logger.addHandler(fh_record)
+logger.addHandler(fh_issues)
 logger.addHandler(ch)
-logger.info("issues logger ready")
 
-# troubleshooting
-# loggers = [logging.getLogger()]  # get the root logger
-# loggers = loggers + [logging.getLogger(name) for name in logging.root.manager.loggerDict]
+# %% Troubleshoot
+""" Troubleshooting and old code """
+
+loggers = [logging.getLogger()]  # get the root logger
+loggers = loggers + [
+    logging.getLogger(name) for name in logging.root.manager.loggerDict
+]
+
+
+# %% Main
+""" Display task data """
+
+if __name__ == "__main__":
+    logger.info("logger ready")
+
+
+# %%

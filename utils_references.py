@@ -13,7 +13,6 @@ import pathlib
 import sys
 
 # Local import
-from utils.utils_logger import logger
 
 
 # %% Functions
@@ -23,20 +22,23 @@ from utils.utils_logger import logger
 # %% Variables
 """ Set script (global) variables """
 
+name_top_package = "GitHub"
+name_sub_package = "scrape_wod_daily"
+
 # Local paths
 # modify path to utils and data based off cwd (run as utils or fps_server)
-if pathlib.Path.cwd().stem == "fps_server":
+if pathlib.Path.cwd().stem == name_sub_package:
     path_local = pathlib.Path.cwd()
+
+elif pathlib.Path.cwd().stem == name_top_package:
+    path_local = pathlib.Path(f"{name_sub_package}/")
 
 elif pathlib.Path.cwd().stem == "utils":
     path_local = pathlib.Path("../")
 
-elif pathlib.Path.cwd().stem == "fps":
-    path_local = pathlib.Path("fps_server/")
-
 path_data = path_local / pathlib.Path("data/")
-path_logs = path_data / pathlib.Path("logs/")
 path_out = path_local / pathlib.Path("output/")
+path_logs = path_local / pathlib.Path("logs/")
 path_utils = path_local / pathlib.Path("utils/")
 
 # Ensure cross-package access by modifying path
@@ -44,25 +46,18 @@ if ".." not in sys.path:
     sys.path.insert(0, "..")
 
 # External paths
-path_fps = path_local.parent
-
-path_tide = path_fps / pathlib.Path("./fps_tide/")
-path_tide_data = path_tide / pathlib.Path("data/")
-
-path_dbt = path_fps / pathlib.Path("./fps_dbt/")
-path_dbt_out = path_dbt/ pathlib.Path("output/")
+path_top = path_local.parent
+path_projects = path_top.parent
+path_webdrivers = path_projects / pathlib.Path("webdrivers/")
 
 # Record paths for handoff to other scripts
 paths = {
     "data": path_data,
     "logs": path_logs,
     "out": path_out,
+    "top": path_top,
     "utils": path_utils,
-    # "plot": path_plot,
-    "tide": path_tide,
-    "tide_data": path_tide_data,
-    "dbt": path_dbt,
-    "dbt_out": path_dbt_out,
+    "webdrivers": path_webdrivers,
 }
 
 # Module level constants and references
@@ -74,7 +69,7 @@ paths = {
 """ Display task data """
 
 if __name__ == "__main__":
-    logger.debug("references ready")
-    # print(list(path_tide_data.glob("*.csv")))
+    print("testing local, find .py files")
+    print(list(path_local.glob("*.py")))
 
 # %%

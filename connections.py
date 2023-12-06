@@ -4,6 +4,9 @@ Created on Tue Feb 07 11:00:00 2023
 
 @author: jhutchison
 
+
+mamba install pytorch torchvision torchaudio cpuonly -c pytorch
+
 """
 
 # %% Packages

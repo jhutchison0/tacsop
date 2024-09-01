@@ -24,11 +24,13 @@ from scipy.spatial.distance import cosine
 # %% Functions
 """ Define functions """
 
+
 def get_word_embedding(word):
     """Get the embedding of a single word."""
     inputs = tokenizer(word, return_tensors="pt")
     outputs = model(**inputs)
     return outputs.last_hidden_state.mean(dim=1).squeeze()
+
 
 def calculate_similarity(word1, word2):
     """Calculate cosine similarity between two words."""
@@ -55,31 +57,46 @@ if __name__ == "__main__":
     model = AutoModel.from_pretrained(model_name)
 
     # Example words
-    words = ["apple", "banana", "orange", "car", "bike", "train", "joy", "happiness", "sadness", "anger"]
     words = [
-    "travel",
-    "cheers",
-    "frasier",
-    "poetry",
-    "whooping",
-    "euphoria",
-    "felciity",
-    "huge",
-    "ficition",
-    "consturcution",
-    "big",
-    "great",
-    "glee",
-    "giant",
-    "paper",
-    "humor",
+        "apple",
+        "banana",
+        "orange",
+        "car",
+        "bike",
+        "train",
+        "joy",
+        "happiness",
+        "sadness",
+        "anger",
+    ]
+    words = [
+        "travel",
+        "cheers",
+        "frasier",
+        "poetry",
+        "whooping",
+        "euphoria",
+        "felciity",
+        "huge",
+        "ficition",
+        "consturcution",
+        "big",
+        "great",
+        "glee",
+        "giant",
+        "paper",
+        "humor",
     ]
 
     # Embedding the words
-    word_embeddings = np.array([get_word_embedding(word).detach().numpy() for word in words])
+    word_embeddings = np.array(
+        [get_word_embedding(word).detach().numpy() for word in words]
+    )
 
     # Calculate similarities (Example)
-    similarity_matrix = np.array([[calculate_similarity(w1, w2) for w2 in words] for w1 in words])
+    similarity_matrix = np.array(
+        [[calculate_similarity(w1, w2) for w2 in words] for w1 in words]
+    )
 
     # Initial clustering (Example with K-means)
     num_clusters = 4  # Assuming we need to form 4 groups
@@ -92,4 +109,3 @@ if __name__ == "__main__":
         clustered_words[cluster].append(word)
 
     clustered_words
-

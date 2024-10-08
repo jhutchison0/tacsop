@@ -11,6 +11,8 @@ archive/
 data/
 outputs/
 
+*.png
+
 # Exceptions (for use case/consideration)
 # */*.json
 # */*.ps1

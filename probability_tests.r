@@ -6,6 +6,8 @@
 library(tidyverse)
 library(glue)
 
+print(glue("100 should be {749/1.2}"))
+
 # Define constants
 p_win <- 0.01
 n_events <- 7

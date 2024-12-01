@@ -28,6 +28,12 @@ path_data = pathlib.Path("data/")
 
 if __name__ == "__main__":
     print("logger update here, main complete")
+    radius = 1.1
+    circumfrence = 2 * np.pi * radius
+    print(f"{circumfrence=:.2f}")
+    distance = 47
+    rotations = distance / circumfrence
+    print(f"{rotations=:.2f}")
 
 
 # %%

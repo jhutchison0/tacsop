@@ -1,123 +1,156 @@
-#!/usr/bin/env python3.11
 # -*- coding: utf-8 -*-
 """
-Updated on 2 Aug 2023
-
-
+Logging utilities
 """
-
-# %% Packages
-""" Third party and local imports """
-
-import datetime
-
-# import json
 import logging
 import os
-import pathlib
-
-# import pandas as pd
-# import sys
-# import time
-
-# Local import
-from utils_references import paths
+from pathlib import Path
+import sys
+from datetime import datetime
+from zoneinfo import ZoneInfo  # or import pytz if Python < 3.9
 
 
-# %% Notes
-""" Notes from the docs on logger levels """
+class LoggerSetup:
+    """Class for setting up loggers with consistent formatting and behavior"""
 
-# =============================================================================
-# Level     Numeric value	    When it's Used
-# CRITICAL  50	A serious error, indicating that the program itself may be
-#                     unable to continue running.
-# ERROR	    40	Due to a more serious problem, the software has not been
-#                     able to perform some function.
-# WARNING	30	An indication that something unexpected happened, or
-#                     indicative of some problem in the near future
-#                     (e.g. ‘disk space low’). The software is still
-#                     working as expected.
-# INFO	    20	Confirmation that things are working as expected.
-# DEBUG	    10	Detailed information, typically of interest only
-#                     when diagnosing problems.
-# NOTSET	 0
-# =============================================================================
+    @staticmethod
+    def setup_logger(name, log_dir, level=logging.INFO, timezone="America/Chicago"):
+        """
+        Set up a logger with the specified name, directory, and level.
 
+        Args:
+            name: Logger name
+            log_dir: Directory to store log files
+            level: Logging level
+            timezone: Timezone for log timestamps (default: America/Chicago)
 
-# %% Variables
-""" Set script (global) variables """
+        Returns:
+            Configured logger
+        """
+        # Convert log_dir to Path object
+        log_dir = Path(log_dir)
 
-path_out = paths["logs"]
+        # Create log directory if it doesn't exist
+        os.makedirs(log_dir, exist_ok=True)
 
+        # Create logger
+        logger = logging.getLogger(name)
+        logger.setLevel(level)
 
-# %% Logger
-""" Create and customize logger """
+        # Clear existing handlers to avoid duplicate logs when reimporting
+        if logger.hasHandlers():
+            logger.handlers.clear()
 
-# create logger
-logger = logging.getLogger(name=__name__)
-if logger.hasHandlers():
-    logger.handlers.clear()
-logger.setLevel(logging.DEBUG)
-logger.propagate = False
+        # Apply timezone
+        try:
+            tz = ZoneInfo(timezone)
+            # Set the converter function to use our timezone
+            logging.Formatter.converter = lambda *args: datetime.now(tz).timetuple()
+        except (ImportError, ValueError):
+            # Fallback to UTC if timezone is invalid or ZoneInfo not available
+            tz = None
+            logger.warning(
+                f"Could not use timezone '{timezone}', falling back to system default"
+            )
 
-# create file handler which logs even debug messages
+        # Create formatter with military time format
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            datefmt="%Y-%m-%d %H%M",  # Military time without colons
+        )
 
-file_name = "daily_wod"
+        # Create file handler with current date in filename
+        current_date = (
+            datetime.now(tz).strftime("%Y%m%d")
+            if tz
+            else datetime.now().strftime("%Y%m%d")
+        )
+        file_handler = logging.FileHandler(log_dir / f"{name}_{current_date}.log")
+        file_handler.setFormatter(formatter)
+        file_handler.setLevel(level)
 
-# Timed rotating File Handler
-# filename is 'string.log' with '%Y-%m-%d_%H-%M-%S' appended to end
+        # Create console handler with color formatting
+        console_handler = VisualConsoleHandler()
+        console_handler.setFormatter(formatter)
+        console_handler.setLevel(level)
 
-# for Sunday rollover, need to identify most recent Sunday
-today = datetime.date.today()
-# datetime returns 0 for Monday; shift index to 0 on Sunday
-# Mon = 0,..., Sun = 6 --> Mon = 0,..Sat = 6
-weekday_shift = (today.weekday() + 1) % 7
-sunday = today - datetime.timedelta(weekday_shift)
-# Append weekday to filename
-file_name_weekly = f"{file_name}_{sunday}"
-# create a light and detailed handler
-# rotate records on Sunday, W6
+        # Add handlers to logger
+        logger.addHandler(file_handler)
+        logger.addHandler(console_handler)
 
-fh_record = logging.FileHandler(filename=path_out / f"{file_name_weekly}.log", mode="a")
-fh_record.setLevel(logging.INFO)
-
-fh_issues = logging.FileHandler(path_out / f"{file_name}.log", mode="w")
-fh_issues.setLevel(logging.DEBUG)
-
-# create console handler and set level to debug
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-
-# create formatter
-formatter = logging.Formatter(
-    fmt="%(asctime)s - %(module)s - " "%(levelname)s - %(message)s",
-    datefmt="%Y/%m/%d %H:%M:%S",
-)
-
-# add formatter to ch_issues
-fh_record.setFormatter(formatter)
-fh_issues.setFormatter(formatter)
-ch.setFormatter(formatter)
-
-# add ch_issues to logger
-logger.addHandler(fh_record)
-logger.addHandler(fh_issues)
-logger.addHandler(ch)
-
-# %% Troubleshoot
-""" Troubleshooting and old code """
-
-loggers = [logging.getLogger()]  # get the root logger
-loggers = loggers + [
-    logging.getLogger(name) for name in logging.root.manager.loggerDict
-]
+        return logger
 
 
-# %% Main
-""" Display task data """
+class VisualConsoleHandler(logging.StreamHandler):
+    """Handler that adds color to console log output"""
 
+    # ANSI color codes
+    COLORS = {
+        "DEBUG": "\033[94m",  # Blue
+        "INFO": "\033[92m",  # Green
+        "WARNING": "\033[93m",  # Yellow
+        "ERROR": "\033[91m",  # Red
+        "CRITICAL": "\033[91m",  # Red (bold)
+        "RESET": "\033[0m",  # Reset to default
+    }
+
+    def __init__(self, stream=None):
+        """Initialize the handler with optional stream (defaults to sys.stderr)"""
+        super().__init__(stream or sys.stderr)
+        # Check if the terminal supports colors
+        self.use_colors = hasattr(self.stream, "isatty") and self.stream.isatty()
+
+    def emit(self, record):
+        """
+        Emit a record with color formatting
+
+        Args:
+            record: LogRecord instance
+        """
+        # Add color to levelname if supported
+        if self.use_colors:
+            levelname = record.levelname
+            if levelname in self.COLORS:
+                record.levelname = (
+                    f"{self.COLORS[levelname]}{levelname}{self.COLORS['RESET']}"
+                )
+
+        super().emit(record)
+
+
+# Test function
+def test_logger():
+    """Test the logger setup"""
+    # Create a test log directory
+    test_log_dir = Path("logs")
+
+    # Setup loggers at different levels
+    debug_logger = LoggerSetup.setup_logger("debug_test", test_log_dir, logging.DEBUG)
+    info_logger = LoggerSetup.setup_logger("info_test", test_log_dir, logging.INFO)
+
+    # Log test messages
+    debug_logger.debug("This is a DEBUG message")
+    debug_logger.info("This is an INFO message")
+    debug_logger.warning("This is a WARNING message")
+    debug_logger.error("This is an ERROR message")
+    debug_logger.critical("This is a CRITICAL message")
+
+    info_logger.debug("This DEBUG message should not appear")
+    info_logger.info("This is an INFO message")
+
+    print(f"Logs written to: {test_log_dir}")
+
+
+# Test code (runs when module is executed directly)
 if __name__ == "__main__":
-    logger.info("logger ready")
+    test_logger()
 
 
-# %%
+'''
+import logging
+from src.utils.utils_logger import LoggerSetup
+
+# Initialize logger
+logger = LoggerSetup.setup_logger("custom_ner_training", Path("logs"), logging.INFO)
+logger.info("Logger initialized for custom NER training")
+'''

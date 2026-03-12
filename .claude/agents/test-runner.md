@@ -40,6 +40,12 @@ pytest -x                           # Stop on first failure
 - Keep your report concise. Only include failing test details, not passing ones.
 - If all tests pass, say so briefly and stop.
 
+## Scope
+
+- **Read**: All paths (to understand what to test)
+- **Run**: `pytest` and related test commands
+- **Write**: None — reports results only, never modifies code or tests
+
 ## Memory
 
 Track recurring test failures, flaky tests, and common failure patterns in your memory. Note which test files cover which modules so you can recommend targeted test runs.

@@ -44,6 +44,12 @@ pytest -k test_name                # Specific test
 pytest -x                          # Stop on first failure
 ```
 
+## Scope
+
+- **Read**: All paths
+- **Write**: `src/myproject/`, `tests/`, `config/`, `docs/`, `scripts/`
+- **Never modify**: `.claude/`, `.github/`
+
 ## Memory
 
 Track implementation patterns, common pitfalls, and architectural decisions. Note test coverage gaps.

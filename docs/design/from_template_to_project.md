@@ -457,14 +457,14 @@ Erring toward CONOP for anything uncertain is better than erring toward Task. A 
 
 ### Agent usage
 
-| Team size | When | Agents |
-|-----------|------|--------|
+| Team size | When | Template |
+|-----------|------|----------|
 | Solo | Config changes, small bug fixes | Just you |
-| 2 agents | Bug fix with tests | python-prototyper + test-runner |
-| 3 agents | New utility module | python-prototyper + test-runner + code-reviewer |
-| Full team | New feature component | All 3 agents |
+| 2 agents | Bug fix with tests | `.claude/teams/bug-fix.md` |
+| 3 agents | New utility module | `.claude/teams/feature-development.md` |
+| Review | Code review pass | `.claude/teams/code-review.md` |
 
-Read `.claude/agents/README.md` before deploying a team. The key rule: every file has exactly one owner. If two agents need to touch the same file, restructure the task.
+Read `.claude/README.md` before deploying a team. The key rule: every file has exactly one owner. If two agents need to touch the same file, restructure the task.
 
 Add domain-specific Level 1 agents as your project grows. Level 0 agents (test-runner, code-reviewer, python-prototyper) are portable — don't modify them.
 

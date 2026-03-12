@@ -85,9 +85,17 @@ utils/
 │   ├── sessions/                 # Session documentation
 │   └── plans/                    # Implementation plans
 ├── .claude/
-│   ├── agents/                   # test-runner, code-reviewer, python-prototyper
-│   ├── commands/                 # session-start, session-end, pcc, pci, task
-│   └── skills/                   # Level 0 skills (config, testing, venv, etc.)
+│   ├── README.md               # Agent roster, teams, scope matrix
+│   ├── agents/                  # Individual agent definitions
+│   │   ├── test-runner.md
+│   │   ├── code-reviewer.md
+│   │   └── python-prototyper.md
+│   ├── teams/                   # Team composition templates
+│   │   ├── feature-development.md
+│   │   ├── bug-fix.md
+│   │   └── code-review.md
+│   ├── commands/                # session-start, session-end, pcc, pci, task
+│   └── skills/                  # Level 0 skills (config, testing, venv, etc.)
 ├── pyproject.toml
 ├── .env.example
 └── CLAUDE.md
@@ -114,7 +122,7 @@ Work scales through four levels. Use `/task promote` or `/task plan` to evaluate
 
 ## Agents
 
-**IMPORTANT**: Before deploying any agent team, read `.claude/agents/README.md` for the current roster and usage guide.
+**IMPORTANT**: Before deploying any agent team, read `.claude/README.md` for the current roster and usage guide.
 
 | Agent | Model | Writes Code? | Primary Domain |
 |---|---|---|---|

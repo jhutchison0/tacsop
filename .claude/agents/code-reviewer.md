@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: Reviews code changes for quality, adherence to design pillars, and consistency. Use proactively after writing or modifying code.
-tools: Read, Grep, Glob, Bash
+tools: Read, Write, Edit, Grep, Glob, Bash
 model: inherit
 memory: project
 ---
@@ -45,6 +45,12 @@ Be direct and specific. For each finding, include:
 - Suggested fix (code snippet if helpful)
 
 If everything looks good, say so briefly.
+
+## Scope
+
+- **Read**: All paths
+- **Write**: `docs/` only (audit reports and review findings)
+- **Never modify**: `src/`, `tests/`, `config/`, `.claude/`
 
 ## Memory
 

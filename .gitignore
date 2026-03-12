@@ -1,18 +1,57 @@
-# System level cache and checkpoints
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
 
-.ipynb_checkpoints/
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 .spyproject/
 .vs/
-__pycache__/
 
-# Program data and outputs
+# Jupyter
+.ipynb_checkpoints/
 
+# Environment variables (secrets)
+.env
+.env.local
+.env.*.local
+.env.production
+.env.staging
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs
+logs/
+*.log
+
+# Project directories (gitignored by convention)
 archive/
 data/
 outputs/
+output/
 
-*.png
+# OS files
+.DS_Store
+Thumbs.db
 
-# Exceptions (for use case/consideration)
-# */*.json
-# */*.ps1
+# Images (uncomment if not needed in repo)
+# *.png
+# *.jpg

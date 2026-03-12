@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "myproject"
+version = "0.1.0"
+description = "A Python project template with reusable utilities"
+requires-python = ">=3.10"
+license = "GPL-3.0-or-later"
+dependencies = [
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+excel = [
+    "pandas>=2.0",
+    "openpyxl>=3.1",
+    "xlsxwriter>=3.1",
+]
+slack = [
+    "slack-sdk>=3.20",
+]
+database = [
+    "psycopg[binary]>=3.1",
+]
+weights = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+]
+all = [
+    "myproject[dev,excel,slack,database,weights]",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

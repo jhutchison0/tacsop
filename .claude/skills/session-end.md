@@ -7,31 +7,25 @@ Record progress at the end of a development session with proper git workflow and
 ### Branch Strategy
 - **Main branch**: `main` — primary development branch for this project
 - **Development branches**: Use `dev-*` branches for larger feature work
-  - `dev-source` - New content sources or sourcing changes
-  - `dev-select` - Selection and scoring improvements
-  - `dev-distill` - Distiller and briefing changes
-  - `dev-pipeline` - Pipeline orchestration work
+  - Name branches after the feature or area (e.g., `dev-auth`, `dev-api`, `dev-ui`)
 - **Merge to `main`** at milestone completion when tests pass and feature is complete
 - Tag milestones (e.g., `v1.0.0`, `v1.1.0`)
 
 ### Commit Strategy
 - **Commit often** directly to current branch
 - Use `[area]` tag format:
-  - `[source]` - Sourcing changes (ArXiv, RSS, new feeds)
-  - `[select]` - Selection and scoring changes
-  - `[distill]` - Distiller and briefing changes
-  - `[pipeline]` - Pipeline orchestration
+  - `[util]` - Utility module changes
   - `[config]` - Configuration changes
-  - `[cli]` - CLI and main.py changes
-  - `[tts]` - TTS/audio integration
+  - `[cli]` - CLI and entry point changes
   - `[doc]` - Documentation updates
   - `[fix]` - Bug fixes
   - `[refactor]` - Code restructuring
   - `[test]` - Test additions/changes
+  - `[infra]` - CI, packaging, workflow infrastructure
 - Examples:
-  - `[source] Add Semantic Scholar API as content source`
-  - `[distill] Improve Challengers' Corner section prompt`
-  - `[fix] Handle RSS feeds with missing publication dates`
+  - `[util] Add retry logic to slack.py`
+  - `[config] Add max_retries to project.yaml`
+  - `[fix] Correct keep_index logic in update_excel_workbook`
 
 ## Knowledge Graph: Session Documents as Edges
 
@@ -82,7 +76,7 @@ Only include the relationship fields that apply to this session.
 | Category | Tags | Use for |
 |----------|------|---------|
 | **Type** | `#session` | Always include for session logs |
-| **Domain** | `#source` `#select` `#distill` `#pipeline` `#config` `#cli` `#tts` | What area of the project |
+| **Domain** | `#util` `#config` `#cli` `#infra` | What area of the project |
 | **Status** | `#complete` `#in-progress` | Work completion state |
 | **Pillars** | `#pillar-1` through `#pillar-5` | Design principle relevance |
 
@@ -184,11 +178,11 @@ graph TD
     A[Start] --> B[Step]
 ```
 
-**Sequence Diagrams** (API interactions, pipeline flows):
+**Sequence Diagrams** (API interactions, data flows):
 ```mermaid
 sequenceDiagram
-    Pipeline->>Sourcer: fetch_papers()
-    Sourcer->>ArXiv: query API
+    Client->>API: request()
+    API->>Database: query()
 ```
 
 **State Diagrams** (status flows):
@@ -199,12 +193,12 @@ stateDiagram-v2
     Active --> Complete
 ```
 
-**Class Diagrams** (data models, source hierarchy):
+**Class Diagrams** (data models, class hierarchy):
 ```mermaid
 classDiagram
-    ContentSourcer <|-- ArxivSourcer
-    ContentSourcer <|-- BlogSourcer
-    ContentSourcer : +fetch()
+    BaseHandler <|-- FileHandler
+    BaseHandler <|-- APIHandler
+    BaseHandler : +process()
 ```
 
 ## Best Practices Summary

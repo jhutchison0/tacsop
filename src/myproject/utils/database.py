@@ -1,4 +1,4 @@
-"""Async PostgreSQL database utilities with JSONB support."""
+"""PostgreSQL database utilities with JSONB support."""
 
 import json
 import logging
@@ -36,30 +36,29 @@ class DatabaseManager:
             )
         self.conn.commit()
 
-    async def insert_or_update_data(self, log_name: str, data: str) -> None:
+    def insert_or_update_data(self, log_name: str, data: str) -> None:
         """Insert a log entry or skip if the name already exists.
 
         Args:
             log_name: Unique identifier for the log entry.
             data: JSON string to store in the JSONB column.
         """
-        async with self.conn.cursor() as cur:
-            await cur.execute("BEGIN;")
-            await cur.execute(
+        with self.conn.cursor() as cur:
+            cur.execute(
                 "SELECT id FROM logs WHERE log_name=%s FOR UPDATE;", (log_name,)
             )
-            result = await cur.fetchone()
+            result = cur.fetchone()
 
             if result:
                 logger.info("No changes detected for %s. Skipping update.", log_name)
             else:
-                await cur.execute(
+                cur.execute(
                     "INSERT INTO logs (log_name, data) VALUES (%s, %s);",
                     (log_name, data),
                 )
                 logger.info("Inserted new log: %s", log_name)
 
-            await self.conn.commit()
+        self.conn.commit()
 
     def close(self) -> None:
         """Close the database connection."""
@@ -92,7 +91,7 @@ class LogReader:
         """
         return json.loads(log_file.read_text())
 
-    async def process_logs(self, db_manager: DatabaseManager) -> None:
+    def process_logs(self, db_manager: DatabaseManager) -> None:
         """Read all logs and insert them into the database.
 
         Args:
@@ -101,4 +100,4 @@ class LogReader:
         for log_file in self.get_logs():
             log_name = log_file.name
             log_data = self.parse_log(log_file)
-            await db_manager.insert_or_update_data(log_name, json.dumps(log_data))
+            db_manager.insert_or_update_data(log_name, json.dumps(log_data))

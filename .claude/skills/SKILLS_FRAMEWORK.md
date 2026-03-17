@@ -100,10 +100,10 @@ These skills are tailored to this specific project's domain and tooling.
 
 *[Project-specific skills would be added here based on the project's domain]*
 
-For paperboy, potential Level 1 skills might include:
-- **source-integration.md**: News source connectors, API adapters, feed parsing
-- **briefing-optimization.md**: Content curation, summarization, delivery formatting
-- **scoring-tuning.md**: Relevance scoring, priority ranking, personalization algorithms
+For example, a data pipeline project might add Level 1 skills such as:
+- **api-integration.md**: API connectors, authentication, rate limiting
+- **data-validation.md**: Schema enforcement, data quality checks, error handling
+- **report-generation.md**: Output formatting, template rendering, delivery
 
 ---
 

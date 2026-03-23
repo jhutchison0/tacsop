@@ -27,6 +27,7 @@ This directory contains agent definitions, team templates, slash commands, and s
 │   ├── task.md            # /task — work tracker + escalation ladder
 │   ├── session-start.md   # /session-start — load context
 │   ├── session-end.md     # /session-end — close session
+│   ├── sitrep.md          # /sitrep — narrative status report
 │   ├── pcc.md             # /pcc — pre-commit check
 │   └── pci.md             # /pci — pre-code inspection
 └── skills/                # Reusable procedural knowledge

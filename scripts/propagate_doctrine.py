@@ -21,16 +21,20 @@ NOTIFICATION_FILENAME = ".claude/upstream-update.md"
 
 
 def find_downstream_repos() -> list[Path]:
-    """Find repos with .claude/commands/ across all project directories."""
+    """Find repos with .claude/commands/ recursively across all project directories.
+
+    A repo is any directory containing .claude/commands/. Skips utils itself
+    and avoids descending into a repo's subdirectories (a .claude/commands/
+    inside a repo's subtree is treated as its own repo).
+    """
     repos = []
-    for project_group in sorted(PROJECTS_DIR.iterdir()):
-        if not project_group.is_dir():
+    for commands_dir in sorted(PROJECTS_DIR.rglob(".claude/commands")):
+        if not commands_dir.is_dir():
             continue
-        for repo in sorted(project_group.iterdir()):
-            if repo == UTILS_ROOT:
-                continue
-            if repo.is_dir() and (repo / ".claude" / "commands").is_dir():
-                repos.append(repo)
+        repo = commands_dir.parent.parent  # .claude/commands -> .claude -> repo
+        if repo == UTILS_ROOT:
+            continue
+        repos.append(repo)
     return repos
 
 
@@ -90,7 +94,8 @@ def propagate(dry_run: bool = False) -> None:
             print(f"[dry-run] Would write: {target}")
         else:
             target.write_text(notification)
-            print(f"Notified: {repo.parent.name}/{repo.name}")
+            rel = repo.relative_to(PROJECTS_DIR)
+            print(f"Notified: {rel}")
 
     if dry_run:
         print(f"\nNotification content:\n{'=' * 40}\n{notification}")

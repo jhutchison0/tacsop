@@ -17,3 +17,5 @@
 - [x] 2026-03-12: Rewrite .claude/ agent framework — single README, teams/, scope matrix
 - [x] 2026-03-17: Fix database.py sync/async mismatch — converted to fully synchronous
 - [x] 2026-03-17: Scrub paperboy content from session-end.md skill and SKILLS_FRAMEWORK.md
+- [x] 2026-03-24: Update escalation ladder — TCS as universal task detail standard across all plan types
+- [x] 2026-03-24: Adopt "wave" terminology for tactical agent deployment, reserve "phase" for strategic roadmap

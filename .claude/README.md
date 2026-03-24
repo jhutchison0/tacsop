@@ -18,6 +18,7 @@ This directory contains agent definitions, team templates, slash commands, and s
 ├── agents/                # Individual agent definitions
 │   ├── test-runner.md
 │   ├── code-reviewer.md
+│   ├── proposer.md
 │   └── python-prototyper.md
 ├── teams/                 # Team composition templates
 │   ├── feature-development.md
@@ -44,19 +45,20 @@ This directory contains agent definitions, team templates, slash commands, and s
 |-------|---------|-------|--------|-------------|
 | `test-runner` | Run pytest suites and report results | haiku | Read-only | After any code change to verify nothing is broken |
 | `code-reviewer` | Adversarial review against design pillars and best practices | inherit | Read + Write reports | After significant changes, before merge |
+| `proposer` | Analyze problems, propose bold approaches, debate before implementation | sonnet | Read + Write reports | Before committing to an implementation strategy |
 | `python-prototyper` | Implement Python features, utilities, and tests | sonnet | Read/Write (scoped) | Feature implementation, bug fixes, new modules |
 
 > **Model configuration**: Agents set to `inherit` use the orchestrator's model. Agents pinned to `sonnet` or `haiku` always use that model regardless of the orchestrator.
 
 ## Scope Matrix
 
-| Path | test-runner | code-reviewer | python-prototyper |
-|------|:-----------:|:-------------:|:-----------------:|
-| `src/myproject/` | Read | Read | **Write** |
-| `tests/` | Read/Run | Read | **Write** |
-| `config/` | Read | Read | **Write** |
-| `docs/` | — | **Write** (reports) | Write |
-| `.claude/` | — | Read | — |
+| Path | test-runner | code-reviewer | proposer | python-prototyper |
+|------|:-----------:|:-------------:|:--------:|:-----------------:|
+| `src/myproject/` | Read | Read | Read | **Write** |
+| `tests/` | Read/Run | Read | Read | **Write** |
+| `config/` | Read | Read | Read | **Write** |
+| `docs/` | — | **Write** (reports) | **Write** (proposals) | Write |
+| `.claude/` | — | Read | Read | — |
 
 **Bold** = primary owner. Regular "Write" = secondary (for tests alongside their code). Dash = no access needed.
 
@@ -77,7 +79,7 @@ Team compositions live in `.claude/teams/`. Use `/task promote` or `/task plan` 
 | Config tweak (1–2 files) | Update a YAML value | 1 (lead only) |
 | Bug fix (≤3 files) | Fix a function, add a test | python-prototyper + test-runner |
 | New utility (single module) | Add a module to `utils/` | python-prototyper + test-runner + code-reviewer |
-| New feature (cross-cutting) | Add a project component | All 3 agents via `feature-development` template |
+| New feature (cross-cutting) | Add a project component | proposer + code-reviewer + python-prototyper + test-runner via `feature-development` template |
 
 ## Inter-Agent Communication
 
@@ -112,12 +114,12 @@ The `/task` command manages the tactical layer and includes an escalation ladder
 |-------|--------|-------------|
 | Task | Single line in `docs/tasks.md` | One agent, one session, clear action |
 | TCS | Structured criteria block | Multi-step with pass/fail conditions |
-| CONOP | `docs/plans/` document | Multi-phase with design decisions |
+| CONOP | `docs/plans/` document | Multi-wave with design decisions |
 | OPORD | `docs/plans/` document | Sequential execution of a decided strategy |
 
 ## Adding Project-Specific Agents
 
-This is a **Level 0** template — the three agents here are portable and generic. When the template becomes a real project:
+This is a **Level 0** template — the four agents here are portable and generic. When the template becomes a real project:
 
 1. Create a Level 1 agent file in `.claude/agents/` scoped to your domain
 2. Add it to the Agent Catalog and Scope Matrix tables above

@@ -67,6 +67,8 @@ Interpret the user's arguments as one of these actions:
 ### Level 2: TCS — Task, Condition, Standard
 **When**: Multi-step task with measurable acceptance criteria.
 
+TCS is also the **universal task specification unit** — every task within a CONOP or OPORD is written at TCS detail level. The document type escalates the frame; the task granularity stays consistent.
+
 **Promote from Task when**:
 - Needs explicit pass/fail criteria
 - Multiple files across 2+ directories
@@ -81,23 +83,34 @@ Interpret the user's arguments as one of these actions:
 ```
 
 ### Level 3: CONOP — Concept of Operations
-**When**: Multi-phase plan with design decisions or multiple agents.
+**When**: Multi-wave plan with design decisions or multiple agent teams.
 
 **Promote from TCS when**:
-- Multiple phases that could run in parallel
+- Multiple waves of work that could run in parallel
 - Design decisions needed before coding
 - Touches 4+ components or introduces new architecture
 - Will span multiple sessions
 
+Every task within the CONOP is specified at TCS detail level.
+
 **Format**: `docs/plans/conop_NNN_descriptive_name.md`
 
 ### Level 4: OPORD — Operations Order
-**When**: Strategy is decided (CONOP approved), now executing a sequential multi-phase operation.
+**When**: Strategy is decided (CONOP approved), now executing a multi-wave operation.
 
 **Promote from CONOP when**:
 - CONOP's design decisions are resolved
-- Phases must run in strict sequence
-- Need to track phase-by-phase completion with checkpoints
+- Waves must run in defined sequence
+- Need to track wave-by-wave completion with checkpoints
+
+Every task within the OPORD is specified at TCS detail level.
+
+## Terminology: Phases vs Waves
+
+- **Phase** — Strategic roadmap milestone (e.g., `build_phases` in `project.yaml`). Phases live outside CONOPs and OPORDs.
+- **Wave** — Tactical parallel execution unit within a CONOP or OPORD. Agent teams deploy in waves.
+
+A campaign-level OPORD may contain phases of waves, but this is deliberate and infrequent. Default to waves within orders; reserve phases for the roadmap.
 
 ## Decision Point Guidance
 

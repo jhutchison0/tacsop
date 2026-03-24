@@ -116,9 +116,11 @@ utils/
 Work scales through four levels. Use `/task promote` or `/task plan` to evaluate:
 
 1. **Task** — One person, one session, clear action (`docs/tasks.md`)
-2. **TCS** — Multi-step with pass/fail criteria (Task, Condition, Standard)
-3. **CONOP** — Multi-phase with design decisions and parallel tracks (`docs/plans/`)
-4. **OPORD** — Sequential execution of a decided strategy (`docs/plans/`)
+2. **TCS** — Multi-step with pass/fail criteria (Task, Condition, Standard) — also the universal task detail unit within all plan types
+3. **CONOP** — Multi-wave with design decisions and parallel tracks (`docs/plans/`)
+4. **OPORD** — Sequential execution of a decided strategy in waves (`docs/plans/`)
+
+**Terminology**: *Phases* are strategic roadmap milestones (`project.yaml`). *Waves* are tactical parallel execution units within CONOPs/OPORDs where agent teams deploy.
 
 ## Agents
 
@@ -128,6 +130,7 @@ Work scales through four levels. Use `/task promote` or `/task plan` to evaluate
 |---|---|---|---|
 | `test-runner` | haiku | No | All — runs pytest, reports results |
 | `code-reviewer` | inherit | No | All — reviews against pillars |
+| `proposer` | sonnet | No | All — analyzes problems, proposes bold approaches, writes proposals |
 | `python-prototyper` | sonnet | Yes | Python implementation |
 
 ## Config Workflow

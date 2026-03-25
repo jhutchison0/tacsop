@@ -26,3 +26,5 @@
 - [x] 2026-03-24: Add proposer agent — bold problem analyst with debate-before-implementation workflow
 - [x] 2026-03-24: Build doctrine propagation system — changelog, notification script, session-start check
 - [x] 2026-03-24: First doctrine propagation to 4 downstream repos (paperboy, fema_cria, flood_model, rmi-reboot)
+- [x] 2026-03-25: Add .gitattributes for cross-platform line ending normalization (LF)
+- [x] 2026-03-25: Second doctrine propagation — 9 repos notified (shark, agent-eval, beesly-equilibrium, elephant-graveyard, magic-movies, paperboy, project-megan, quest-engine, tactics-game)

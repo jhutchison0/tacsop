@@ -7,7 +7,6 @@
 - [ ] [P2] Add coverage config to pyproject.toml ([tool.coverage.run/report])
 - [ ] [P2] Add tests for scripts/propagate_doctrine.py
 - [ ] [P2] Update from_template_to_project.md with clone-cleanup steps (carryover from 2026-03-17)
-- [ ] [P2] Doctrine propagation — notify downstream repos of decision_science module availability
 - [ ] [P3] Remove dead sample_data fixture from conftest.py (carryover from 2026-03-17)
 - [ ] [P3] Remove dead project_root fixture from conftest.py (carryover from 2026-03-17)
 - [ ] [P3] Add README.md for GitHub human readers
@@ -37,3 +36,4 @@
 - [x] 2026-03-26: CONOP: decision_science_utility.md — full 4-wave plan with migration path for 6 repos
 - [x] 2026-03-26: End-to-end integration test for decision_science pipeline (8 tests)
 - [x] 2026-03-26: Team review hardening — 3 bugs fixed, 3 defensive guards, 3 analysis features (explain, dominance, robustness)
+- [x] 2026-03-26: Third doctrine propagation — 9 repos notified of decision_science module

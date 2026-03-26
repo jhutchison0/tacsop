@@ -4,8 +4,10 @@ import pytest
 
 from src.myproject.decision_science.scorer import Criterion, MAUTScorer
 from src.myproject.decision_science.sensitivity import (
+    RobustnessReport,
     monte_carlo,
     one_at_a_time,
+    robustness_report,
     scenario_compare,
 )
 from src.myproject.decision_science.value_functions import linear
@@ -129,6 +131,12 @@ class TestOneAtATime:
         one_at_a_time(scorer, _SPEED_ACCURACY_ALTS)
         final_weights = {c.name: c.weight for c in scorer._criteria}
         assert original_weights == final_weights
+
+    def test_single_criterion_returns_only_baseline(self):
+        """BUG 2: single-criterion scorer must not crash on perturbation."""
+        scorer = _make_scorer(_criterion("only", 1.0))
+        result = one_at_a_time(scorer, {"A": {"only": 0.8}, "B": {"only": 0.4}})
+        assert set(result.keys()) == {"baseline"}
 
     def test_each_result_is_sorted_descending(self):
         scorer = _three_criterion_scorer()
@@ -314,3 +322,70 @@ class TestScenarioCompare:
         scenario_compare(scorer, _SPEED_ACCURACY_ALTS, self._scenarios())
         final_weights = {c.name: c.weight for c in scorer._criteria}
         assert original_weights == final_weights
+
+
+# ---------------------------------------------------------------------------
+# robustness_report (ITEM 9)
+# ---------------------------------------------------------------------------
+
+class TestRobustnessReport:
+    def _mc_result(self) -> dict[str, dict[str, float]]:
+        # A wins rank-1 most often (0.7), B is runner-up (0.3)
+        return {
+            "A": {"1": 0.7, "2": 0.3},
+            "B": {"1": 0.3, "2": 0.7},
+        }
+
+    def test_winner_identified(self):
+        report = robustness_report(self._mc_result())
+        assert report.winner == "A"
+
+    def test_runner_up_identified(self):
+        report = robustness_report(self._mc_result())
+        assert report.runner_up == "B"
+
+    def test_winner_frequency(self):
+        report = robustness_report(self._mc_result())
+        assert report.winner_frequency == pytest.approx(0.7)
+
+    def test_runner_up_frequency(self):
+        report = robustness_report(self._mc_result())
+        assert report.runner_up_frequency == pytest.approx(0.3)
+
+    def test_margin_calculation(self):
+        report = robustness_report(self._mc_result())
+        assert report.margin == pytest.approx(0.4)
+
+    def test_is_robust_true_when_margin_exceeds_threshold(self):
+        report = robustness_report(self._mc_result(), threshold=0.2)
+        assert report.is_robust is True
+
+    def test_is_robust_false_when_margin_below_threshold(self):
+        # Nearly tied: margin ≈ 0.1
+        tight = {
+            "A": {"1": 0.55, "2": 0.45},
+            "B": {"1": 0.45, "2": 0.55},
+        }
+        report = robustness_report(tight, threshold=0.2)
+        assert report.is_robust is False
+
+    def test_too_few_alternatives_raises(self):
+        with pytest.raises(ValueError, match="at least 2"):
+            robustness_report({"A": {"1": 1.0}})
+
+    def test_empty_raises(self):
+        with pytest.raises(ValueError):
+            robustness_report({})
+
+    def test_returns_robustness_report_type(self):
+        report = robustness_report(self._mc_result())
+        assert isinstance(report, RobustnessReport)
+
+    def test_integration_with_monte_carlo(self):
+        scorer = _three_criterion_scorer()
+        mc = monte_carlo(scorer, _THREE_ALTS, n_samples=500, seed=42)
+        report = robustness_report(mc)
+        assert isinstance(report, RobustnessReport)
+        assert report.winner in _THREE_ALTS
+        assert report.runner_up in _THREE_ALTS
+        assert report.winner != report.runner_up

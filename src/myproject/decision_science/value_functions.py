@@ -49,7 +49,10 @@ def exponential(x: float, low: float, high: float, rate: float = 1.0) -> float:
         raise ValueError("rate must be nonzero; use linear() for rate=0 behavior")
 
     t = max(0.0, min(1.0, (x - low) / (high - low)))
-    return (1.0 - math.exp(-rate * t)) / (1.0 - math.exp(-rate))
+    # Clamp exponents to avoid OverflowError for extreme rate values.
+    exp_t = 0.0 if -rate * t < -700 else (1e308 if -rate * t > 700 else math.exp(-rate * t))
+    exp_1 = 0.0 if -rate < -700 else (1e308 if -rate > 700 else math.exp(-rate))
+    return (1.0 - exp_t) / (1.0 - exp_1)
 
 
 def logarithmic(x: float, low: float, high: float) -> float:
@@ -95,7 +98,12 @@ def logistic(x: float, midpoint: float, steepness: float = 1.0) -> float:
     """
     if steepness == 0.0:
         raise ValueError("steepness must be nonzero")
-    return 1.0 / (1.0 + math.exp(-steepness * (x - midpoint)))
+    z = -steepness * (x - midpoint)
+    if z > 700:
+        return 0.0  # e^700 overflows; 1/(1+huge) ≈ 0
+    if z < -700:
+        return 1.0  # 1/(1+tiny) ≈ 1
+    return 1.0 / (1.0 + math.exp(z))
 
 
 def step(

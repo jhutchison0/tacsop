@@ -1,10 +1,11 @@
 """Tests for decision_science.scorer."""
 
+import warnings
 from pathlib import Path
 
 import pytest
 
-from src.myproject.decision_science.scorer import Criterion, MAUTScorer
+from src.myproject.decision_science.scorer import Criterion, DecisionResult, MAUTScorer, dominance_check
 from src.myproject.decision_science.value_functions import linear
 
 FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
@@ -270,3 +271,218 @@ class TestAddCriterion:
         scorer.add_criterion(_criterion("b", 0.6))
         result = scorer.score("x", {"a": 1.0, "b": 1.0})
         assert result.utility == pytest.approx(1.0)
+
+
+class TestFromYamlParamValidation:
+    """BUG 3: from_yaml should catch typo'd params at load time."""
+
+    def test_typo_in_params_raises_at_load(self, tmp_path):
+        bad_yaml = tmp_path / "bad_params.yaml"
+        bad_yaml.write_text(
+            "criteria:\n"
+            "  - name: x\n"
+            "    weight: 1.0\n"
+            "    value_fn: linear\n"
+            "    params: {hgh: 100}\n"  # typo: should be 'high'
+        )
+        with pytest.raises(ValueError, match="Invalid params"):
+            MAUTScorer.from_yaml(bad_yaml)
+
+    def test_valid_params_loads_successfully(self, tmp_path):
+        good_yaml = tmp_path / "good_params.yaml"
+        good_yaml.write_text(
+            "criteria:\n"
+            "  - name: x\n"
+            "    weight: 1.0\n"
+            "    value_fn: linear\n"
+            "    params: {low: 0, high: 100}\n"
+        )
+        scorer = MAUTScorer.from_yaml(good_yaml)
+        assert scorer is not None
+
+
+class TestValueFunctionOutputValidation:
+    """ITEM 4: value functions returning outside [0,1] must raise."""
+
+    def test_bad_value_function_raises(self):
+        def bad_fn(x: float) -> float:
+            return 1.5  # always out of range
+
+        scorer = MAUTScorer([Criterion("a", 1.0, bad_fn)])
+        with pytest.raises(ValueError, match="outside \\[0, 1\\]"):
+            scorer.score("alt", {"a": 0.5})
+
+    def test_good_value_function_does_not_raise(self):
+        scorer = _make_scorer(_criterion("a", 1.0))
+        result = scorer.score("alt", {"a": 0.5})
+        assert 0.0 <= result.utility <= 1.0
+
+
+class TestFromWeights:
+    """ITEM 5: from_weights classmethod bridges weights.py output to MAUTScorer."""
+
+    def test_builds_scorer_from_weights_df(self):
+        pd = pytest.importorskip("pandas")
+        import pandas
+
+        weights_df = pandas.DataFrame(
+            {"Ranks": [1, 2], "SMARTER": [0.6, 0.4]},
+            index=["quality", "speed"],
+        )
+        weights_df.index.name = "Attributes"
+
+        scorer = MAUTScorer.from_weights(
+            weights_df,
+            value_fns={"quality": linear, "speed": linear},
+            method="SMARTER",
+        )
+        result = scorer.score("alt", {"quality": 1.0, "speed": 0.0})
+        assert result.utility == pytest.approx(0.6)
+
+    def test_missing_method_column_raises(self):
+        pd = pytest.importorskip("pandas")
+        import pandas
+
+        weights_df = pandas.DataFrame(
+            {"Ranks": [1], "SMARTER": [1.0]},
+            index=["x"],
+        )
+        with pytest.raises(ValueError, match="Method column"):
+            MAUTScorer.from_weights(weights_df, {"x": linear}, method="NoSuchMethod")
+
+    def test_missing_value_fn_raises(self):
+        pd = pytest.importorskip("pandas")
+        import pandas
+
+        weights_df = pandas.DataFrame(
+            {"Ranks": [1, 2], "SMARTER": [0.6, 0.4]},
+            index=["quality", "speed"],
+        )
+        with pytest.raises(ValueError, match="missing entries"):
+            MAUTScorer.from_weights(weights_df, {"quality": linear})  # speed missing
+
+
+class TestUtilityRangeWarning:
+    """ITEM 6: rank() should warn when a criterion's utility range < 0.2."""
+
+    def test_warns_when_utility_range_is_narrow(self):
+        scorer = _make_scorer(
+            _criterion("clustered", 0.5),
+            _criterion("spread", 0.5),
+        )
+        # clustered criterion: all alternatives have nearly the same raw score
+        alts = {
+            "A": {"clustered": 0.51, "spread": 0.0},
+            "B": {"clustered": 0.52, "spread": 1.0},
+        }
+        with pytest.warns(UserWarning, match="clustered"):
+            scorer.rank(alts)
+
+    def test_no_warning_when_range_is_wide(self):
+        scorer = _make_scorer(
+            _criterion("a", 0.5),
+            _criterion("b", 0.5),
+        )
+        alts = {
+            "A": {"a": 0.0, "b": 0.0},
+            "B": {"a": 1.0, "b": 1.0},
+        }
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            scorer.rank(alts)  # should not raise
+
+
+class TestDecisionResultExplain:
+    """ITEM 7: explain() returns structured dict with expected shape."""
+
+    def test_explain_keys(self):
+        scorer = _make_scorer(
+            _criterion("x", 0.6),
+            _criterion("y", 0.4),
+        )
+        result = scorer.score("opt", {"x": 1.0, "y": 0.5})
+        explanation = result.explain()
+        assert explanation["alternative"] == "opt"
+        assert "utility" in explanation
+        assert "criteria" in explanation
+
+    def test_explain_criteria_structure(self):
+        scorer = _make_scorer(
+            _criterion("x", 0.6),
+            _criterion("y", 0.4),
+        )
+        result = scorer.score("opt", {"x": 1.0, "y": 0.5})
+        explanation = result.explain()
+        for item in explanation["criteria"]:
+            assert "name" in item
+            assert "raw_utility" in item
+            assert "weighted_contribution" in item
+            assert "pct_of_total" in item
+
+    def test_explain_sorted_descending_by_contribution(self):
+        scorer = _make_scorer(
+            _criterion("x", 0.6),
+            _criterion("y", 0.4),
+        )
+        result = scorer.score("opt", {"x": 1.0, "y": 0.5})
+        explanation = result.explain()
+        contributions = [c["weighted_contribution"] for c in explanation["criteria"]]
+        assert contributions == sorted(contributions, reverse=True)
+
+    def test_explain_pct_sums_to_one(self):
+        scorer = _make_scorer(
+            _criterion("x", 0.6),
+            _criterion("y", 0.4),
+        )
+        result = scorer.score("opt", {"x": 1.0, "y": 0.5})
+        explanation = result.explain()
+        total_pct = sum(c["pct_of_total"] for c in explanation["criteria"])
+        assert total_pct == pytest.approx(1.0, abs=0.01)
+
+    def test_raw_utilities_populated(self):
+        scorer = _make_scorer(_criterion("a", 1.0))
+        result = scorer.score("s", {"a": 0.75})
+        assert result.raw_utilities["a"] == pytest.approx(0.75)
+
+    def test_decision_result_raw_utilities_defaults_empty(self):
+        # Backwards compatibility: raw_utilities defaults to empty dict.
+        dr = DecisionResult(alternative="x", utility=0.5, breakdown={"a": 0.5})
+        assert dr.raw_utilities == {}
+
+
+class TestDominanceCheck:
+    """ITEM 8: dominance_check() detects dominated alternatives."""
+
+    def _result(self, name: str, raw: dict[str, float]) -> DecisionResult:
+        return DecisionResult(
+            alternative=name,
+            utility=sum(raw.values()),
+            breakdown={k: v for k, v in raw.items()},
+            raw_utilities=raw,
+        )
+
+    def test_detects_strict_dominance(self):
+        strong = self._result("strong", {"quality": 0.9, "speed": 0.8})
+        weak = self._result("weak", {"quality": 0.3, "speed": 0.2})
+        pairs = dominance_check([strong, weak])
+        assert ("strong", "weak") in pairs
+
+    def test_no_dominance_when_tradeoff(self):
+        fast = self._result("fast", {"quality": 0.2, "speed": 0.9})
+        precise = self._result("precise", {"quality": 0.9, "speed": 0.2})
+        pairs = dominance_check([fast, precise])
+        assert pairs == []
+
+    def test_empty_results(self):
+        assert dominance_check([]) == []
+
+    def test_single_result(self):
+        r = self._result("only", {"x": 0.5})
+        assert dominance_check([r]) == []
+
+    def test_dominated_not_in_dominator_position(self):
+        strong = self._result("strong", {"q": 0.9, "s": 0.9})
+        weak = self._result("weak", {"q": 0.1, "s": 0.1})
+        pairs = dominance_check([strong, weak])
+        # weak does not dominate strong
+        assert ("weak", "strong") not in pairs

@@ -6,6 +6,8 @@ Three analysis methods for understanding how robust a ranking is:
 - scenario_compare: evaluate alternatives under named weight profiles
 """
 
+from dataclasses import dataclass
+
 import numpy as np
 
 from src.myproject.decision_science.scorer import Criterion, DecisionResult, MAUTScorer
@@ -74,6 +76,11 @@ def one_at_a_time(
     results: dict[str, list[DecisionResult]] = {
         "baseline": _rescored(scorer, baseline_weights, alternatives)
     }
+
+    # With a single criterion there are no other criteria to absorb weight
+    # changes, so perturbation is meaningless — return only the baseline.
+    if len(criteria) == 1:
+        return results
 
     for criterion in criteria:
         for sign, label_suffix in [(+1, f"+delta"), (-1, f"-delta")]:
@@ -224,3 +231,64 @@ def scenario_compare(
         name: _rescored(scorer, weights, alternatives)
         for name, weights in scenarios.items()
     }
+
+
+@dataclass
+class RobustnessReport:
+    """Summary of Monte Carlo sensitivity results as a single confidence metric.
+
+    Attributes:
+        winner: Alternative with the highest rank-1 frequency.
+        winner_frequency: Proportion of samples where winner ranked first.
+        runner_up: Alternative with the second-highest rank-1 frequency.
+        runner_up_frequency: Proportion of samples where runner_up ranked first.
+        margin: Difference between winner_frequency and runner_up_frequency.
+        is_robust: True when margin exceeds the robustness threshold.
+    """
+
+    winner: str
+    winner_frequency: float
+    runner_up: str
+    runner_up_frequency: float
+    margin: float
+    is_robust: bool
+
+
+def robustness_report(
+    mc_result: dict[str, dict[str, float]],
+    threshold: float = 0.2,
+) -> RobustnessReport:
+    """Summarize Monte Carlo results into a single confidence metric.
+
+    Args:
+        mc_result: Output from monte_carlo(). {alternative: {rank_str: frequency}}.
+        threshold: Margin required for is_robust to be True. Defaults to 0.2.
+
+    Returns:
+        RobustnessReport with winner, runner_up, margin, and is_robust flag.
+
+    Raises:
+        ValueError: If mc_result is empty or has fewer than two alternatives.
+    """
+    if len(mc_result) < 2:
+        raise ValueError(
+            f"robustness_report requires at least 2 alternatives; got {len(mc_result)}"
+        )
+
+    rank1_freqs = {alt: freqs.get("1", 0.0) for alt, freqs in mc_result.items()}
+    sorted_alts = sorted(rank1_freqs, key=lambda a: rank1_freqs[a], reverse=True)
+
+    winner = sorted_alts[0]
+    runner_up = sorted_alts[1]
+    winner_freq = rank1_freqs[winner]
+    runner_up_freq = rank1_freqs[runner_up]
+    margin = winner_freq - runner_up_freq
+
+    return RobustnessReport(
+        winner=winner,
+        winner_frequency=winner_freq,
+        runner_up=runner_up,
+        runner_up_frequency=runner_up_freq,
+        margin=margin,
+        is_robust=margin > threshold,
+    )

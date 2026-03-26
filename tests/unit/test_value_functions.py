@@ -87,6 +87,11 @@ class TestExponential:
         for x in [0.0, 0.25, 0.5, 0.75, 1.0]:
             assert 0.0 <= exponential(x, low=0.0, high=1.0, rate=3.0) <= 1.0
 
+    def test_overflow_extreme_rate_does_not_crash(self):
+        # rate=-800 is a very large exponent; must not raise OverflowError.
+        result = exponential(0.5, 0, 1, rate=-800)
+        assert 0.0 <= result <= 1.0
+
 
 class TestLogarithmic:
     def test_low_maps_to_zero(self):
@@ -141,6 +146,21 @@ class TestLogistic:
         for x in [-10.0, 0.0, 0.5, 1.0, 10.0]:
             result = logistic(x, midpoint=0.5, steepness=2.0)
             assert 0.0 < result < 1.0
+
+    def test_overflow_large_positive_exponent_returns_zero(self):
+        # steepness=1000 on x far below midpoint: z > 700 → result ≈ 0
+        result = logistic(49, 50, 1000)
+        assert result == pytest.approx(0.0)
+
+    def test_overflow_large_negative_exponent_returns_one(self):
+        # steepness=1000 on x far above midpoint: z < -700 → result ≈ 1
+        result = logistic(51, 50, 1000)
+        assert result == pytest.approx(1.0)
+
+    def test_overflow_does_not_crash(self):
+        # No OverflowError raised for extreme inputs.
+        result = logistic(49, 50, 1000)
+        assert 0.0 <= result <= 1.0
 
 
 class TestStep:

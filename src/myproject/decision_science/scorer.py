@@ -1,6 +1,7 @@
 """MAUTScorer: additive multi-attribute utility aggregation."""
 
 import functools
+import warnings
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
@@ -33,11 +34,37 @@ class DecisionResult:
         alternative: Name of the alternative.
         utility: Aggregate utility U = sum(w_i * u_i).
         breakdown: Per-criterion weighted contributions {name: w_i * u_i}.
+        raw_utilities: Per-criterion unweighted utilities {name: u_i}.
     """
 
     alternative: str
     utility: float
     breakdown: dict[str, float] = field(default_factory=dict)
+    raw_utilities: dict[str, float] = field(default_factory=dict)
+
+    def explain(self) -> dict:
+        """Structured explanation of this result.
+
+        Returns:
+            Dict with keys: alternative, utility, criteria (list of per-criterion
+            dicts with name, raw_utility, weighted_contribution, pct_of_total).
+        """
+        total = self.utility or 1.0
+        criteria_detail = []
+        for name, weighted in self.breakdown.items():
+            raw = self.raw_utilities.get(name, 0.0)
+            criteria_detail.append({
+                "name": name,
+                "raw_utility": round(raw, 4),
+                "weighted_contribution": round(weighted, 4),
+                "pct_of_total": round(weighted / total, 4) if total > 0 else 0.0,
+            })
+        criteria_detail.sort(key=lambda c: c["weighted_contribution"], reverse=True)
+        return {
+            "alternative": self.alternative,
+            "utility": round(self.utility, 4),
+            "criteria": criteria_detail,
+        }
 
 
 class MAUTScorer:
@@ -100,8 +127,8 @@ class MAUTScorer:
             DecisionResult with aggregate utility and per-criterion breakdown.
 
         Raises:
-            ValueError: If weights are invalid or a criterion name is missing
-                from raw_scores.
+            ValueError: If weights are invalid, a criterion name is missing
+                from raw_scores, or a value function returns outside [0, 1].
         """
         self.validate_weights()
 
@@ -112,20 +139,31 @@ class MAUTScorer:
             )
 
         breakdown: dict[str, float] = {}
+        raw_utilities: dict[str, float] = {}
         for c in self._criteria:
             u = c.value_fn(raw_scores[c.name])
+            if not (0.0 <= u <= 1.0):
+                raise ValueError(
+                    f"Value function for '{c.name}' returned {u}, "
+                    f"which is outside [0, 1] (input was {raw_scores[c.name]})"
+                )
+            raw_utilities[c.name] = u
             breakdown[c.name] = c.weight * u
 
         return DecisionResult(
             alternative=alternative,
             utility=sum(breakdown.values()),
             breakdown=breakdown,
+            raw_utilities=raw_utilities,
         )
 
     def rank(
         self, alternatives: dict[str, dict[str, float]]
     ) -> list[DecisionResult]:
         """Score and rank all alternatives, highest utility first.
+
+        Emits a warning for any criterion whose utility range across alternatives
+        is less than 0.2 — such a criterion may be effectively deweighted.
 
         Args:
             alternatives: Mapping of alternative name to its raw_scores dict.
@@ -142,6 +180,20 @@ class MAUTScorer:
 
         results = [self.score(name, scores) for name, scores in alternatives.items()]
         results.sort(key=lambda r: r.utility, reverse=True)
+
+        for crit in self._criteria:
+            if crit.weight <= 0:
+                continue
+            contributions = [r.raw_utilities.get(crit.name, 0.0) for r in results]
+            if contributions:
+                util_range = max(contributions) - min(contributions)
+                if util_range < 0.2:
+                    warnings.warn(
+                        f"Criterion '{crit.name}' has utility range {util_range:.3f} "
+                        f"across alternatives — it may be effectively deweighted",
+                        stacklevel=2,
+                    )
+
         return results
 
     @classmethod
@@ -164,7 +216,7 @@ class MAUTScorer:
 
         Raises:
             ValueError: If required fields are missing, an unknown value
-                function is named, or weights are invalid.
+                function is named, params are invalid, or weights are invalid.
             FileNotFoundError: If the path does not exist.
         """
         yaml_path = Path(path)
@@ -202,6 +254,14 @@ class MAUTScorer:
             params: dict = entry.get("params", {})
             bound_fn = functools.partial(builtin_fns[fn_name], **params)
 
+            try:
+                bound_fn(0.0)  # smoke-test the partial binding
+            except TypeError as e:
+                raise ValueError(
+                    f"Invalid params for criterion '{entry['name']}' "
+                    f"with value_fn '{fn_name}': {e}"
+                ) from e
+
             criteria.append(
                 Criterion(
                     name=entry["name"],
@@ -213,3 +273,88 @@ class MAUTScorer:
         scorer = cls(criteria)
         scorer.validate_weights()
         return scorer
+
+    @classmethod
+    def from_weights(
+        cls,
+        weights_df: "pd.DataFrame",
+        value_fns: dict[str, Callable[[float], float]],
+        method: str = "SMARTER",
+    ) -> "MAUTScorer":
+        """Build a MAUTScorer from generate_weights() output.
+
+        Args:
+            weights_df: DataFrame from weights.generate_weights() with columns
+                including the named method. Index contains attribute names.
+            value_fns: Mapping of attribute name (DataFrame index) to value function.
+            method: Column name to use for weights. Defaults to "SMARTER".
+
+        Returns:
+            Configured MAUTScorer with weights from the specified method.
+
+        Raises:
+            ValueError: If method column doesn't exist, or value_fns doesn't
+                cover all attributes.
+        """
+        try:
+            import pandas as pd  # noqa: F401 — guard-import; pandas is optional
+        except ImportError:
+            raise ImportError(
+                "pandas is required for from_weights(). "
+                "Install it with: pip install -e '.[excel]'"
+            )
+
+        if method not in weights_df.columns:
+            raise ValueError(
+                f"Method column '{method}' not found in weights_df. "
+                f"Available columns: {list(weights_df.columns)}"
+            )
+
+        attribute_names = list(weights_df.index)
+        missing_fns = [name for name in attribute_names if name not in value_fns]
+        if missing_fns:
+            raise ValueError(
+                f"value_fns is missing entries for attributes: {missing_fns}"
+            )
+
+        criteria = [
+            Criterion(
+                name=name,
+                weight=float(weights_df.loc[name, method]),
+                value_fn=value_fns[name],
+            )
+            for name in attribute_names
+        ]
+
+        scorer = cls(criteria)
+        scorer.validate_weights()
+        return scorer
+
+
+def dominance_check(results: list[DecisionResult]) -> list[tuple[str, str]]:
+    """Find dominated alternatives (weight-independent).
+
+    Alternative A dominates B if A's raw utility >= B's raw utility on
+    every criterion and strictly > on at least one.
+
+    Args:
+        results: List of DecisionResult (must have raw_utilities populated).
+
+    Returns:
+        List of (dominator, dominated) tuples. Empty if no dominance found.
+    """
+    dominated_pairs: list[tuple[str, str]] = []
+
+    for i, a in enumerate(results):
+        for j, b in enumerate(results):
+            if i == j:
+                continue
+            criteria_keys = set(a.raw_utilities.keys()) & set(b.raw_utilities.keys())
+            if not criteria_keys:
+                continue
+            all_ge = all(a.raw_utilities[k] >= b.raw_utilities[k] for k in criteria_keys)
+            any_gt = any(a.raw_utilities[k] > b.raw_utilities[k] for k in criteria_keys)
+            if all_ge and any_gt:
+                dominated_pairs.append((a.alternative, b.alternative))
+
+    return dominated_pairs

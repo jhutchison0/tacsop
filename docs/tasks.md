@@ -12,6 +12,7 @@
 - [ ] [P3] Remove dead project_root fixture from conftest.py (carryover from 2026-03-17)
 - [ ] [P3] Add README.md for GitHub human readers
 - [ ] [P3] Add GitHub Actions CI workflow
+- [ ] [P3] Add from_yaml round-trip tests for exponential, logarithmic, step, piecewise_linear value functions
 
 ## Blocked
 
@@ -34,3 +35,5 @@
 - [x] 2026-03-26: Decision science module — Wave 3: visualization (radar, tornado, heatmap), 32 tests
 - [x] 2026-03-26: Add decision-scientist agent (Level 1) and decision-science team template
 - [x] 2026-03-26: CONOP: decision_science_utility.md — full 4-wave plan with migration path for 6 repos
+- [x] 2026-03-26: End-to-end integration test for decision_science pipeline (8 tests)
+- [x] 2026-03-26: Team review hardening — 3 bugs fixed, 3 defensive guards, 3 analysis features (explain, dominance, robustness)

@@ -19,11 +19,13 @@ This directory contains agent definitions, team templates, slash commands, and s
 │   ├── test-runner.md
 │   ├── code-reviewer.md
 │   ├── proposer.md
-│   └── python-prototyper.md
+│   ├── python-prototyper.md
+│   └── decision-scientist.md
 ├── teams/                 # Team composition templates
 │   ├── feature-development.md
 │   ├── bug-fix.md
-│   └── code-review.md
+│   ├── code-review.md
+│   └── decision-science.md
 ├── commands/              # Slash commands
 │   ├── task.md            # /task — work tracker + escalation ladder
 │   ├── session-start.md   # /session-start — load context
@@ -48,17 +50,23 @@ This directory contains agent definitions, team templates, slash commands, and s
 | `proposer` | Analyze problems, propose bold approaches, debate before implementation | sonnet | Read + Write reports | Before committing to an implementation strategy |
 | `python-prototyper` | Implement Python features, utilities, and tests | sonnet | Read/Write (scoped) | Feature implementation, bug fixes, new modules |
 
+**Level 1 (project-specific)**
+
+| Agent | Purpose | Model | Access | When to Use |
+|-------|---------|-------|--------|-------------|
+| `decision-scientist` | Audit decision models for MAUT correctness — weights, value functions, sensitivity coverage | inherit | Read + Write reports | When configuring criteria, reviewing decision model YAML, or before operationalizing a decision |
+
 > **Model configuration**: Agents set to `inherit` use the orchestrator's model. Agents pinned to `sonnet` or `haiku` always use that model regardless of the orchestrator.
 
 ## Scope Matrix
 
-| Path | test-runner | code-reviewer | proposer | python-prototyper |
-|------|:-----------:|:-------------:|:--------:|:-----------------:|
-| `src/myproject/` | Read | Read | Read | **Write** |
-| `tests/` | Read/Run | Read | Read | **Write** |
-| `config/` | Read | Read | Read | **Write** |
-| `docs/` | — | **Write** (reports) | **Write** (proposals) | Write |
-| `.claude/` | — | Read | Read | — |
+| Path | test-runner | code-reviewer | proposer | python-prototyper | decision-scientist |
+|------|:-----------:|:-------------:|:--------:|:-----------------:|:------------------:|
+| `src/myproject/` | Read | Read | Read | **Write** | Read |
+| `tests/` | Read/Run | Read | Read | **Write** | — |
+| `config/` | Read | Read | Read | **Write** | Read |
+| `docs/` | — | **Write** (reports) | **Write** (proposals) | Write | **Write** (audits) |
+| `.claude/` | — | Read | Read | — | — |
 
 **Bold** = primary owner. Regular "Write" = secondary (for tests alongside their code). Dash = no access needed.
 
@@ -71,6 +79,7 @@ Team compositions live in `.claude/teams/`. Use `/task promote` or `/task plan` 
 | [`feature-development`](teams/feature-development.md) | python-prototyper + test-runner + code-reviewer | New modules, utilities, or project components |
 | [`bug-fix`](teams/bug-fix.md) | python-prototyper + test-runner | Targeted fixes with test verification |
 | [`code-review`](teams/code-review.md) | code-reviewer + test-runner | Review-only passes, no new code |
+| [`decision-science`](teams/decision-science.md) | proposer + decision-scientist + python-prototyper + test-runner + code-reviewer | MAUT/MCDA implementation, decision model design, scoring logic migration |
 
 ### Scaling Rules
 

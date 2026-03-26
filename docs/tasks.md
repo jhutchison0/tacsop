@@ -7,6 +7,7 @@
 - [ ] [P2] Add coverage config to pyproject.toml ([tool.coverage.run/report])
 - [ ] [P2] Add tests for scripts/propagate_doctrine.py
 - [ ] [P2] Update from_template_to_project.md with clone-cleanup steps (carryover from 2026-03-17)
+- [ ] [P2] Doctrine propagation — notify downstream repos of decision_science module availability
 - [ ] [P3] Remove dead sample_data fixture from conftest.py (carryover from 2026-03-17)
 - [ ] [P3] Remove dead project_root fixture from conftest.py (carryover from 2026-03-17)
 - [ ] [P3] Add README.md for GitHub human readers
@@ -28,3 +29,8 @@
 - [x] 2026-03-24: First doctrine propagation to 4 downstream repos (paperboy, fema_cria, flood_model, rmi-reboot)
 - [x] 2026-03-25: Add .gitattributes for cross-platform line ending normalization (LF)
 - [x] 2026-03-25: Second doctrine propagation — 9 repos notified (shark, agent-eval, beesly-equilibrium, elephant-graveyard, magic-movies, paperboy, project-megan, quest-engine, tactics-game)
+- [x] 2026-03-26: Decision science module — Wave 1: MAUT scorer, 7 value functions, from_yaml(), 82 tests
+- [x] 2026-03-26: Decision science module — Wave 2: sensitivity analysis (OAT, Monte Carlo, scenario compare), 31 tests
+- [x] 2026-03-26: Decision science module — Wave 3: visualization (radar, tornado, heatmap), 32 tests
+- [x] 2026-03-26: Add decision-scientist agent (Level 1) and decision-science team template
+- [x] 2026-03-26: CONOP: decision_science_utility.md — full 4-wave plan with migration path for 6 repos

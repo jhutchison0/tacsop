@@ -4,6 +4,74 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
+## 2026-03-26: Decision Science Module — Shared MAUT/MCDA Utility
+
+**Files added**: `src/myproject/decision_science/` (4 modules), `.claude/agents/decision-scientist.md` (new), `.claude/teams/decision-science.md` (new)
+
+### 1. Shared MAUT Scorer
+
+A new `decision_science` subpackage provides the infrastructure that 6+ repos were building independently:
+
+- **`value_functions.py`** — 7 pluggable value functions: `linear`, `exponential`, `logarithmic`, `logistic`, `step`, `gaussian`, `piecewise_linear`. All return `float` in `[0, 1]`.
+- **`scorer.py`** — `MAUTScorer` class with additive aggregation `U = Σ w×u`. Includes:
+  - `from_yaml()` — config-driven model loading (mandatory, not optional)
+  - `from_weights()` — bridge to `weights.py` `generate_weights()` output
+  - `score()` / `rank()` — with weight validation and value function output bounds checking
+  - `explain()` on `DecisionResult` — structured dict for programmatic consumption
+  - `dominance_check()` — weight-independent dominated alternative detection
+- **`sensitivity.py`** — `one_at_a_time()`, `monte_carlo()` (Dirichlet sampling), `scenario_compare()`, `robustness_report()` (single confidence metric)
+- **`visualization.py`** — `radar_chart()`, `tornado_plot()`, `rank_stability_heatmap()` (matplotlib optional)
+
+### 2. Decision-Scientist Agent
+
+New Level 1 agent that audits decision models for MAUT correctness:
+- Validates weights sum to 1.0, no negatives, value functions output in [0,1]
+- Flags missing sensitivity analysis, inappropriate value function shapes
+- Audit-only scope: reads everything, writes only to `docs/`
+
+### 3. Decision-Science Team
+
+New 5-agent team template: proposer + decision-scientist + python-prototyper + test-runner + code-reviewer. Use for any MAUT/MCDA work.
+
+### 4. YAML Config Schema
+
+Decision models are defined in YAML:
+
+```yaml
+criteria:
+  - name: effectiveness
+    weight: 0.35
+    value_fn: linear
+    params: {low: 0, high: 100}
+  - name: risk
+    weight: 0.40
+    value_fn: gaussian
+    params: {center: 0, sigma: 50}
+  - name: survival
+    weight: 0.25
+    value_fn: logistic
+    params: {midpoint: 0.5, steepness: 8}
+```
+
+### Action Required
+
+**If your repo does MAUT/MCDA scoring** (tactics-game, quest-engine, project-megan, agent-eval, paperboy, elephant-graveyard):
+- Review the shared module — it can replace your local scorer implementation
+- Your domain-specific criteria, value function parameters, and profiles stay in your repo
+- The scoring infrastructure, sensitivity analysis, and visualization come from utils
+- Migration is opt-in and additive — nothing breaks if you don't adopt
+
+**If your repo does NOT do MAUT/MCDA**:
+- No action required — ignore this update
+- The module exists if you ever need weighted multi-criteria decision analysis
+
+**Agent/team adoption** (all repos):
+- Copy `.claude/agents/decision-scientist.md` if you do any form of weighted scoring
+- Copy `.claude/teams/decision-science.md` for MAUT/MCDA workflow support
+- Update `.claude/README.md` agent roster and scope matrix if you adopt either
+
+---
+
 ## 2026-03-24: Planning Framework, Proposer Agent, and Doctrine Propagation
 
 **Files changed**: `.claude/commands/task.md`, `.claude/commands/session-start.md`, `.claude/agents/proposer.md` (new), `.claude/README.md`, `.claude/teams/feature-development.md`, `CLAUDE.md`

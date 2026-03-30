@@ -24,8 +24,8 @@ def find_downstream_repos() -> list[Path]:
     """Find repos with .claude/commands/ recursively across all project directories.
 
     A repo is any directory containing .claude/commands/. Skips utils itself
-    and avoids descending into a repo's subdirectories (a .claude/commands/
-    inside a repo's subtree is treated as its own repo).
+    and filters out nested repos (e.g. git submodules inside another repo's
+    subtree like lib/PageIndex).
     """
     repos = []
     for commands_dir in sorted(PROJECTS_DIR.rglob(".claude/commands")):
@@ -35,7 +35,13 @@ def find_downstream_repos() -> list[Path]:
         if repo == UTILS_ROOT:
             continue
         repos.append(repo)
-    return repos
+
+    # Remove nested repos — if repo A is inside repo B, keep only B
+    filtered = []
+    for repo in repos:
+        if not any(repo != other and repo.is_relative_to(other) for other in repos):
+            filtered.append(repo)
+    return filtered
 
 
 def extract_latest_entry(doctrine_path: Path) -> str | None:
@@ -91,11 +97,17 @@ def propagate(dry_run: bool = False) -> None:
     for repo in repos:
         target = repo / NOTIFICATION_FILENAME
         if dry_run:
-            print(f"[dry-run] Would write: {target}")
+            existing = " (append)" if target.exists() else " (new)"
+            print(f"[dry-run] Would write: {target}{existing}")
         else:
-            target.write_text(notification)
             rel = repo.relative_to(PROJECTS_DIR)
-            print(f"Notified: {rel}")
+            if target.exists():
+                existing = target.read_text()
+                target.write_text(existing.rstrip() + "\n\n---\n\n" + latest)
+                print(f"Appended: {rel}")
+            else:
+                target.write_text(notification)
+                print(f"Notified: {rel}")
 
     if dry_run:
         print(f"\nNotification content:\n{'=' * 40}\n{notification}")

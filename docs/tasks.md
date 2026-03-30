@@ -37,3 +37,5 @@
 - [x] 2026-03-26: End-to-end integration test for decision_science pipeline (8 tests)
 - [x] 2026-03-26: Team review hardening — 3 bugs fixed, 3 defensive guards, 3 analysis features (explain, dominance, robustness)
 - [x] 2026-03-26: Third doctrine propagation — 9 repos notified of decision_science module
+- [x] 2026-03-30: Add append mode to doctrine propagation script — preserves unread updates instead of overwriting
+- [x] 2026-03-30: Fourth doctrine propagation — decision science update to 10 repos (5 new, 5 appended to existing)

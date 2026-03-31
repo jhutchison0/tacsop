@@ -53,10 +53,10 @@ testing:
 # Session state
 state:
   last_session:
-    date: "2026-03-30"
-    file: "docs/sessions/20260330_doctrine_propagation_append.md"
-    summary: "Added append mode to doctrine propagation, pushed decision science update to 10 repos"
-  active_work: "Doctrine propagation maintenance and downstream sync"
+    date: "2026-03-31"
+    file: "docs/sessions/20260331_testing_docs_and_template_hardening.md"
+    summary: "34 new tests, logger improvements, coverage config, template guide and README rewrite, doctrine propagation to 10 repos"
+  active_work: "Template hardening and test coverage"
   known_issues:
     - "numpy must be installed manually if venv predates decision_science addition"
 

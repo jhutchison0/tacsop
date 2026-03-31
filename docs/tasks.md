@@ -2,7 +2,6 @@
 
 ## Active
 
-- [ ] [P1] Add tests for geo.py and logger.py — easiest coverage wins
 - [ ] [P2] Add coverage config to pyproject.toml ([tool.coverage.run/report])
 - [ ] [P2] Update from_template_to_project.md with clone-cleanup steps (carryover from 2026-03-17)
 - [ ] [P3] Add README.md for GitHub human readers
@@ -38,3 +37,6 @@
 - [x] 2026-03-31: Add 14 tests for propagate_doctrine.py — extract, build, discovery, propagate with append
 - [x] 2026-03-31: Fix excel.py update_excel_workbook keep_index inverted logic
 - [x] 2026-03-31: Remove dead sample_data and project_root fixtures from conftest.py
+- [x] 2026-03-31: Add 10 tests for geo.py — haversine distance and bearing with known city pairs and edge cases
+- [x] 2026-03-31: Improve logger.py — optional log_dir, get_logger() convenience function, customizable datefmt
+- [x] 2026-03-31: Add 10 tests for logger.py — color handling, file creation, console-only, handler dedup, custom datefmt

@@ -10,13 +10,13 @@
 
 This template gives you a working Python project scaffold with zero wasted code. What you get on clone:
 
-- `src/myproject/` package with eight production-quality utility modules
+- `src/myproject/` package with utility modules and a decision science subpackage
 - `pyproject.toml` with optional dependency groups (install only what you need)
-- pytest infrastructure with an example passing test suite
-- Claude Code workflow: session commands, three prepositioned agents, PCC/PCI quality gates
+- pytest infrastructure with 189 tests across 8 test files (53% coverage)
+- Claude Code workflow: session commands, four prepositioned agents, PCC/PCI quality gates
 - Design pillars, roadmap, and task escalation framework ready to fill in
 
-What you do **not** get: a README, a CI pipeline, and working test coverage beyond `math_utils`. Those gaps are documented in Section 9.
+What you do **not** get: a README or a CI pipeline. Those gaps are documented in Section 9.
 
 **Why it exists**: Starting a Python project from scratch means making a dozen identical decisions every time — how to structure packages, how to handle optional deps, whether to use src-layout, how to set up logging, how to run parallel tasks. This template makes those decisions once so you can focus on the domain.
 
@@ -92,19 +92,41 @@ pip install -e ".[database]"     # If keeping database.py (fix it first — see 
 pip install -e ".[weights]"      # If keeping weights.py
 ```
 
-### Step 4: Verify tests pass
+### Step 4: Strip what you don't need
+
+Remove unused modules, their tests, and their dependency groups. Be ruthless — see Section 3 for guidance on what to keep vs. remove.
+
+```bash
+# Example: removing geo.py
+rm src/$NEW/utils/geo.py
+rm tests/unit/test_geo.py
+# Remove the dep group from pyproject.toml if one exists
+```
+
+Then clean up template artifacts:
+
+| Action | Why |
+|--------|-----|
+| Delete `docs/sessions/*.md` | Template session history, not yours |
+| Delete `docs/design/from_template_to_project.md` | You've read it — it's template scaffolding |
+| Reset `docs/tasks.md` to empty Active/Blocked/Completed sections | Template tasks, not yours |
+| Clean `.claude/README.md` of template-specific wording | Update agent roster and scope matrix for your project |
+| Remove the `all` dep group from `pyproject.toml` if it points to groups you deleted | Dead indirection |
+| Preserve `.claude/commands/` and `.claude/skills/` intact | These carry workflow logic, not template scaffolding |
+
+### Step 5: Verify tests pass
 
 ```bash
 pytest
 ```
 
-You should see the `math_utils` tests pass. If anything fails, the rename step missed something — re-check all `myproject` references.
+You should see all remaining tests pass. If anything fails, the rename step missed something — re-check all `myproject` references.
 
-### Step 5: Update the task list
+### Step 6: Update the task list
 
 Create `docs/tasks.md` if it doesn't exist (run `/task list` in Claude Code to generate the stub). Add your first real tasks here.
 
-### Step 6: Initial commit
+### Step 7: Initial commit
 
 ```bash
 git add -A
@@ -119,11 +141,25 @@ This is your project's starting line. Everything before this point is template. 
 
 Every module is optional unless your project actually needs it. Be ruthless — dead code in a template becomes dead code in your project.
 
+### Standards (follow everywhere)
+
+**`pathlib`** — The template uses `pathlib.Path` exclusively for all filesystem operations. No `os.path` anywhere. Follow this convention in your project — use `Path` for construction, `/` for joining, `.read_text()` / `.write_text()` for I/O.
+
 ### Keep (universal)
 
-**`logger.py`** — Every project needs logging. This implementation handles the two common footguns (duplicate handlers on re-import, timezone-correct timestamps) correctly. Drop it in and use `LoggerSetup.setup_logger()`.
+**`logger.py`** — Every project needs logging. Use the convenience function for quick setup:
 
-One caveat: the `Formatter.converter` assignment on line 72 is a global mutation that affects all formatters in the process. If you set up two loggers with different timezones, the last one wins. Fine for most projects; document the constraint if your project runs multiple loggers concurrently.
+```python
+from myproject.utils.logger import get_logger
+
+logger = get_logger("myapp")                          # Console-only
+logger = get_logger("myapp", "logs/")                 # Console + file
+logger = get_logger("myapp", datefmt="%H:%M:%S")      # Custom time format
+```
+
+Features: colored console output (auto-detects TTY), timezone-aware timestamps, date-stamped log files, duplicate handler prevention on re-import. Console-only mode (no `log_dir`) is ideal for scripts and notebooks. The class-based API `LoggerSetup.setup_logger()` is also available.
+
+One caveat: the `Formatter.converter` assignment is a global mutation that affects all formatters in the process. If you set up two loggers with different timezones, the last one wins. Fine for most projects; document the constraint if your project runs multiple loggers concurrently.
 
 ### Evaluate (domain-dependent)
 
@@ -133,11 +169,13 @@ One caveat: the `Formatter.converter` assignment on line 72 is a global mutation
 
 **`weights.py`** — Keep if you're doing multi-criteria decision analysis or ranking. Three weighting methods (SMARTER, rank reciprocal, rank sum) with tie handling. Requires `numpy` + `pandas` (`pip install -e ".[weights]"`). Drop it if you're not doing MCDA work.
 
-**`excel.py`** — Keep if you're generating Excel reports. Handles DataFrame-to-table formatting cleanly. Has a known bug (see Section 9). Requires `pandas`, `openpyxl`, `xlsxwriter`. Drop it if you're not generating Excel files.
+**`excel.py`** — Keep if you're generating Excel reports. Handles DataFrame-to-table formatting cleanly. Requires `pandas`, `openpyxl`, `xlsxwriter`. Drop it if you're not generating Excel files.
 
 **`slack.py`** — Keep if you need Slack notifications. Thin wrapper — the whole module is 37 lines. Easy to understand and extend. Requires `slack-sdk`. Drop it if you're not posting to Slack.
 
-**`database.py`** — **Do not use as-is.** The sync/async mismatch makes `insert_or_update_data` uncallable at runtime. Fix the mismatch before building on this module (see Section 9). Keep after fixing if you need PostgreSQL + JSONB storage. Drop it if you're using a different database or ORM.
+**`database.py`** — Keep if you need PostgreSQL + JSONB storage. Fully synchronous implementation. Requires `psycopg`. Drop it if you're using a different database or ORM.
+
+**`decision_science/`** — Keep if you're doing multi-criteria decision analysis, weighted scoring, or alternative ranking. A complete MAUT subpackage: 7 value functions, `MAUTScorer` with `from_yaml()`, sensitivity analysis (OAT, Monte Carlo, scenario comparison), visualization (radar, tornado, heatmap). Includes a `decision-scientist` agent and team template. Requires `numpy` (required dep), `matplotlib` (optional for visualization). Drop the entire subpackage if you're not doing MCDA work.
 
 ### Consider removing
 
@@ -348,7 +386,7 @@ Every key your code reads from `os.environ`, with a dummy value and a comment ex
 
 ### The pattern to follow
 
-Look at `tests/unit/test_math_utils.py`. It's the only complete test in the repo. Key patterns:
+The template ships with 189 tests across 8 test files. Key patterns:
 
 - Tests are in `tests/unit/` for unit tests, `tests/integration/` for integration tests
 - Test file names match module names: `test_math_utils.py` tests `math_utils.py`
@@ -386,19 +424,16 @@ Write tests in this order (easiest to hardest):
 
 ### Running with coverage
 
-```bash
-pytest --cov=src --cov-report=term-missing
-```
+Coverage is configured in `pyproject.toml` under `[tool.coverage.run]` and `[tool.coverage.report]`:
 
-Note: `pytest --cov=myproject` will fail because `myproject` is not a top-level package. Use `--cov=src` to hit the `src/` layout correctly.
+```bash
+pytest --cov                        # Coverage table with missing lines
+pytest --cov --cov-report=html      # HTML report in htmlcov/
+```
 
 ### Coverage target
 
-`config/project.yaml` declares 80% as the threshold. The template ships at 4%. Closing that gap is your first real task. Section 9 lists the must-fix modules.
-
-### Current state
-
-The template violates its own Shift-Left Testing pillar at Phase 1 completion. Seven of eight utility modules have 0% test coverage. This is the most important thing to fix before building on top of the template.
+The template ships at 53% coverage with a `fail_under = 50` threshold. Ratchet this up as you add tests — aim for 80%+ on modules you actively develop. Modules behind optional dependencies (excel, slack, database) will show 0% unless those extras are installed.
 
 ---
 
@@ -485,67 +520,7 @@ Use `[area]` tags as defined in `session-end.md`:
 
 ## 9. Known Issues & First Fixes
 
-These are bugs and gaps the next team inherits. Fix them before building on top.
-
-### Critical: database.py sync/async mismatch
-
-`DatabaseManager.__init__` uses `psycopg.connect()` (synchronous). But `insert_or_update_data` is `async` and calls `await self.conn.cursor()` — which doesn't exist on a sync connection. This raises `TypeError` at runtime.
-
-**Fix**: Convert to fully async using `psycopg.AsyncConnection`:
-
-```python
-# Change __init__ to async factory method
-@classmethod
-async def create(cls, db_config: dict[str, str]) -> "DatabaseManager":
-    instance = cls.__new__(cls)
-    instance.conn = await psycopg.AsyncConnection.connect(**db_config)
-    await instance._create_table()
-    return instance
-```
-
-Or simplify to fully synchronous if you don't need async. Don't leave the mismatch.
-
-### Critical: Test coverage is 4%
-
-Before building anything new, add tests for at least `geo.py` and `logger.py`. These are the easiest (pure functions, no external deps). Together they will bring coverage above 25% and validate the test infrastructure.
-
-Start with `tests/unit/test_geo.py`:
-```python
-from myproject.utils.geo import get_distance, get_bearing
-
-def test_same_point_distance():
-    assert get_distance(0, 0, 0, 0) == 0.0
-
-def test_known_distance():
-    # Chicago to NYC is approximately 1145 km
-    dist = get_distance(41.85, -87.65, 40.71, -74.01)
-    assert abs(dist - 1145) < 10
-```
-
-### Warning: excel.py keep_index logic inverted
-
-In `update_excel_workbook` at line 97-98:
-
-```python
-if not keep_index:
-    df = df.reset_index(level=0, drop=False)  # drop=False adds index as column
-```
-
-When `keep_index=False`, the intent is to not include the index — but `drop=False` adds it as a column. Compare to `save_excel_table` which correctly inserts the index column only when `keep_index=True`. The logic is inverted.
-
-**Fix**: Change to `drop=True` when `keep_index=False`, or restructure to match `save_excel_table`'s pattern.
-
-### Warning: session-end.md skill has leftover paperboy content
-
-`.claude/skills/session-end.md` contains domain-specific commit tags (`[source]`, `[select]`, `[distill]`, `[pipeline]`, `[tts]`) and branch names (`dev-source`, `dev-select`) from a different project. This is a Level 0 skill — it must be project-agnostic.
-
-**Fix**: Replace domain-specific tags with generic examples. Update branch naming section to use generic names.
-
-### Warning: SKILLS_FRAMEWORK.md references "paperboy"
-
-`.claude/skills/SKILLS_FRAMEWORK.md` lines 103-106 list example Level 1 skills for "paperboy" by name. This exposes the template's origin project.
-
-**Fix**: Replace with generic placeholder examples (e.g., "For a data pipeline project, Level 1 skills might include: `api-integration.md`, `pipeline-debugging.md`").
+Remaining gaps the next team inherits.
 
 ### Informational: No README.md
 
@@ -553,18 +528,27 @@ There's no `README.md` at the project root. `CLAUDE.md` is for Claude Code, not 
 
 **Fix**: Write a minimal README covering: what the project does, how to set up the environment, how to run tests, and how to contribute.
 
-### Informational: Coverage config incomplete
+### Informational: No CI pipeline
 
-`pyproject.toml` has no `[tool.coverage.run]` or `[tool.coverage.report]` section. Add:
+No GitHub Actions workflow exists. Tests run locally but not on push or PR.
 
-```toml
-[tool.coverage.run]
-source = ["src"]
+**Fix**: Add `.github/workflows/ci.yml` with pytest and coverage check.
 
-[tool.coverage.report]
-fail_under = 80
-show_missing = true
-```
+### Informational: Optional-dep modules have 0% coverage
+
+`database.py`, `excel.py`, `parallel.py`, `slack.py`, and `weights.py` have no test coverage because their dependencies aren't in the base install. If you keep any of these modules, add tests gated with `pytest.importorskip`.
+
+### Previously fixed (for reference)
+
+These issues existed in earlier versions of the template and have been resolved:
+
+- **database.py sync/async mismatch** — Converted to fully synchronous (2026-03-17)
+- **excel.py keep_index inverted logic** — Fixed `if not keep_index` → `if keep_index` (2026-03-31)
+- **session-end.md paperboy content** — Scrubbed domain-specific tags (2026-03-17)
+- **SKILLS_FRAMEWORK.md paperboy references** — Replaced with generic examples (2026-03-17)
+- **Dead conftest.py fixtures** — Removed unused `sample_data` and `project_root` (2026-03-31)
+- **Coverage config missing** — Added `[tool.coverage.run/report]` to pyproject.toml (2026-03-31)
+- **Test coverage at 4%** — Now at 53% with 189 tests (2026-03-31)
 
 ---
 
@@ -579,8 +563,6 @@ show_missing = true
 **Letting the task list grow unchecked.** A task list with 40 items is not a task list — it's a guilt log. Keep active tasks under 10. Promote complex work to plans. Archive stale tasks.
 
 **Running PCI instead of PCC for small changes.** PCC is cheap. Run it on every push. Save PCI for big diffs and pre-merge reviews.
-
-**Building on top of database.py before fixing the sync/async bug.** This is the most dangerous pitfall. The module looks correct — it has type hints, docstrings, proper structure. The bug is subtle. If you write application code that calls `insert_or_update_data` before fixing the mismatch, you'll get a runtime error that's annoying to trace back.
 
 **Treating design pillars as aspirational rather than enforceable.** Pillars only work if PCI checks against them and code review flags violations. If your pillar says "every new component includes tests" and a PR adds 200 lines with zero tests, that's a violation, not a missed ideal.
 

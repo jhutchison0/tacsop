@@ -94,7 +94,7 @@ def update_excel_workbook(
         ws = wb[sheetname]
 
         df = sheets[sheetname].copy()
-        if not keep_index:
+        if keep_index:
             df = df.reset_index(level=0, drop=False)
 
         for row in dataframe_to_rows(df, index=False, header=True):

@@ -1,74 +1,107 @@
-# myproject
+# utils
 
-A Python project template with reusable utility modules and a structured development workflow.
+A Python project template and upstream doctrine hub for Claude Code agent workflows.
 
-## Quick Start
+This repo serves two purposes:
+
+1. **Template** — Clone it to start a new Python project with proven utilities, testing infrastructure, and a full Claude Code agent workflow already wired up.
+2. **Upstream Hub** — Maintain shared agent best practices, decision science tooling, and workflow commands here, then propagate updates to all downstream repos.
+
+## What's Included
+
+| Category | Contents |
+|----------|----------|
+| **Utilities** | Logging (colored, timezone-aware), geo (haversine, bearing), Excel tables, Slack webhooks, PostgreSQL/JSONB, multiprocessing patterns, SMARTER weights |
+| **Decision Science** | MAUT scorer with 7 value functions, sensitivity analysis (OAT, Monte Carlo), visualization (radar, tornado, heatmap) — all config-driven via YAML |
+| **Agent Workflow** | 4 agents (test-runner, code-reviewer, proposer, python-prototyper), team templates, session commands (`/session-start`, `/session-end`, `/pcc`, `/pci`, `/task`) |
+| **Testing** | 189 tests, 53% coverage, pytest-cov configured |
+
+## Line of Effort 1: Build a New Repo
+
+Clone this template and strip it down to what your project needs.
 
 ```bash
-# Clone and setup
-git clone <repo-url> myproject
-cd myproject
+git clone <this-repo> my-new-project
+cd my-new-project
+rm -rf .git && git init
 
-# Create virtual environment
+# Rename the package
+mv src/myproject src/my_new_project
+# Update references in: pyproject.toml, config/project.yaml, CLAUDE.md, tests/
+
+# Set up environment
 python3 -m venv .venv
 source .venv/bin/activate
-
-# Install (base only — lightweight)
 pip install -e ".[dev]"
 
-# Run tests
+# Verify
 pytest
-
-# Install optional modules as needed
-pip install -e ".[excel]"      # pandas, openpyxl, xlsxwriter
-pip install -e ".[slack]"      # slack-sdk
-pip install -e ".[database]"   # psycopg
-pip install -e ".[all]"        # everything
 ```
 
-## Starting a New Project
+Delete modules you don't need, reset `docs/tasks.md` and `docs/sessions/`, and make your first commit. See **[From Template to Project](docs/design/from_template_to_project.md)** for the full Day-1 checklist.
 
-1. Rename `src/myproject/` to `src/yourproject/`
-2. Update `name` in `pyproject.toml` and `config/project.yaml`
-3. Define your design pillars in `docs/design/pillars.md`
-4. Update `docs/design/roadmap.md` with your phases
-5. Copy `.env.example` to `.env` and fill in your keys
-6. Delete utility modules you don't need from `src/yourproject/utils/`
+## Line of Effort 2: Propagate Updates Downstream
 
-## Utility Modules
+When agent workflows, commands, or shared utilities change here, push updates to all downstream repos.
 
-| Module | Description | Dependency Group |
-|--------|-------------|-----------------|
-| `logger` | OOP logging with colors and timezone support | (none — stdlib) |
-| `math_utils` | nCr/nCk combinatorics | (none — stdlib) |
-| `geo` | Haversine distance and bearing | (none — stdlib) |
-| `excel` | DataFrame-to-Excel with formatted tables | `[excel]` |
-| `weights` | SMARTER/reciprocal/rank-sum weight generation | `[weights]` |
-| `parallel` | Producer-consumer and starmap multiprocessing | (none — stdlib) |
-| `slack` | Slack channel message posting | `[slack]` |
-| `database` | Async PostgreSQL with JSONB | `[database]` |
+```bash
+# 1. Document the change in the changelog
+#    Add a new ## YYYY-MM-DD entry to docs/doctrine-updates.md
+
+# 2. Propagate to all downstream repos
+python scripts/propagate_doctrine.py          # writes .claude/upstream-update.md
+python scripts/propagate_doctrine.py --dry-run # preview without writing
+
+# 3. Downstream repos see the update on their next /session-start
+```
+
+The script finds all repos under `~/projects/` with `.claude/commands/` directories. Updates append to existing notifications — repos that haven't reviewed earlier updates won't lose them.
 
 ## Project Structure
 
 ```
-├── src/myproject/utils/    # Reusable utility modules
-├── config/project.yaml     # Project identity and phases
-├── tests/                  # pytest test suites
-├── docs/                   # Design docs, sessions, plans
-├── .claude/                # Agents, commands, skills
-├── archive/                # Old code preserved for reference (gitignored)
-└── pyproject.toml          # Modern Python packaging
+utils/
+├── src/myproject/
+│   ├── utils/              # Reusable utility modules
+│   │   ├── logger.py       # get_logger() — colored, timezone-aware, console or file
+│   │   ├── geo.py          # Haversine distance and bearing
+│   │   ├── excel.py        # DataFrame-to-Excel tables
+│   │   ├── parallel.py     # Multiprocessing patterns
+│   │   ├── slack.py        # Slack webhook posting
+│   │   ├── database.py     # Synchronous PostgreSQL with JSONB
+│   │   ├── weights.py      # SMARTER/reciprocal/rank-sum weights
+│   │   └── math_utils.py   # Combinatorics
+│   └── decision_science/   # MAUT/MCDA subpackage
+│       ├── scorer.py       # MAUTScorer with from_yaml()
+│       ├── value_functions.py
+│       ├── sensitivity.py
+│       └── visualization.py
+├── .claude/                # Agent definitions, teams, commands, skills
+├── scripts/                # Doctrine propagation tooling
+├── config/project.yaml     # Project identity, phases, state
+├── tests/                  # 189 tests (pytest)
+├── docs/
+│   ├── design/             # Pillars, roadmap, template guide
+│   ├── sessions/           # Session documentation
+│   ├── plans/              # CONOPs and OPORDs
+│   └── doctrine-updates.md # Changelog for downstream propagation
+└── pyproject.toml          # Packaging, deps, coverage config
 ```
 
-## Development Workflow
+## Quick Start (Development)
 
-This template includes Claude Code infrastructure for structured development:
+```bash
+source .venv/bin/activate
+pytest                     # Run all tests
+pytest --cov               # With coverage report
+pytest -k test_name        # Run specific tests
+```
 
-- `/session-start` — Load context and check project health
-- `/session-end` — Commit, document, and update tasks
-- `/pcc` — Pre-Code Check before pushing
-- `/pci` — Pre-Code Inspection for deeper review
-- `/task` — Track and escalate work items
+## Standards
+
+- **pathlib everywhere** — No `os.path`. Use `Path` for all filesystem operations.
+- **Shift-left testing** — Tests ship alongside code, not as an afterthought.
+- **Config-driven** — `config/project.yaml` is the source of truth. YAML for structure, `.env` for secrets.
 
 ## License
 

@@ -3,11 +3,8 @@
 ## Active
 
 - [ ] [P1] Add tests for geo.py and logger.py — easiest coverage wins
-- [ ] [P2] Fix excel.py update_excel_workbook keep_index inverted logic
 - [ ] [P2] Add coverage config to pyproject.toml ([tool.coverage.run/report])
 - [ ] [P2] Update from_template_to_project.md with clone-cleanup steps (carryover from 2026-03-17)
-- [ ] [P3] Remove dead sample_data fixture from conftest.py (carryover from 2026-03-17)
-- [ ] [P3] Remove dead project_root fixture from conftest.py (carryover from 2026-03-17)
 - [ ] [P3] Add README.md for GitHub human readers
 - [ ] [P3] Add GitHub Actions CI workflow
 - [ ] [P3] Add from_yaml round-trip tests for exponential, logarithmic, step, piecewise_linear value functions
@@ -39,3 +36,5 @@
 - [x] 2026-03-30: Add append mode to doctrine propagation script — preserves unread updates instead of overwriting
 - [x] 2026-03-30: Fourth doctrine propagation — decision science update to 10 repos (5 new, 5 appended to existing)
 - [x] 2026-03-31: Add 14 tests for propagate_doctrine.py — extract, build, discovery, propagate with append
+- [x] 2026-03-31: Fix excel.py update_excel_workbook keep_index inverted logic
+- [x] 2026-03-31: Remove dead sample_data and project_root fixtures from conftest.py

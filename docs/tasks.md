@@ -2,7 +2,6 @@
 
 ## Active
 
-- [ ] [P2] Update from_template_to_project.md with clone-cleanup steps (carryover from 2026-03-17)
 - [ ] [P3] Add README.md for GitHub human readers
 - [ ] [P3] Add GitHub Actions CI workflow
 - [ ] [P3] Add from_yaml round-trip tests for exponential, logarithmic, step, piecewise_linear value functions
@@ -40,3 +39,4 @@
 - [x] 2026-03-31: Improve logger.py — optional log_dir, get_logger() convenience function, customizable datefmt
 - [x] 2026-03-31: Add 10 tests for logger.py — color handling, file creation, console-only, handler dedup, custom datefmt
 - [x] 2026-03-31: Add coverage config to pyproject.toml — threshold 50%, show_missing, exclude_lines
+- [x] 2026-03-31: Update from_template_to_project.md — clone-cleanup steps, logger/pathlib/coverage updates, fixed issues archived

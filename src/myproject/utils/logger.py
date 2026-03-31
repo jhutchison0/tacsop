@@ -41,23 +41,27 @@ class LoggerSetup:
     @staticmethod
     def setup_logger(
         name: str,
-        log_dir: str | Path,
+        log_dir: str | Path | None = None,
         level: int = logging.INFO,
         timezone: str = "America/Chicago",
+        datefmt: str | None = None,
     ) -> logging.Logger:
         """Set up a logger with file and colored console handlers.
 
         Args:
             name: Logger name (also used in the log filename).
             log_dir: Directory to store log files. Created if it doesn't exist.
+                     None for console-only output (no file handler).
             level: Logging level (default: INFO).
             timezone: IANA timezone for timestamps (default: America/Chicago).
+            datefmt: Custom date format string (default: military time "%Y-%m-%d %H%M").
 
         Returns:
             Configured logger instance.
         """
-        log_dir = Path(log_dir)
-        log_dir.mkdir(parents=True, exist_ok=True)
+        if log_dir is not None:
+            log_dir = Path(log_dir)
+            log_dir.mkdir(parents=True, exist_ok=True)
 
         logger = logging.getLogger(name)
         logger.setLevel(level)
@@ -77,28 +81,55 @@ class LoggerSetup:
                 timezone,
             )
 
-        # Military time format
+        # Date format: custom or military time default
+        datefmt = datefmt or "%Y-%m-%d %H%M"
         formatter = logging.Formatter(
             "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-            datefmt="%Y-%m-%d %H%M",
+            datefmt=datefmt,
         )
 
         # File handler with date-stamped filename
-        current_date = (
-            datetime.now(tz).strftime("%Y%m%d")
-            if tz
-            else datetime.now().strftime("%Y%m%d")
-        )
-        file_handler = logging.FileHandler(log_dir / f"{name}_{current_date}.log")
-        file_handler.setFormatter(formatter)
-        file_handler.setLevel(level)
+        if log_dir is not None:
+            current_date = (
+                datetime.now(tz).strftime("%Y%m%d")
+                if tz
+                else datetime.now().strftime("%Y%m%d")
+            )
+            file_handler = logging.FileHandler(
+                log_dir / f"{name}_{current_date}.log"
+            )
+            file_handler.setFormatter(formatter)
+            file_handler.setLevel(level)
+            logger.addHandler(file_handler)
 
         # Console handler with color
         console_handler = VisualConsoleHandler()
         console_handler.setFormatter(formatter)
         console_handler.setLevel(level)
-
-        logger.addHandler(file_handler)
         logger.addHandler(console_handler)
 
         return logger
+
+
+def get_logger(
+    name: str,
+    log_dir: str | Path | None = None,
+    level: int = logging.INFO,
+    timezone: str = "America/Chicago",
+    datefmt: str | None = None,
+) -> logging.Logger:
+    """Create a configured logger with one call.
+
+    Args:
+        name: Logger name.
+        log_dir: Directory for log files, or None for console-only.
+        level: Logging level (default: INFO).
+        timezone: IANA timezone for timestamps (default: America/Chicago).
+        datefmt: Custom date format string (default: military time "%Y-%m-%d %H%M").
+
+    Returns:
+        Configured logger instance.
+    """
+    return LoggerSetup.setup_logger(
+        name, log_dir=log_dir, level=level, timezone=timezone, datefmt=datefmt
+    )

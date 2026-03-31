@@ -4,6 +4,27 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
+## 2026-03-31: Session-Start — Add Git Sync
+
+**Files changed**: `.claude/commands/session-start.md`
+
+### Change
+
+Added `git fetch && git pull` as the first command in Step 4 (Verify Health). Session-start now syncs with remote before running tests or checking status.
+
+### Action Required
+
+Update your `.claude/commands/session-start.md` Step 4 to include the fetch/pull before other health checks:
+
+```bash
+git fetch && git pull # Sync with remote before anything else
+pytest                # Verify all tests pass
+git status            # Check for uncommitted changes
+git branch -v         # Current branch state
+```
+
+---
+
 ## 2026-03-26: Decision Science Module — Shared MAUT/MCDA Utility
 
 **Files added**: `src/myproject/decision_science/` (4 modules), `.claude/agents/decision-scientist.md` (new), `.claude/teams/decision-science.md` (new)

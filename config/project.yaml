@@ -1,0 +1,69 @@
+# Project Configuration — Single Source of Truth
+# Rename 'myproject' when starting a new project
+
+project:
+  name: "myproject"
+  version: "0.1.0"
+  description: "A Python project template with reusable utilities"
+  python_requires: ">=3.10"
+
+# Design pillars — define in docs/design/pillars.md
+# Reference them here by name for quick lookup
+design_pillars:
+  - "Simplicity First"
+  - "Shift-Left Testing"
+  - "Config-Driven"
+  # TODO: Add your project-specific pillars
+
+# Directory structure
+paths:
+  source: "src/myproject"
+  tests: "tests"
+  config: "config"
+  docs: "docs"
+  sessions: "docs/sessions"
+  plans: "docs/plans"
+
+# Build phases — update status as work progresses
+# Statuses: not_started, in_progress, complete
+build_phases:
+  phase_1:
+    name: "Foundation"
+    status: "complete"
+    deliverable: "Project template with utility modules and dev workflow"
+  phase_2:
+    name: "TODO"
+    status: "not_started"
+    deliverable: "TODO — define your next phase"
+
+# Python settings
+python:
+  min_version: "3.10"
+  test_framework: "pytest"
+  package_manager: "pip"
+
+# Testing configuration
+testing:
+  command: "pytest"
+  coverage_threshold: 80
+  test_patterns:
+    - "tests/unit/test_*.py"
+    - "tests/integration/test_*.py"
+
+# Session state
+state:
+  last_session:
+    date: "2026-03-31"
+    file: "docs/sessions/20260331_testing_docs_and_template_hardening.md"
+    summary: "34 new tests, logger improvements, coverage config, template guide and README rewrite, doctrine propagation to 10 repos"
+  active_work: "Template hardening and test coverage"
+  known_issues:
+    - "numpy must be installed manually if venv predates decision_science addition"
+
+# Slash commands reference
+commands:
+  session_start: "Load context, check health, review tasks"
+  session_end: "Commit, update tasks, write session doc"
+  pcc: "Pre-Code Check — fast pass/fail before push"
+  pci: "Pre-Code Inspection — context-aware review"
+  task: "Manage task list, escalate work items"

@@ -1,0 +1,13 @@
+criteria:
+  - name: damage_output
+    weight: 0.35
+    value_fn: linear
+    params: {low: 0, high: 100}
+  - name: threat_proximity
+    weight: 0.40
+    value_fn: gaussian
+    params: {center: 0, sigma: 50}
+  - name: survival_probability
+    weight: 0.25
+    value_fn: logistic
+    params: {midpoint: 0.5, steepness: 8}

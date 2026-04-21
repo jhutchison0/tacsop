@@ -50,7 +50,7 @@ The `.claude/README.md` scope matrix was updated to reflect explicit per-directo
 
 2. **`code-reviewer.md`** (or equivalent auditor): change output path to `docs/reviews/YYYYMMDD_<subject>.md`. Add the standard header template.
 
-3. **`proposer.md`** (if present): proposals → `docs/plans/YYYYMMDD_<subject>.md`, investigation reports → `docs/reviews/YYYYMMDD_<subject>.md`. Update Scope Write to enumerate both.
+3. **`proposer.md`** (if present): no change to proposal location (`docs/plans/` was already correct). Add `docs/reviews/YYYYMMDD_<subject>.md` as the output for investigation-only reports. Update Scope Write to enumerate `docs/plans/` and `docs/reviews/` explicitly instead of the broad `docs/` grant.
 
 4. **`python-prototyper.md`** (if present): narrow `docs/` Write grant to `docs/sessions/`, `docs/plans/` explicitly — prototypers should not write to `docs/reviews/`.
 

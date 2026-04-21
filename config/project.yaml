@@ -23,6 +23,7 @@ paths:
   docs: "docs"
   sessions: "docs/sessions"
   plans: "docs/plans"
+  reviews: "docs/reviews"
 
 # Build phases — update status as work progresses
 # Statuses: not_started, in_progress, complete

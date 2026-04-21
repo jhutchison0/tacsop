@@ -129,9 +129,10 @@ Work scales through four levels. Use `/task promote` or `/task plan` to evaluate
 | Agent | Model | Writes Code? | Primary Domain |
 |---|---|---|---|
 | `test-runner` | haiku | No | All — runs pytest, reports results |
-| `code-reviewer` | inherit | No | All — reviews against pillars |
+| `code-reviewer` | inherit | No | All — reviews against pillars, writes to `docs/reviews/` |
 | `proposer` | sonnet | No | All — analyzes problems, proposes bold approaches, writes proposals |
 | `python-prototyper` | sonnet | Yes | Python implementation |
+| `decision-scientist` | inherit | No | Decision science — MAUT audits, weight validation, writes to `docs/reviews/` |
 
 ## Config Workflow
 

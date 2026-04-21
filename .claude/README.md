@@ -65,7 +65,9 @@ This directory contains agent definitions, team templates, slash commands, and s
 | `src/myproject/` | Read | Read | Read | **Write** | Read |
 | `tests/` | Read/Run | Read | Read | **Write** | — |
 | `config/` | Read | Read | Read | **Write** | Read |
-| `docs/` | — | **Write** (reports) | **Write** (proposals) | Write | **Write** (audits) |
+| `docs/sessions/` | — | Read | Read | Write | Read |
+| `docs/plans/` | — | Read | **Write** (proposals) | Write | Read |
+| `docs/reviews/` | — | **Write** (reports) | Write (analysis) | — | **Write** (audits) |
 | `.claude/` | — | Read | Read | — | — |
 
 **Bold** = primary owner. Regular "Write" = secondary (for tests alongside their code). Dash = no access needed.
@@ -97,7 +99,7 @@ Agents communicate through shared artifacts — no direct messaging required for
 - **Config files** — `config/project.yaml` is the shared schema contract and project state
 - **Test results** — `pytest` output validates changes and is the evidence standard for all agents
 - **Task list** — `docs/tasks.md` tracks ownership and status across agent turns
-- **Review reports** — `code-reviewer` writes findings to `docs/` for async review
+- **Review reports** — `code-reviewer` and `decision-scientist` write findings to `docs/reviews/` for async review
 
 ## Escalation Paths
 

@@ -47,7 +47,7 @@ pytest -x                          # Stop on first failure
 ## Scope
 
 - **Read**: All paths
-- **Write**: `src/myproject/`, `tests/`, `config/`, `docs/`, `scripts/`
+- **Write**: `src/myproject/`, `tests/`, `config/`, `docs/sessions/`, `docs/plans/`, `scripts/`
 - **Never modify**: `.claude/`, `.github/`
 
 ## Memory

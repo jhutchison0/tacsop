@@ -9,7 +9,7 @@
 | Teammate | Role | Responsibility |
 |----------|------|----------------|
 | `proposer` | Analyst | Frame the decision problem, propose model structure and value function choices, write proposal to `docs/plans/` |
-| `decision-scientist` | Domain reviewer | Audit model structure for MAUT correctness — weights, value functions, sensitivity coverage; write findings to `docs/` |
+| `decision-scientist` | Domain reviewer | Audit model structure for MAUT correctness — weights, value functions, sensitivity coverage; write findings to `docs/reviews/` |
 | `python-prototyper` | Implementer | Implement the approved model alongside its tests |
 | `test-runner` | Validator | Run tests after each implementation step, report coverage gaps |
 | `code-reviewer` | Quality gate | Review code against design pillars; does not evaluate domain correctness (that is `decision-scientist`'s role) |

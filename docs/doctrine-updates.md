@@ -4,6 +4,68 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
+## 2026-04-21: Agent Output Convention — docs/reviews/ and YYYYMMDD_<subject>.md
+
+**Files changed**: `.claude/agents/decision-scientist.md`, `.claude/agents/code-reviewer.md`, `.claude/agents/proposer.md`, `.claude/agents/python-prototyper.md`, `.claude/README.md`, `.claude/teams/decision-science.md`, `.claude/teams/feature-development.md`, `CLAUDE.md`, `config/project.yaml`
+
+**Files added**: `docs/reviews/` directory
+
+### Change
+
+Agents that write reports, audits, or analysis now share a single output convention:
+- **Directory**: `docs/reviews/` (dedicated, not the `docs/` root)
+- **Filename**: `YYYYMMDD_<subject>.md` (date first, sorts chronologically)
+- **Author**: goes in the file header, not the filename
+
+Previously, agents wrote to `docs/` with inconsistent filenames (e.g., `decision_audit_YYYYMMDD.md` — date buried, no subject, not sortable). The new convention matches the session doc pattern and makes it easy to find the most recent review across all agents.
+
+Each agent definition now includes a standard report header template:
+
+```markdown
+# [Report title]
+
+**Author**: [agent-name]
+**Date**: YYYY-MM-DD
+**Type**: [MAUT audit / Code review / Config review / ...]
+```
+
+### Scope changes per agent
+
+| Agent | Write scope (before) | Write scope (after) |
+|-------|---------------------|---------------------|
+| `decision-scientist` | `docs/` | `docs/reviews/` |
+| `code-reviewer` | `docs/` | `docs/reviews/` |
+| `proposer` | `docs/` | `docs/plans/` (proposals), `docs/reviews/` (analysis) |
+| `python-prototyper` | `docs/` | `docs/sessions/`, `docs/plans/` (explicitly, no `docs/reviews/`) |
+
+The `.claude/README.md` scope matrix was updated to reflect explicit per-directory rows (`docs/sessions/`, `docs/plans/`, `docs/reviews/`) instead of a single `docs/` column.
+
+`config/project.yaml` `paths:` section now includes `reviews: "docs/reviews/"`.
+
+### Action Required
+
+**For all repos with agent definitions** — update each agent that writes reports:
+
+1. **`decision-scientist.md`** (if present): change output path to `docs/reviews/YYYYMMDD_<subject>.md`. Add the standard header template to the Output Format section.
+
+2. **`code-reviewer.md`** (or equivalent auditor): change output path to `docs/reviews/YYYYMMDD_<subject>.md`. Add the standard header template.
+
+3. **`proposer.md`** (if present): proposals → `docs/plans/YYYYMMDD_<subject>.md`, investigation reports → `docs/reviews/YYYYMMDD_<subject>.md`. Update Scope Write to enumerate both.
+
+4. **`python-prototyper.md`** (if present): narrow `docs/` Write grant to `docs/sessions/`, `docs/plans/` explicitly — prototypers should not write to `docs/reviews/`.
+
+5. **`.claude/README.md` scope matrix**: replace single `docs/` row with three rows: `docs/sessions/`, `docs/plans/`, `docs/reviews/`. Assign Write access only to the agents that own each directory.
+
+6. **`config/project.yaml`**: add `reviews: "docs/reviews/"` under `paths:`.
+
+7. **Create `docs/reviews/`**: `mkdir -p docs/reviews && touch docs/reviews/.gitkeep`
+
+8. **Team templates** (`.claude/teams/*.md`): update any role description that says "write to `docs/`" to name the specific subdirectory.
+
+9. **`CLAUDE.md` agent table**: if `decision-scientist` is listed, confirm it shows `docs/reviews/` as its output. If it is absent, add it.
+
+---
+
 ## 2026-03-31: Session-Start — Add Git Sync
 
 **Files changed**: `.claude/commands/session-start.md`

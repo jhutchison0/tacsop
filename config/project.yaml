@@ -54,10 +54,10 @@ testing:
 # Session state
 state:
   last_session:
-    date: "2026-03-31"
-    file: "docs/sessions/20260331_testing_docs_and_template_hardening.md"
-    summary: "34 new tests, logger improvements, coverage config, template guide and README rewrite, doctrine propagation to 10 repos"
-  active_work: "Template hardening and test coverage"
+    date: "2026-04-21"
+    file: "docs/sessions/20260421_docs_reviews_convention_and_python311.md"
+    summary: "Adopted docs/reviews/YYYYMMDD_<subject>.md convention across all reporting agents; bumped Python minimum to 3.11; propagated to 11 repos"
+  active_work: "Agent output standardization and doctrine propagation"
   known_issues:
     - "numpy must be installed manually if venv predates decision_science addition"
 

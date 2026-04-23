@@ -41,3 +41,8 @@
 - [x] 2026-03-31: Add coverage config to pyproject.toml — threshold 50%, show_missing, exclude_lines
 - [x] 2026-03-31: Update from_template_to_project.md — clone-cleanup steps, logger/pathlib/coverage updates, fixed issues archived
 - [x] 2026-03-31: Rewrite README.md — template repo + upstream doctrine hub with two LOEs
+- [x] 2026-04-21: Adopt docs/reviews/YYYYMMDD_<subject>.md convention across all reporting agents
+- [x] 2026-04-21: Add decision-scientist to CLAUDE.md agent table (was missing)
+- [x] 2026-04-21: Narrow python-prototyper write scope to exclude docs/reviews/
+- [x] 2026-04-21: Fifth doctrine propagation — docs/reviews/ convention to 11 repos (3 new, 8 appended)
+- [x] 2026-04-21: Bump minimum Python version 3.10 → 3.11 in pyproject.toml, project.yaml, CLAUDE.md

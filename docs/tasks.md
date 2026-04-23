@@ -4,6 +4,7 @@
 
 - [ ] [P3] Add GitHub Actions CI workflow
 - [ ] [P3] Add from_yaml round-trip tests for exponential, logarithmic, step, piecewise_linear value functions
+- [ ] [P2] Include Python 3.11 minimum bump in next doctrine propagation (already applied to pyproject.toml, project.yaml, CLAUDE.md on 2026-04-21)
 
 ## Blocked
 

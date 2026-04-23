@@ -58,7 +58,7 @@ This is a Python project template with reusable utility modules. It provides a s
 
 ## Tech Stack
 
-- **Language**: Python (3.10+)
+- **Language**: Python (3.11+)
 - **Base Dependencies**: pyyaml, python-dotenv
 - **Optional**: pandas, openpyxl, xlsxwriter, slack-sdk, psycopg, numpy
 

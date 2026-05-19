@@ -83,6 +83,7 @@ Loaded on demand when this SKILL.md cites them. Read only the ones relevant to t
 - [MOCKS.md](MOCKS.md) — three mock patterns: simple, configurable, realistic-with-behavior.
 - [FIXTURES.md](FIXTURES.md) — shared fixtures, conftest patterns, test data management (YAML, Faker, generated).
 - [VERTICAL-SLICING.md](VERTICAL-SLICING.md) — tracer-bullet TDD discipline: rules, pre-code planning checklist, core principle. Adapted from Pocock.
+- [ENFORCEMENT.md](ENFORCEMENT.md) — enforcement gradient (probabilistic → deterministic), the PostToolUse audit hook, why we don't hard-block, when to escalate.
 - [CI.md](CI.md) — GitHub Actions example, coverage thresholds, marker-based test selection.
 - [ANTIPATTERNS.md](ANTIPATTERNS.md) — four anti-patterns to avoid, examples by domain (web API, data pipeline, ML), and the pre-commit testing checklist.
 
@@ -98,5 +99,5 @@ Loaded on demand when this SKILL.md cites them. Read only the ones relevant to t
 ---
 
 **Maintained by**: Shift-Left Testing Skill
-**Version**: 2.0.0 — restructured to directory form with sidecar progressive disclosure (2026-05-19)
-**Previous version**: 1.1.0 single-file at `.claude/skills/shift-left-testing.md`, replaced by this directory.
+**Version**: 2.0.0 — restructured to directory form with sidecar progressive disclosure, vertical-slicing discipline added, ENFORCEMENT sidecar describes deterministic hooks (2026-05-19)
+**Replaces**: prior single-file at `.claude/skills/shift-left-testing.md` (deleted in the same commit).

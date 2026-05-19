@@ -21,5 +21,19 @@
     "additionalDirectories": [
       "/tmp"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/post-tool-shift-left-audit.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
   }
 }

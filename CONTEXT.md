@@ -88,8 +88,9 @@ When an agent or human is introduced to this project, point them at these files 
 3. [CLAUDE.md](CLAUDE.md) — workflow conventions and quick commands.
 4. [config/project.yaml](config/project.yaml) — current machine-readable state.
 5. [.claude/README.md](.claude/README.md) — agent roster, scope matrix, team templates.
-6. [docs/sessions/](docs/sessions/) — recent session for live context (most recently modified file).
-7. [docs/propagation-protocol.md](docs/propagation-protocol.md) — only if touching anything that propagates downstream.
+6. [docs/propagation-protocol.md](docs/propagation-protocol.md) — required reading if touching anything that propagates downstream.
+7. [docs/adr/](docs/adr/) — accepted architecture decisions; check before reopening any decision they cover.
+8. [docs/sessions/](docs/sessions/) — recent session for live context (most recently modified file).
 
 ---
 

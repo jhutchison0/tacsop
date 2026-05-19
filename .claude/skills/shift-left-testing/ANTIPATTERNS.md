@@ -231,5 +231,6 @@ Quarterly or per phase:
 ## See Also
 
 - `VERTICAL-SLICING.md` — the rhythm that prevents anti-patterns 2 and 5 from creeping in.
+- `ENFORCEMENT.md` — the deterministic mechanisms (PostToolUse audit hook) that catch new code without a test partner.
 - `CI.md` — the CI configuration that surfaces anti-pattern 3 if it appears.
 - `MOCKS.md` — the line between healthy mocking and mock-the-thing-you're-testing.

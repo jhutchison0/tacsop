@@ -48,7 +48,7 @@ When a term is missing or contested, invoke the `maintaining-ubiquitous-language
 
 **Team**: A pre-composed agent roster for a class of work, defined in `.claude/teams/<name>.md`. Templates only; teams are instantiated at deployment time. _Avoid:_ squad, group.
 
-**Roster**: The set of agents currently defined in `.claude/agents/`. Five at the time of writing: `proposer`, `code-reviewer`, `decision-scientist`, `python-prototyper`, `test-runner`.
+**Roster**: The set of agents currently defined in `.claude/agents/`. The live list is whatever is in that directory; CONTEXT.md tracks the current count and names.
 
 **Subagent Type**: The named template a teammate is spawned from. Drives tool access and default model. _Avoid:_ agent role.
 

@@ -55,11 +55,12 @@ testing:
 state:
   last_session:
     date: "2026-05-19"
-    file: "docs/sessions/20260519_doctrine_artifact_buildout.md"
-    summary: "Pass 1 (proposer/code-reviewer/decision-scientist) reviewed plan1.md; built LANGUAGE.md, CONTEXT.md, ADR system, propagation-protocol.md, 3 new skills (directory form), SKILLS_FRAMEWORK v2, shift-left-testing TDD upgrade, session-end deduplication"
-  active_work: "Doctrine artifact buildout complete; sixth propagation cycle pending"
+    file: "docs/sessions/20260519_enforcement_layer_and_propagation_prep.md"
+    summary: "Passes 4/5/6 reviews; built shift-left enforcement layer (PostToolUse audit hook + ENFORCEMENT.md sidecar); wrote ADR-0001; authored the 22-artifact doctrine-updates.md entry; rewrote from_template_to_project.md to 12 sections. 8 agent reports across 3 review passes. Propagation deliberately deferred (A4 vs A6 decision pending fresh-eyes call)."
+  active_work: "Sixth doctrine propagation pending fresh-eyes A4-vs-A6 decision (pilot first vs bundle+adopt-helper); enforcement layer live on main and producing audit-log evidence"
   known_issues:
     - "numpy must be installed manually if venv predates decision_science addition"
+    - "Audit hook is soft-deterministic (logs, never blocks); cannot enforce temporal vertical-slicing (all tests then all impl)"
 
 # Slash commands reference
 commands:

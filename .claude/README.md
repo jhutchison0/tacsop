@@ -35,11 +35,19 @@ This directory contains agent definitions, team templates, slash commands, and s
 │   └── pci.md             # /pci — pre-code inspection
 └── skills/                # Reusable procedural knowledge
     ├── SKILLS_FRAMEWORK.md
+    │
+    ├── # Single-file (legacy form)
     ├── configuration-management.md
     ├── python-venv-management.md
-    ├── session-end.md
-    └── shift-left-testing.md
+    ├── shift-left-testing.md
+    │
+    └── # Directory form (Anthropic Dec 18 open standard)
+        ├── maintaining-ubiquitous-language/SKILL.md
+        ├── maintaining-project-context/SKILL.md
+        └── recording-architecture-decisions/SKILL.md
 ```
+
+> Note: `session-end.md` was retired 2026-05-19 — its reference content moved to `docs/session-doc-format.md`. The `/session-end` workflow remains in `.claude/commands/session-end.md`.
 
 ## Agent Catalog
 

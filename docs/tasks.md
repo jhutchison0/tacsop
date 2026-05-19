@@ -2,9 +2,10 @@
 
 ## Active
 
+- [ ] [P1] Sixth doctrine propagation — bundle: LANGUAGE.md skill, CONTEXT.md skill, ADR system, SKILLS_FRAMEWORK v2 (Anthropic Dec 18 open standard), shift-left-testing vertical-slicing upgrade, session-end skill/command deduplication, propagation-protocol.md, Python 3.11 minimum bump. Each downstream repo will receive LANGUAGE.md and CONTEXT.md as **starter templates** to be customized per-project.
 - [ ] [P3] Add GitHub Actions CI workflow
 - [ ] [P3] Add from_yaml round-trip tests for exponential, logarithmic, step, piecewise_linear value functions
-- [ ] [P2] Include Python 3.11 minimum bump in next doctrine propagation (already applied to pyproject.toml, project.yaml, CLAUDE.md on 2026-04-21)
+- [ ] [P3] Evaluate `diagnosing-defects` skill — defer per code-reviewer (bug-fix.md team template already covers the loop); revisit if team template usage data shows underuse
 
 ## Blocked
 
@@ -46,3 +47,15 @@
 - [x] 2026-04-21: Narrow python-prototyper write scope to exclude docs/reviews/
 - [x] 2026-04-21: Fifth doctrine propagation — docs/reviews/ convention to 11 repos (3 new, 8 appended)
 - [x] 2026-04-21: Bump minimum Python version 3.10 → 3.11 in pyproject.toml, project.yaml, CLAUDE.md
+- [x] 2026-05-19: Three-agent Pass 1 review of `docs/design/hold/plan1.md` (proposer grill, code-reviewer audit, decision-scientist MAUT — reports in `docs/reviews/`)
+- [x] 2026-05-19: Add `docs/design/hold/` to .gitignore as per-repo scratch workspace
+- [x] 2026-05-19: Rename `.claude/settings.local.json` → `.claude/settings.json` (Anthropic convention)
+- [x] 2026-05-19: Write `LANGUAGE.md` (project-specific glossary; decision science + agent framework + escalation ladder + governance terms; cites Pocock's pattern, not vocabulary)
+- [x] 2026-05-19: Write `CONTEXT.md` (project identity, mission, current state, constraints, key relationships)
+- [x] 2026-05-19: Write `docs/propagation-protocol.md` (formalized the doctrine-propagation evaluation gate, batching rules, append mode, rollback)
+- [x] 2026-05-19: Build ADR system — `docs/adr/ADR-FORMAT.md` + `docs/adr/.gitkeep` + `.claude/skills/recording-architecture-decisions/SKILL.md` (Pocock's triple-filter gate)
+- [x] 2026-05-19: Build `.claude/skills/maintaining-ubiquitous-language/` skill (directory form)
+- [x] 2026-05-19: Build `.claude/skills/maintaining-project-context/` skill (directory form)
+- [x] 2026-05-19: Update `.claude/skills/SKILLS_FRAMEWORK.md` to Anthropic Dec 18 open standard (frontmatter spec, directory form, progressive disclosure, civilian/military vocabulary crosswalk)
+- [x] 2026-05-19: Upgrade `.claude/skills/shift-left-testing.md` with vertical-slicing (tracer-bullet) discipline from Pocock's tdd skill
+- [x] 2026-05-19: Resolve session-end skill/command duplication — moved reference content to `docs/session-doc-format.md`, deleted `.claude/skills/session-end.md`, updated command to reference new doc

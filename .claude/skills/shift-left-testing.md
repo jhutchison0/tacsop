@@ -1,7 +1,7 @@
 ---
 name: shift-left-testing
-description: Comprehensive testing strategy with early validation, multi-tier tests, mocks, and simulated data
-version: "1.0.0"
+description: Comprehensive testing strategy with early validation, multi-tier tests, mocks, simulated data, and vertical-slicing (tracer-bullet) TDD discipline. Use when setting up test infrastructure, designing test strategy, implementing mocks, or driving feature work via test-first one-cycle-at-a-time TDD.
+version: "1.1.0"
 ---
 
 # Shift-Left Testing Strategy
@@ -1150,6 +1150,69 @@ def test_model_prediction():
 
 ---
 
+## Vertical Slicing (Tracer Bullets)
+
+The patterns above describe **what** to test and **how** to organize. This section adds the discipline of **when** to write each test — one at a time, in lockstep with the implementation it drives.
+
+Adapted from Matt Pocock's `tdd` skill (`mattpocock/skills/skills/engineering/tdd/SKILL.md`). The patterns are sound; the discipline is the part that is hard to keep.
+
+### The Failure Mode
+
+Without explicit discipline, both agents and humans tend to write **horizontal slices**: all tests first, then all implementation. The structure looks productive but produces brittle code — the implementation gets shaped by what the author *thought* the tests would need, not by what each test actually requires.
+
+```
+WRONG (horizontal):
+  RED:   test1, test2, test3, test4, test5
+  GREEN: impl1, impl2, impl3, impl4, impl5
+
+RIGHT (vertical):
+  RED→GREEN: test1→impl1
+  RED→GREEN: test2→impl2
+  RED→GREEN: test3→impl3
+```
+
+### Rules (verbatim from Pocock)
+
+- **One test at a time.** Only enough code to pass the current test.
+- **Don't anticipate future tests.** If a test you'll write later needs different structure, that pressure should surface when you write *that* test, not now.
+- **Never refactor while RED.** Get to GREEN first. Refactor only when all tests pass.
+
+### Pre-Code Planning Checklist (verbatim from Pocock)
+
+Before writing any test or implementation, confirm with the user:
+
+> - Confirm with user what interface changes are needed
+> - Confirm with user which behaviors to test (prioritize)
+> - Identify opportunities for deep modules (small interface, deep implementation)
+> - Design interfaces for testability
+> - List the behaviors to test (not implementation steps)
+> - Get user approval on the plan
+
+The driving question: *"What should the public interface look like? Which behaviors are most important to test?"*
+
+### Core Principle (verbatim from Pocock)
+
+> Tests should verify behavior through public interfaces, not implementation details. Code can change entirely; tests shouldn't.
+
+This is the discriminator between brittle tests and durable tests. A test that breaks when you refactor the implementation (without changing the public behavior) is the wrong kind of test — it is coupled to internals.
+
+### How This Interacts with the Rest of This Skill
+
+The mock, fixture, and tier patterns above describe **what** to test against. The vertical-slicing rule describes **when** to write each piece. They are complementary:
+
+- The test pyramid (unit/integration/system) sets the strategy.
+- Vertical slicing sets the rhythm.
+- Mocks set the boundary between the unit under test and its dependencies.
+
+A test that does not verify behavior through a public interface fails the core principle, regardless of how well it follows the other patterns.
+
+### Source
+
+- Matt Pocock, `mattpocock/skills/skills/engineering/tdd/SKILL.md` — verbatim quotes attributed inline.
+- Kent Beck, *Test-Driven Development by Example* — the original red-green-refactor pattern.
+
+---
+
 ## References
 
 ### Testing Frameworks
@@ -1175,5 +1238,5 @@ def test_model_prediction():
 ---
 
 **Maintained by**: Shift-Left Testing Skill
-**Version**: 1.0.0
-**Last Updated**: 2025-11-14
+**Version**: 1.1.0
+**Last Updated**: 2026-05-19 (added Vertical Slicing / Tracer Bullets section; updated description to include TDD discipline)

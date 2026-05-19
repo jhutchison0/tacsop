@@ -53,7 +53,7 @@ Use directory form when the skill carries reference content, examples, or script
 .claude/skills/<skill-name>.md
 ```
 
-Use single-file form for short, self-contained skills that don't need sidecar files. Our three remaining single-file Level 0 skills (`configuration-management.md`, `shift-left-testing.md`, `python-venv-management.md`) stay in this form for stability — there is no value in migrating them unless they grow past 500 lines.
+Use single-file form for short, self-contained skills that don't need sidecar files. As of 2026-05-19 all Level 0 skills in this template have migrated to directory form — the legacy single-file form is documented for reference and remains valid for any future skill small enough not to need sidecars.
 
 ---
 
@@ -100,31 +100,31 @@ If a skill's SKILL.md is creeping past 400 lines, the right move is usually to e
 
 ## Level 0: Universal Foundation Skills
 
-These skills are portable to any software project. They contain no project names, no domain-specific content.
+These skills are portable to any software project. They contain no project names, no domain-specific content. All current Level 0 skills use directory form with sidecars for progressive disclosure.
 
-### configuration-management.md (single-file)
+### configuration-management (directory form)
 
-**Focus**: Hierarchical configuration systems with profiles, secrets, and environment management.
+**Path**: `.claude/skills/configuration-management/SKILL.md` + 5 sidecars (`STRUCTURE-AND-FILES.md`, `LOADER.md`, `SECRETS.md`, `VALIDATION.md`, `TESTING-AND-PATTERNS.md`).
 
-**Key concepts**: configuration priority order, secrets management, profile-based environments, YAML configuration with environment variable substitution, schema validation, testing strategies for configuration.
+**Focus**: Hierarchical YAML configuration systems with profiles, secrets, and environment management.
 
-**Use when**: Setting up config systems, managing secrets, switching environments, refactoring hardcoded values.
+**Use when**: Setting up config systems, managing secrets, switching environments, refactoring hardcoded values, auditing config architecture.
 
-### shift-left-testing.md (single-file)
+### shift-left-testing (directory form)
 
-**Focus**: Early testing with multi-tier strategy, mocks, and simulated data. Includes vertical-slicing (tracer-bullet) TDD discipline added 2026-05-19.
+**Path**: `.claude/skills/shift-left-testing/SKILL.md` + 7 sidecars (`TIERS.md`, `PATTERNS.md`, `MOCKS.md`, `FIXTURES.md`, `VERTICAL-SLICING.md`, `CI.md`, `ANTIPATTERNS.md`).
 
-**Key concepts**: test pyramid, test organization, mock implementation patterns, test independence, CI/CD integration with coverage thresholds, testing anti-patterns, vertical-slicing TDD with one-test-at-a-time enforcement.
+**Focus**: Multi-tier testing strategy with vertical-slicing (tracer-bullet) TDD, mocks, fixtures, simulation, CI integration, and explicit anti-patterns.
 
-**Use when**: Setting up test infrastructure, designing test strategy, implementing mocks, running TDD.
+**Use when**: Setting up test infrastructure, designing test strategy, implementing mocks, driving feature work via test-first TDD.
 
-### python-venv-management.md (single-file)
+### python-venv-management (directory form)
 
-**Focus**: Python virtual environment creation and troubleshooting.
+**Path**: `.claude/skills/python-venv-management/SKILL.md` + 2 sidecars (`SETUP.md`, `TROUBLESHOOTING.md`).
 
-**Key concepts**: when to use single vs multiple environments, dependency conflict resolution, setup script patterns, environment activation and management.
+**Focus**: Python virtual environment creation, management, and troubleshooting.
 
-**Use when**: Setting up Python environments, resolving dependency conflicts.
+**Use when**: Setting up Python environments, resolving dependency conflicts, automating setup, migrating off system Python.
 
 ### maintaining-ubiquitous-language (directory form)
 
@@ -294,24 +294,48 @@ This is why `session-end`, `pcc`, `pci`, `sitrep`, `session-start`, and `task` r
 .claude/skills/
 ├── SKILLS_FRAMEWORK.md                       # This file
 │
-├── [Level 0: single-file legacy form]
-│   ├── configuration-management.md
-│   ├── shift-left-testing.md
-│   └── python-venv-management.md
+├── # Level 0 — directory form (current standard)
+├── configuration-management/
+│   ├── SKILL.md
+│   ├── STRUCTURE-AND-FILES.md
+│   ├── LOADER.md
+│   ├── SECRETS.md
+│   ├── VALIDATION.md
+│   └── TESTING-AND-PATTERNS.md
 │
-├── [Level 0: directory form, current standard]
-│   ├── maintaining-ubiquitous-language/
-│   │   └── SKILL.md
-│   ├── maintaining-project-context/
-│   │   └── SKILL.md
-│   └── recording-architecture-decisions/
-│       └── SKILL.md
+├── shift-left-testing/
+│   ├── SKILL.md
+│   ├── TIERS.md
+│   ├── PATTERNS.md
+│   ├── MOCKS.md
+│   ├── FIXTURES.md
+│   ├── VERTICAL-SLICING.md
+│   ├── CI.md
+│   └── ANTIPATTERNS.md
 │
-└── [Level 1: Project-Specific]
-    └── (none — this is a template; downstream repos add as needed)
+├── python-venv-management/
+│   ├── SKILL.md
+│   ├── SETUP.md
+│   └── TROUBLESHOOTING.md
+│
+├── maintaining-ubiquitous-language/
+│   └── SKILL.md
+│
+├── maintaining-project-context/
+│   └── SKILL.md
+│
+├── recording-architecture-decisions/
+│   └── SKILL.md
+│
+└── # Level 1 — Project-Specific
+    (none — this is a template; downstream repos add as needed)
 ```
 
-Note: the legacy `.claude/skills/session-end.md` was retired 2026-05-19. Its reference content moved to `docs/session-doc-format.md`. The `/session-end` workflow continues to live at `.claude/commands/session-end.md`.
+**Retired skills**:
+- `.claude/skills/session-end.md` (2026-05-19) — reference content moved to `docs/session-doc-format.md`. The `/session-end` workflow continues at `.claude/commands/session-end.md`.
+- `.claude/skills/configuration-management.md` (2026-05-19) — replaced by directory-form skill above.
+- `.claude/skills/shift-left-testing.md` (2026-05-19) — replaced by directory-form skill above.
+- `.claude/skills/python-venv-management.md` (2026-05-19) — replaced by directory-form skill above.
 
 ---
 

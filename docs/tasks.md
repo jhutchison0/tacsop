@@ -59,3 +59,4 @@
 - [x] 2026-05-19: Update `.claude/skills/SKILLS_FRAMEWORK.md` to Anthropic Dec 18 open standard (frontmatter spec, directory form, progressive disclosure, civilian/military vocabulary crosswalk)
 - [x] 2026-05-19: Upgrade `.claude/skills/shift-left-testing.md` with vertical-slicing (tracer-bullet) discipline from Pocock's tdd skill
 - [x] 2026-05-19: Resolve session-end skill/command duplication — moved reference content to `docs/session-doc-format.md`, deleted `.claude/skills/session-end.md`, updated command to reference new doc
+- [x] 2026-05-19: Wave 2 — refactor 3 legacy single-file skills to directory form with sidecar progressive disclosure: `shift-left-testing` (1242→8 files), `configuration-management` (1533→6 files), `python-venv-management` (623→3 files). All SKILL.md files <110 lines; all sidecars <400 lines. Tests still green. SKILLS_FRAMEWORK.md and .claude/README.md updated to reflect the new layout.

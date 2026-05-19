@@ -36,18 +36,16 @@ This directory contains agent definitions, team templates, slash commands, and s
 └── skills/                # Reusable procedural knowledge
     ├── SKILLS_FRAMEWORK.md
     │
-    ├── # Single-file (legacy form)
-    ├── configuration-management.md
-    ├── python-venv-management.md
-    ├── shift-left-testing.md
-    │
-    └── # Directory form (Anthropic Dec 18 open standard)
+    └── # All Level 0 skills now use directory form (Anthropic Dec 18 open standard)
+        ├── configuration-management/SKILL.md + 5 sidecars
+        ├── shift-left-testing/SKILL.md + 7 sidecars
+        ├── python-venv-management/SKILL.md + 2 sidecars
         ├── maintaining-ubiquitous-language/SKILL.md
         ├── maintaining-project-context/SKILL.md
         └── recording-architecture-decisions/SKILL.md
 ```
 
-> Note: `session-end.md` was retired 2026-05-19 — its reference content moved to `docs/session-doc-format.md`. The `/session-end` workflow remains in `.claude/commands/session-end.md`.
+> Note: legacy single-file skills `configuration-management.md`, `shift-left-testing.md`, `python-venv-management.md`, and `session-end.md` were retired 2026-05-19. The first three migrated to directory form with sidecar progressive disclosure; `session-end.md` reference content moved to `docs/session-doc-format.md`. The `/session-end` workflow remains in `.claude/commands/session-end.md`. See [SKILLS_FRAMEWORK.md](skills/SKILLS_FRAMEWORK.md) for the full inventory.
 
 ## Agent Catalog
 

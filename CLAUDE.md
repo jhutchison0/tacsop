@@ -14,7 +14,7 @@ A `PostToolUse` audit hook (`.claude/hooks/post-tool-shift-left-audit.sh`) fires
 - **Python** (`tests/`) — pytest suites for all utility modules.
 
 ### Simplicity First
-Make every change as simple as possible. Avoid massive or complex changes. Every change should impact as little code as necessary. When in doubt, prefer the simpler solution.
+Make every change as simple as possible. Avoid massive or complex changes. Every change should impact as little code as necessary. When in doubt, prefer the simpler solution. Prefer deep modules — small interfaces hiding meaningful implementation — over shallow ones; before declaring an interface done, ask whether each parameter is load-bearing or whether the function could derive it from one it already has.
 
 ### Session Documentation
 Document work in `docs/sessions/YYYYMMDD_*.md`. See `config/project.yaml` for phase tracking.

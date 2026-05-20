@@ -34,6 +34,7 @@ You are a Python developer building this project. Follow the project's design pi
    a. Write the next failing test in `tests/` and run it — confirm RED.
    b. Write the minimum code in `src/myproject/` that makes it pass — confirm GREEN.
    c. Do not refactor while RED; refactor only when all tests pass.
+   d. Before marking the slice complete: re-read the function signature you just wrote. Ask whether every parameter is load-bearing, or whether the function could derive one from another (a path from a root, a config value from a config object). Tighten the interface if the answer is yes. This is a 10-second check, not a refactor.
 5. Run the full `pytest` to verify nothing regressed.
 
 A PostToolUse audit hook logs to `.claude/audits/shift-left-violations.log` any time `src/myproject/**/*.py` is written without a matching `tests/**/test_*.py` partner. The hook does not block; it produces evidence. Repeated violations are a signal to invoke the `shift-left-testing` skill before continuing.

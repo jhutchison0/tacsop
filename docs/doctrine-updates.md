@@ -43,6 +43,8 @@ docs/adr/0001-directory-form-mandatory-for-new-skills.md
 .claude/skills/python-venv-management/                   (directory replaces former single-file)
   SKILL.md + 2 sidecars
 .claude/hooks/post-tool-shift-left-audit.sh              (executable; A5 PostToolUse audit)
+scripts/adopt_doctrine.py                                (optional downstream-side adoption helper; see §23)
+tests/unit/test_adopt_doctrine.py                        (35 tests for the helper)
 ```
 
 ### Files changed (utils)
@@ -104,6 +106,7 @@ Each artifact in this propagation has one of four adoption modes. Downstream mai
 | 20 | `.claude/agents/python-prototyper.md` (test-first workflow + pillars ref fix) | **CUSTOMIZE** | Workflow change is universal, but the agent file contains hard-coded `src/myproject/` references in the Project Layout and Scope sections. Substitute to your package name. If you've previously customized this agent locally, diff first — see §9. |
 | 21 | `CLAUDE.md` Development Principles strengthening (test-first vertical-slice) | **CUSTOMIZE** | Copy the wording template; adapt path references to your repo's package layout. |
 | 22 | `.claude/settings.local.json` → `.claude/settings.json` rename | **TEMPLATE-COPY** | Anthropic convention. Your existing settings.local.json (if any) becomes per-user-override-only, gitignored. |
+| 23 | `scripts/adopt_doctrine.py` + tests | **TEMPLATE-COPY** | Optional adoption helper. Automates the mechanical parts of this bundle (verbatim copies, hook substitution, settings.json merge, .gitignore append). See §23 for the action and the explicit non-goals. |
 
 ---
 
@@ -430,9 +433,36 @@ Anthropic's convention: `.claude/settings.json` is the team-wide checked-in file
 
 ---
 
+### 23. Optional Adoption Helper (`scripts/adopt_doctrine.py`)
+
+A downstream-side helper that applies the **mechanical** parts of this bundle for you: the 10 verbatim copies, the hook-script `myproject` → `<yourpkg>` substitution, the `.claude/settings.json` `PostToolUse` merge, and the `.gitignore` append. Everything that requires human judgment (LANGUAGE.md content, CONTEXT.md content, CLAUDE.md merge, ADR-0001 attribution, python-prototyper customization, Python 3.11 bump, hub-only propagation-protocol, legacy single-file skill deletions, `settings.local.json` rename) is **deliberately left for you** — the script prints a checklist of those items with section references back to this entry.
+
+**Explicit non-goals**: the helper does not delete anything, does not edit `LANGUAGE.md` / `CONTEXT.md` / `CLAUDE.md` / `pyproject.toml`, does not rename `settings.local.json`, and does not overwrite existing target files (any pre-existing target is skipped with a "review by hand" status). The settings.json merge preserves all existing top-level keys and any existing `PostToolUse` matchers; it appends ours as an additional entry and is idempotent on re-run.
+
+**Action required**:
+1. Copy `scripts/adopt_doctrine.py` into your repo's `scripts/` directory. (You can also run it from a local utils clone without copying — `python ~/projects/github/utils/scripts/adopt_doctrine.py` from your repo root.)
+2. Optionally copy `tests/unit/test_adopt_doctrine.py` if you want the test partner local; otherwise the upstream tests are authoritative.
+3. From your repo root, dry-run first: `python scripts/adopt_doctrine.py --dry-run`. Review the printed plan and the "MANUAL ATTENTION REQUIRED" checklist.
+4. Re-run without `--dry-run` to apply: `python scripts/adopt_doctrine.py`. You will be prompted `Apply changes? [y/N]` unless you pass `--yes`.
+5. Apply the manual-attention items by hand using this doctrine entry as your reference.
+
+**Flags**:
+- `--upstream PATH` — local utils clone (default `~/projects/github/utils/`).
+- `--package NAME` — your downstream package name (default: auto-detect from `src/<pkg>/` if exactly one subdirectory exists).
+- `--dry-run` — print the plan, write nothing.
+- `--yes` — skip the confirmation prompt.
+
+**Operational safety**: dry-run is the default mental model — the explicit prompt before any write is non-negotiable in the interactive path. The helper is idempotent: re-running after a partial adoption skips already-applied items.
+
+**The risk of using the helper vs. by-hand adoption**: the helper itself is a single point of failure — a bug in the script applies the bug to every repo that runs it. Mitigations: (a) 35 tests covering all 9 functions including settings-merge edge cases (empty / other-matcher / our-matcher-already-present); (b) skip-don't-overwrite semantics on every target; (c) the helper deliberately refuses CUSTOMIZE artifacts so the human still applies the judgment-heavy ones. If you are uncomfortable with the helper, the manual adoption path below remains fully supported.
+
+---
+
 ### Suggested Adoption Order
 
-Within one merge session per repo:
+**Fast path (helper-assisted, see §23)**: dry-run `scripts/adopt_doctrine.py` from your repo root, review the plan and the manual-attention checklist, re-run to apply the mechanical 13 artifacts in one step, then work through the printed checklist for the 10 judgment-required items by hand.
+
+**Slow path (fully by hand)** — within one merge session per repo:
 
 1. **First — the framework spec**: copy SKILLS_FRAMEWORK.md v2 (§5). Everything else makes sense against it.
 2. **Refactor the three legacy skills to directory form**: shift-left-testing, configuration-management, python-venv-management (§5).

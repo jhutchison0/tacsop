@@ -2,7 +2,7 @@
 
 ## Active
 
-- [ ] [P1] Sixth doctrine propagation — RUN `scripts/propagate_doctrine.py` to ship the 2026-05-19 entry (now 23 artifacts including `scripts/adopt_doctrine.py` per A6 decision). Helper is built, tested (35 tests green), and verified end-to-end against a sandbox repo. Bundle includes: LANGUAGE.md skill, CONTEXT.md skill, ADR system + ADR-0001, SKILLS_FRAMEWORK v2, shift-left-testing vertical-slicing + ENFORCEMENT.md + PostToolUse audit hook, session-end dedup, propagation-protocol.md, Python 3.11 bump, python-prototyper test-first, CLAUDE.md test-first, and the new adopt_doctrine.py helper.
+- [ ] [P3] Next doctrine propagation cycle — bundle two small refinements when enough downstream value accumulates to justify a cycle: (1) **deep-modules discipline** added to `CLAUDE.md` Simplicity First + `python-prototyper.md` Step 4d (commit `8ad387e`, 2026-05-20); (2) **proword convention** added to `.claude/commands/task.md` — CONOPs/OPORDs get a 2–3 syllable noun handle; campaign-scaling doctrine preserved for future use (this session, 2026-05-23). No urgency: 23-artifact bundle shipped 4 days ago; 7 downstream repos still have unread cycles backed up.
 - [ ] [P3] Add GitHub Actions CI workflow
 - [ ] [P3] Add from_yaml round-trip tests for exponential, logarithmic, step, piecewise_linear value functions
 - [ ] [P3] Evaluate `diagnosing-defects` skill — defer per code-reviewer (bug-fix.md team template already covers the loop); revisit if team template usage data shows underuse

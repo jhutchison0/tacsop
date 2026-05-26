@@ -54,10 +54,10 @@ testing:
 # Session state
 state:
   last_session:
-    date: "2026-05-19"
-    file: "docs/sessions/20260519_enforcement_layer_and_propagation_prep.md"
-    summary: "A6 decision taken: built scripts/adopt_doctrine.py test-first (9 slices, 35 tests, full repo 224 passing) under the new shift-left enforcement layer. Added as artifact #23 in the 2026-05-19 doctrine-updates entry. Sandbox dry-run + live run verified end-to-end (hook substitution, settings.json merge, gitignore append, idempotent re-run). Propagation script extraction still clean."
-  active_work: "Sixth doctrine propagation ready to ship — scripts/propagate_doctrine.py will distribute the 23-artifact bundle including the new adopt_doctrine.py helper"
+    date: "2026-05-23"
+    file: "docs/sessions/20260523_proword_convention_for_plans.md"
+    summary: "Added proword convention for CONOPs and OPORDs to /task: 2–3 syllable concrete noun, NATO-phonetic-adjacent, roll-your-own picking; scaling doctrine preserved for above-OPORD use. Cleared stale P1 propagation task (shipped last session) and replaced with P3 entry tracking two small refinements (deep-modules discipline + prowords) accumulating for the next propagation cycle. No production code changed; 259 passing."
+  active_work: "Two small refinements accumulating for the next doctrine propagation cycle — deep-modules (8ad387e, 2026-05-20) + proword convention (2026-05-23). No urgency: 23-artifact bundle just shipped; downstream repos still have unread cycles."
   known_issues:
     - "numpy must be installed manually if venv predates decision_science addition"
     - "Audit hook is soft-deterministic (logs, never blocks); cannot enforce temporal vertical-slicing (all tests then all impl)"

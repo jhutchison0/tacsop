@@ -4,6 +4,61 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
+## 2026-05-29: Windows-Portability Patch
+
+A small, bug-fix-only follow-up to the 2026-05-19 cycle. `heimdall-darkroom` adopted the cycle on 2026-05-28 as the first Windows-native downstream and surfaced three Windows-only failure modes in artifacts shipped by that propagation. All three are patched in this entry; no new doctrine, no new artifacts.
+
+**Adoption mode for downstreams**: PATCH-COPY. If you adopted the 2026-05-19 cycle but haven't yet run on Windows, you can ignore this entry. If you have run on Windows (or expect to), the cleanest path is to:
+
+1. Re-copy `.claude/hooks/post-tool-shift-left-audit.sh` from utils (the path-normalization fix is one new line near the top; verify the comment block then take the file as-is).
+2. Re-copy `scripts/adopt_doctrine.py` if you keep a local copy (the UTF-8 stdio fix is at the top of the imports block).
+3. If you scaffolded `src/<pkg>/utils/logger.py` from the utils template, port the broader `except` clause: add `ZoneInfoNotFoundError` to the import and to the except tuple.
+4. Append `tzdata; sys_platform == 'win32'` to your `pyproject.toml` base dependencies if not already present.
+
+`heimdall-darkroom` applied all four locally on 2026-05-28 (before this upstream patch existed); see [`heimdall-darkroom` `docs/sessions/20260528_doctrine_adoption.md`](https://github.com/jhutchison0/heimdall-darkroom/blob/main/docs/sessions/20260528_doctrine_adoption.md) for the discovery context.
+
+### The three fixes
+
+| # | File | Symptom | Fix |
+|---|---|---|---|
+| 1 | `scripts/adopt_doctrine.py` | `UnicodeEncodeError` on first invocation: `'charmap' codec can't encode character '→' in position 61`. The helper crashes before doing any work. | Reconfigure `sys.stdout` / `sys.stderr` to UTF-8 at module-load time. Fail-soft (wrapped in `try/except` for streams that don't support reconfigure). |
+| 2 | `.claude/hooks/post-tool-shift-left-audit.sh` | Hook fires (exit 0) but does nothing — `case "$file_path" in */src/<pkg>/*.py)` cannot match `C:\…\src\<pkg>\foo.py`. Silent no-op for every Edit/Write on Windows. | Normalize backslashes: `file_path=${file_path//\\//}` after the jq parse. Also clarify in the trailing comment that `*` in case patterns matches across slashes, so subdirectories are covered. |
+| 3 | `src/myproject/utils/logger.py` + `pyproject.toml` | On Windows + Python 3.9+ without `tzdata`, `ZoneInfo("America/Chicago")` raises `ZoneInfoNotFoundError` (a `KeyError` subclass — NOT `ImportError`/`ValueError`). The existing except clause didn't catch it; every caller of `get_logger()` crashed at import time. | Import `ZoneInfoNotFoundError` and add it to the `except` tuple. Also add `tzdata; sys_platform == 'win32'` to `pyproject.toml` base deps so timezones actually work, with the fallback as a belt-and-braces guard. |
+
+### Bonus: two pre-existing Windows test failures fixed
+
+While running the utils test suite to validate the fixes, two pre-existing Windows-only test failures surfaced in `tests/unit/test_adopt_doctrine.py`:
+
+| Test | Symptom | Fix |
+|---|---|---|
+| `TestPlanCopies::test_sources_rooted_at_upstream` | `assert str(src).startswith("/fake/upstream/")` fails because `Path("/fake/upstream") / "x"` produces `\fake\upstream\x` on Windows. | Use `Path(src).is_relative_to(upstream)` instead of string-prefix comparison. |
+| `TestSubstituteHook::test_executable_bit_preserved` | NTFS has no POSIX `+x` bit; `chmod(0o755)` is a no-op. The assertion `dst.stat().st_mode & 0o111` is `0`. | Skip on `sys.platform == "win32"` with an explanatory reason. |
+
+### Files changed
+
+```
+scripts/adopt_doctrine.py                              (UTF-8 stdio reconfigure block at top of imports)
+.claude/hooks/post-tool-shift-left-audit.sh            (path normalization + clarifying comment)
+src/myproject/utils/logger.py                          (import ZoneInfoNotFoundError + add to except)
+pyproject.toml                                         (+ tzdata; sys_platform == 'win32')
+tests/unit/test_logger.py                              (+ TestTimezoneFallback regression test)
+tests/unit/test_adopt_doctrine.py                      (Path.is_relative_to + skipif on win32)
+```
+
+### Verification
+
+- Full utils logger + adopt_doctrine test suites: **45 passed, 1 skipped** (the +x test, now correctly skipping on Windows).
+- `adopt_doctrine.py --dry-run` from a Windows shell **without** `PYTHONUTF8=1`: succeeds and prints `→` correctly.
+- Patched hook fed a Windows backslash `file_path`: matches `*/src/myproject/*.py` and exits cleanly. No-op behavior on out-of-scope paths preserved.
+
+### Provenance
+
+- Discovery: `heimdall-darkroom` 2026-05-28 doctrine-adoption session — see [`docs/sessions/20260528_doctrine_adoption.md`](https://github.com/jhutchison0/heimdall-darkroom/blob/main/docs/sessions/20260528_doctrine_adoption.md) §6.
+- Fix and propagation: this entry, utils 2026-05-29.
+- The `tzdata` + `ZoneInfoNotFoundError` portion has actually been a known issue in heimdall-darkroom since 2026-04-22 (Phase 1 pivot session) but was never propagated upstream until now. Carried in heimdall's task list as "port back to utils template" for over a month.
+
+---
+
 ## 2026-05-19: Doctrine Artifact Buildout + Skills Framework v2 + TDD Enforcement Hook
 
 This is the largest propagation cycle to date. It bundles work from three sessions:

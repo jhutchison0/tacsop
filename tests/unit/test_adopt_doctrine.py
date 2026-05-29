@@ -77,7 +77,10 @@ class TestPlanCopies:
         upstream = Path("/fake/upstream")
         plan = adopt_doctrine._plan_copies(upstream)
         for src, _dst, _kind in plan:
-            assert str(src).startswith("/fake/upstream/")
+            # Use is_relative_to instead of string-prefix comparison so the
+            # assertion works on Windows, where Path() normalizes to backslash
+            # separators and str(src) starts with `\fake\upstream\…`.
+            assert Path(src).is_relative_to(upstream)
 
 
 # --- _apply_copies ---
@@ -184,6 +187,12 @@ class TestSubstituteHook:
         assert "*/src/pkg/*.py) ;;" in body
         assert "esac" in body
 
+    @pytest.mark.skipif(
+        sys.platform == "win32",
+        reason="NTFS has no POSIX +x bit; chmod(0o755) is a no-op on Windows. "
+               "Hooks invoked via `bash <path>` from the harness don't need "
+               "the bit anyway.",
+    )
     def test_executable_bit_preserved(self, tmp_path, downstream):
         src = tmp_path / "hook.sh"
         src.write_text(HOOK_SAMPLE)

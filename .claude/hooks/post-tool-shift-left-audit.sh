@@ -22,6 +22,13 @@ fi
 tool_name=$(echo "$input" | jq -r '.tool_name // empty' 2>/dev/null)
 file_path=$(echo "$input" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
 
+# Normalize Windows backslash paths to forward slashes so the case globs
+# match on both Git Bash (Windows) and POSIX shells. The harness passes
+# file_path verbatim from the tool call; on Windows that is backslash-
+# separated. Without normalization, the `*/src/<pkg>/*.py` glob below
+# would never match a Windows path and the hook would silently no-op.
+file_path=${file_path//\\//}
+
 # Only Write and Edit are audited; everything else (Read, Bash, Grep, ...) is a no-op.
 case "$tool_name" in
     Write|Edit) ;;
@@ -30,7 +37,8 @@ esac
 
 # Only files under src/myproject/ are audited. Other paths (docs/, config/,
 # tests/ themselves, .claude/, scripts/) are out of scope — they don't need
-# a test partner.
+# a test partner. `*` in case patterns matches across slashes, so this also
+# catches files in subdirectories like src/myproject/sub/foo.py.
 case "$file_path" in
     */src/myproject/*.py) ;;
     *) exit 0 ;;

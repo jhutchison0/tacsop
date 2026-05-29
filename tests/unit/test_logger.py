@@ -3,6 +3,7 @@
 import io
 import logging
 import re
+import zoneinfo
 
 import pytest
 
@@ -96,3 +97,29 @@ class TestCustomDateFormat:
         content = log_files[0].read_text()
         # Custom format has colons in time (HH:MM:SS), military format does not
         assert re.search(r"\d{2}:\d{2}:\d{2}", content)
+
+
+class TestTimezoneFallback:
+    """Regression coverage for the ZoneInfoNotFoundError fallback.
+
+    On Windows + Python 3.9+ without the `tzdata` package installed,
+    ZoneInfo("America/Chicago") raises ZoneInfoNotFoundError (a KeyError
+    subclass — NOT ImportError or ValueError). Before the 2026-05-29 fix,
+    setup_logger would crash on import for any module that called it,
+    making the project unusable on Windows without tzdata. Caught when
+    heimdall-darkroom adopted the template as the first Windows downstream.
+    """
+
+    def test_setup_logger_falls_back_when_zoneinfo_data_missing(
+        self, monkeypatch, tmp_path
+    ):
+        def boom(_name):
+            raise zoneinfo.ZoneInfoNotFoundError("simulated missing tzdata")
+
+        monkeypatch.setattr("src.myproject.utils.logger.ZoneInfo", boom)
+
+        # Must NOT raise — the except clause should catch
+        # ZoneInfoNotFoundError just like ImportError / ValueError.
+        logger = LoggerSetup.setup_logger("test_tz_fallback", tmp_path / "logs")
+        assert logger is not None
+        assert len(logger.handlers) == 2  # file + console, fallback succeeded

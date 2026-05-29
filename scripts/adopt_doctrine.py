@@ -20,6 +20,16 @@ import shutil
 import sys
 from pathlib import Path
 
+# Force UTF-8 stdio so the Unicode arrows (→) used in status messages don't
+# crash on Windows, where Python's default stdio encoding is cp1252. No-op on
+# POSIX (already UTF-8) and on streams that don't support reconfigure (e.g.,
+# stdout redirected to a pipe with a fixed encoding).
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8")
+    except (AttributeError, OSError):
+        pass
+
 
 HOOK_RELATIVE = ".claude/hooks/post-tool-shift-left-audit.sh"
 SETTINGS_RELATIVE = ".claude/settings.json"

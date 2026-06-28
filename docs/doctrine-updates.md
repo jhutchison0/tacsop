@@ -4,6 +4,64 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
+## 2026-06-28: Line-Ending Guard — `.gitattributes` as Doctrine
+
+`utils` has shipped a `.gitattributes` (`* text=auto eol=lf` + explicit text/binary
+rules) for a while, but it was never recorded as doctrine, so most downstream repos
+never adopted it. The gap surfaced concretely when `magic-movies` — developed across
+both Windows and WSL — accumulated a phantom "uncommitted change" of 948 insertions /
+948 deletions that was **pure CRLF↔LF churn**, not real work: `core.autocrlf` was unset
+and no `.gitattributes` existed, so git saw every line as modified each time the tree
+bounced between platforms.
+
+This entry records `.gitattributes` as a propagatable artifact and the one-time
+renormalization step that should accompany it.
+
+### Files (utils — already present, now recorded as doctrine)
+
+```
+.gitattributes
+```
+
+### Adoption-Mode Table
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 1 | `.gitattributes` | **TEMPLATE-COPY** | Copy `utils/.gitattributes` verbatim. Extend the binary list if your repo tracks asset types not already covered (`*.mp4`, `*.wasm`, `*.ttf`, etc.) — `text=auto` auto-detects binaries, but explicit rules are belt-and-braces. |
+
+### Action required
+
+1. Copy `utils/.gitattributes` into your repo root.
+2. Renormalize existing files so the working tree and index agree with the new rules:
+   ```bash
+   git add .gitattributes
+   git add --renormalize .
+   git status        # review — only files currently committed with CRLF should change
+   git commit -m "[infra] Add .gitattributes — normalize line endings to LF (CRLF guard)"
+   ```
+   The renormalize diff is usually small (the few files that happened to be committed with
+   CRLF). If it is unexpectedly large, inspect before committing — a misdetected binary is
+   the thing to rule out.
+3. Verify `core.autocrlf` is not fighting the attributes: with `.gitattributes` present,
+   `eol=lf` wins regardless of the local `core.autocrlf` setting, so no per-machine config
+   is required.
+
+### Why this matters cross-platform
+
+The failure mode is silent: nothing errors, but every Windows↔Linux hop produces a
+full-file "change" that masks real diffs, pollutes `git status`, and can swallow genuine
+edits in the noise (as nearly happened in `magic-movies`). The `.gitattributes` guard makes
+LF the single source of truth in the repo; platforms check out and commit through it
+transparently.
+
+### Rollback
+
+`.gitattributes` is inert to delete — remove the file to revert to platform-default
+behavior. Any renormalization commit is a normal content commit and can be reverted like
+any other.
+
+---
+
 ## 2026-06-28: Branching Doctrine — Short-Lived Topic Branches by Work Shape
 
 A new skill codifies the branching policy that emerged from MEGAN's CONOP-002 §4.2

@@ -4,6 +4,65 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
+## 2026-06-28: Branching Doctrine — Short-Lived Topic Branches by Work Shape
+
+A new skill codifies the branching policy that emerged from MEGAN's CONOP-002 §4.2
+retrospective: **branch on the shape of the work, not on a permanent partition of the
+codebase.** This replaces the older "one permanent branch per domain" convention
+(`dev-safety`, `dev-ui`, `dev-perception`, …), which forced constant resyncing against
+`main` for no review benefit.
+
+### Files added (utils)
+
+```
+.claude/skills/using-topic-branches/SKILL.md
+```
+
+### Files changed (utils)
+
+```
+CLAUDE.md   (new "Branching" Development Principle, references the skill)
+```
+
+### The policy
+
+- **Lead-only doc / ADR / small-refactor work** → land directly on `main`. No branch
+  overhead where there is no audit gate and no parallel contributors.
+- **Team-deployed or multi-agent code work with an audit gate** → a short-lived
+  `topic/<scope>-<slug>` branch, created at the start, merged via merge-commit at the gate,
+  and **deleted local + origin immediately after merge**. Lifetime: hours to one session.
+- **Parallel contributors on independent files within one task** → share the same topic
+  branch (file ownership prevents conflict); do not split per-contributor.
+
+The skill also includes an **auditing standing branches** procedure — classify every
+non-`main` branch by its `ahead`/`behind` count vs `origin/main`, and act by `ahead` only
+(`ahead==0` → safe delete; `ahead>0, behind==0` → main is behind, merge then delete;
+diverged → investigate before deciding). **Never delete a branch on `behind` alone.**
+
+### Adoption-Mode Table
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 1 | `.claude/skills/using-topic-branches/` | **TEMPLATE-COPY** | Skill mechanics are universal — copy the directory verbatim. The policy is git-workflow doctrine, not project-specific. |
+| 2 | `CLAUDE.md` "Branching" principle | **TEMPLATE-COPY** | Copy the wording template into your Development Principles section. No path substitution needed (the skill path is the same in every repo). |
+
+### Action required
+
+1. Copy `.claude/skills/using-topic-branches/` verbatim into your repo.
+2. Add the "Branching" Development Principle to your `CLAUDE.md` (wording template in the
+   utils CLAUDE.md).
+3. **Audit your own standing branches** with the procedure in the skill. Retire fully-merged
+   branches; merge-then-delete any branch `main` is behind; investigate diverged branches
+   before touching them.
+
+### Rollback
+
+The skill is docs only — no code consumes it. Delete the directory and revert the CLAUDE.md
+principle to remove it. Adopting it changes no existing branches; it only changes how new
+work is branched going forward.
+
+---
+
 ## 2026-05-29: Windows-Portability Patch
 
 A small, bug-fix-only follow-up to the 2026-05-19 cycle. `heimdall-darkroom` adopted the cycle on 2026-05-28 as the first Windows-native downstream and surfaced three Windows-only failure modes in artifacts shipped by that propagation. All three are patched in this entry; no new doctrine, no new artifacts.

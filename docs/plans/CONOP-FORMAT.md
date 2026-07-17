@@ -4,7 +4,9 @@ This is the template for Concepts of Operations in this repo. CONOPs live in `do
 
 A CONOP is where **design decisions get debated**. If the strategy is already decided and the work only needs sequenced execution, skip the CONOP and write an OPORD (see `OPORD-FORMAT.md`). If there are no design decisions and no parallel tracks, the work does not warrant a CONOP — keep it at TCS level in `docs/tasks.md`.
 
-This format codifies the structure validated in practice by `docs/plans/decision_science_utility.md` — the sections below existed there before they existed here.
+Most of this format codifies structure validated in practice by `docs/plans/decision_science_utility.md` — Problem, Situation, Approaches, Design Decisions, Waves, NOT-Build, and Agent Design existed there before they existed here. Mission and Measures of Success are doctrinal additions from FM 5-0, not yet validated by an instance. The Assumptions block and the gating rules were added 2026-07-17 from a four-repo planning retrospective (`docs/reviews/20260717_planning_retrospective_*.md`).
+
+Plans that predate these format standards — in this repo or downstream — are grandfathered: do not rename or restructure them.
 
 ---
 
@@ -28,7 +30,7 @@ Copy this template into `docs/plans/conop_<PROWORD>_<slug>.md`. First line of th
 ```markdown
 # CONOP <PROWORD> — <Descriptive Name>
 
-**Status**: Draft | In Debate | Approved | Superseded by OPORD <PROWORD>
+**Status**: Draft | In Debate | Approved | Rejected | Complete | Superseded by OPORD <PROWORD>
 **Date**: YYYY-MM-DD
 **Lead**: <name>
 **Parent task**: <link or line reference into docs/tasks.md>
@@ -57,6 +59,23 @@ against this plan. Be specific — "complexity" is not an enemy force;
 ### Terrain (the ground we operate on)
 The relevant shape of the codebase and ecosystem: gaps we can exploit,
 boundaries we must respect, dependencies we inherit.
+
+### Assumptions
+What we are treating as true without proof. For each load-bearing
+assumption, three fields are mandatory:
+
+| Assumption | Cheapest falsifier | Blast radius if wrong | Kill-criterion |
+|------------|--------------------|-----------------------|----------------|
+|            |                    |                       |                |
+
+The **cheapest falsifier** is the ~1-afternoon empirical test that
+would prove it wrong (capture a real payload, run on the real target,
+score the known-good reference). The **blast radius** names which
+waves and decisions collapse with it. The **kill-criterion** is the
+result that abandons the approach rather than patching it. An
+assumption with no falsifier is a risk being ignored, not a fact —
+and naming a risk while deferring its mitigation to "a test later"
+is decoration, not mitigation.
 
 ---
 
@@ -97,15 +116,32 @@ write the ADR and link it.
   coverage, lint, review findings addressed. Mechanical, checkable.
 - **MOE (effectiveness)**: Did the thing work? The outcome in the
   world the plan exists to change — the downstream repo migrated, the
-  scorer adopted, the workflow faster.
+  scorer adopted, the workflow faster. State **when** each MOE
+  becomes measurable — many are not observable at plan close.
 
 A plan with MOP but no MOE measures activity instead of outcome.
+
+**Calibration rule**: any metric used to gate a wave must first
+demonstrate that it rank-orders known-good above known-bad reference
+cases. An uncalibrated gate is worse than none — it converts a
+measurement error into waves of misdirected work.
 
 ---
 
 ## Wave Breakdown
 
-Waves are tactical parallel-execution units. Each wave gets:
+Waves are tactical parallel-execution units. Two sequencing rules:
+
+1. **Wave order derives from the stated dependency chain.** If the
+   Mission or Situation names a source of truth, securing it is
+   Wave 1's job. Do not build dependents first.
+2. **Validate before detailing.** Each load-bearing assumption's
+   cheapest falsifier (see Assumptions) runs before or within the
+   first wave that depends on it. Until it passes, dependent waves
+   stay at one-line sketch level — do not author detailed waves on
+   an unvalidated core.
+
+Each wave gets:
 
 ### Wave N — <Name>
 - **Team**: which template from `.claude/teams/`, with modifications
@@ -144,9 +180,13 @@ Related CONOPs/OPORDs, ADRs, session docs, external sources.
 ## Status Values
 
 - **Draft** — being written; not yet ready for challenge.
-- **In Debate** — under review by `code-reviewer` (and `decision-scientist` when a decision model is in scope).
-- **Approved** — lead has selected an approach; open design decisions resolved or explicitly deferred with rationale.
+- **In Debate** — under review. Review weight scales to blast radius: a plan whose failure is cheap and reversible gets one reviewer, not the full panel; `decision-scientist` joins only when a decision model is in scope.
+- **Approved** — lead has selected an approach; open design decisions resolved or explicitly deferred with rationale. From this point the CONOP is **append-only**: reality-driven changes land as dated amendment entries (a "Locked Decisions" or "Status Log" section), never as silent rewrites of the original sections — an edited-in-place plan erases the churn record that future retrospectives need.
+- **Rejected** — debated and not pursued. Kept as the record of why; the proword is released.
+- **Complete** — executed directly from the CONOP (no OPORD was needed) and closed; the proword is released.
 - **Superseded by OPORD <PROWORD>** — execution has begun under an OPORD, which usually inherits the proword. The CONOP is kept as the record of *why*; the OPORD is the record of *how*.
+
+Every CONOP must end in a terminal status (Rejected, Complete, or Superseded). A plan left "Approved" forever is a stale board — when work stops for any reason, annotate the status with why.
 
 ---
 
@@ -162,16 +202,9 @@ If any box is unchecked, execute directly from the approved CONOP — not every 
 
 ---
 
-## Adoption
-
-Reference this file from the `promote` subcommand in `.claude/commands/task.md`:
-
-> If the user agrees, create a skeleton document in `docs/plans/` **using the template in `docs/plans/CONOP-FORMAT.md` (or `OPORD-FORMAT.md`)** and link the task to the new document.
-
----
-
 ## Sources
 
 - FM 5-0 / ADP 5-0 (Army planning doctrine) — Situation/Mission structure, mission statement form, MOE/MOP distinction.
 - `docs/plans/decision_science_utility.md` — the validated in-practice structure this format codifies.
 - `docs/adr/ADR-FORMAT.md` — the house pattern for pinned document schemas.
+- `docs/reviews/20260717_planning_retrospective_*.md` — the four-repo retrospective (20 episodes) behind the Assumptions block, the sequencing rules, the calibration rule, and the append-only/terminal-status lifecycle.

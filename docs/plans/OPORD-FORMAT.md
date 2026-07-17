@@ -68,9 +68,18 @@ The wave sequence in prose: what runs when, what depends on what,
 where the checkpoints sit. A Mermaid diagram is preferred over ASCII
 when the dependency graph is non-linear.
 
+**First-contact rule**: the earliest feasible checkpoint exercises
+the plan's riskiest assumption against the real target — real
+payloads, real hardware, real platform, real data. Simulator-only
+confidence defers every deployment discovery to the end, where they
+all land at once.
+
 ### Wave N — <Name>
 - **Team**: template from `.claude/teams/`, with modifications
-- **Preconditions**: what must be true before this wave launches
+- **Preconditions**: what must be true before this wave launches,
+  including **baseline-health checks** ahead of expensive steps — do
+  not run a costly matrix against a baseline a diagnostic has
+  already flagged as degenerate
 - **Tasks**: at TCS detail level
 
   | Task | Condition | Standard |
@@ -78,14 +87,20 @@ when the dependency graph is non-linear.
   |      |           |          |
 
 - **Exit criterion**: the shared condition that closes the wave
-- **Checkpoint**: what the lead verifies before authorizing the next
-  wave (test counts, review findings addressed, artifacts written)
+- **Checkpoint**: a **commit-gate with a named owner** — the wave is
+  not closed until its verifying commit exists and the owner has
+  checked it (test counts, review findings addressed, artifacts
+  written). Checkpoints that are prose rather than commit-gates are
+  how a six-wave feature arrives as one uncommitted blob.
 
 ### Coordinating Instructions
 - **Report-immediately conditions**: the CCIR of this operation.
   Inherit the escalation paths in `.claude/README.md` (agent
   deadlock without evidence, >5 files, destructive operations,
   Critical review findings) and add any operation-specific triggers.
+  Always included: **a mid-wave finding that invalidates a wave's
+  precondition** — halt the wave and report. A live diagnostic
+  outranks the plan's momentum.
 - **Branches**: pre-decided responses to anticipated contingencies
   ("if Wave 2 tests reveal the schema is wrong, revert to CONOP").
 - **Standing constraints**: shift-left testing, scope matrix, and
@@ -120,7 +135,11 @@ writes.
 
 Closing an OPORD requires: final `/task backbrief`, session doc per
 `docs/session-doc-format.md`, tasks moved to Completed, Status set
-to Complete, and the proword released for reuse.
+to Complete, the parent CONOP's status flipped to Superseded (or
+its annotation verified), every plan checklist ticked or explicitly
+annotated — a stale board that still reads "in progress" costs a
+future session a status rediscovery — and the proword released for
+reuse.
 ```
 
 ---
@@ -139,14 +158,9 @@ A reviewer (human or `code-reviewer`) can validate an OPORD mechanically: five p
 
 ---
 
-## Adoption
-
-Reference this file from the `promote` subcommand in `.claude/commands/task.md` (see the Adoption section of `CONOP-FORMAT.md` for the exact wording).
-
----
-
 ## Sources
 
 - FM 5-0 / ADP 5-0 — the five-paragraph OPORD, commander's intent, CCIR.
 - `.claude/README.md` — escalation paths inherited as baseline report-immediately conditions.
 - `docs/adr/ADR-FORMAT.md` — the house pattern for pinned document schemas.
+- `docs/reviews/20260717_planning_retrospective_*.md` — the four-repo retrospective behind the first-contact rule, commit-gate checkpoints, baseline-health preconditions, and the mid-wave halt condition.

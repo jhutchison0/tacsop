@@ -41,8 +41,10 @@ Interpret the user's arguments as one of these actions:
 ### `promote <task>` — Escalate a task to a planning document
 - Evaluate the task against the Escalation Ladder (below)
 - Recommend the appropriate document type
-- If the user agrees, create a skeleton document in `docs/plans/`
+- If the user agrees, create a skeleton document in `docs/plans/` using the template in `docs/plans/CONOP-FORMAT.md` (or `docs/plans/OPORD-FORMAT.md`)
 - Link the task to the new document
+- The plan must exist and reach Approved **before** its first wave launches — a plan written after the build documents, it does not plan
+- Every exit/kill-criterion in the plan carries a named owner; an ownerless criterion defers itself indefinitely
 
 ### `update <task> — <note>` — Add a status note to a task
 
@@ -93,7 +95,7 @@ TCS is also the **universal task specification unit** — every task within a CO
 
 Every task within the CONOP is specified at TCS detail level.
 
-**Format**: `docs/plans/conop_<PROWORD>_<descriptive_name>.md` — e.g., `conop_pathfinder_decision_science_gaps.md`. First line of the doc: `# CONOP PATHFINDER — Decision Science Gaps`.
+**Format**: `docs/plans/conop_<PROWORD>_<descriptive_name>.md` — e.g., `conop_pathfinder_decision_science_gaps.md`. First line of the doc: `# CONOP PATHFINDER — Decision Science Gaps`. Template and section standard: `docs/plans/CONOP-FORMAT.md`.
 
 ### Level 4: OPORD — Operations Order
 **When**: Strategy is decided (CONOP approved), now executing a multi-wave operation.
@@ -105,7 +107,7 @@ Every task within the CONOP is specified at TCS detail level.
 
 Every task within the OPORD is specified at TCS detail level.
 
-**Format**: `docs/plans/opord_<PROWORD>_<descriptive_name>.md`. Often inherits the parent CONOP's proword. First line: `# OPORD PATHFINDER — <descriptive name>`.
+**Format**: `docs/plans/opord_<PROWORD>_<descriptive_name>.md`. Often inherits the parent CONOP's proword. First line: `# OPORD PATHFINDER — <descriptive name>`. Template and section standard: `docs/plans/OPORD-FORMAT.md`.
 
 ## Prowords
 

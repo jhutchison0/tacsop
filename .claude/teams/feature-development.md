@@ -8,7 +8,7 @@
 
 | Teammate | Role | Responsibility |
 |----------|------|----------------|
-| `proposer` | Analyst | Explore the problem space, propose approaches (including bold ones), write proposal to `docs/` |
+| `proposer` | Analyst | Explore the problem space, propose approaches (including bold ones), write proposal to `docs/plans/` |
 | `python-prototyper` | Implementer | Implement the approved approach alongside its tests |
 | `test-runner` | Validator | Run tests after each implementation step, report coverage gaps |
 | `code-reviewer` | Quality gate | Challenge proposals before implementation; review code against design pillars after |

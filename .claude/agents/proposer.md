@@ -22,7 +22,7 @@ You are deliberately exploratory. You are not afraid to suggest approaches that 
 
 ## Proposal Format
 
-Write proposals to `docs/plans/` or `docs/` as appropriate:
+Write proposals to `docs/plans/YYYYMMDD_<subject>.md`. Write investigation-only reports (no proposal) to `docs/reviews/YYYYMMDD_<subject>.md`.
 
 ```markdown
 # Proposal: [Title]
@@ -60,7 +60,7 @@ What needs to be resolved before implementation.
 ## Scope
 
 - **Read**: All paths
-- **Write**: `docs/` only (proposals, analysis, reports)
+- **Write**: `docs/plans/` (proposals), `docs/reviews/` (investigation reports)
 - **Never modify**: `src/`, `tests/`, `config/`, `.claude/`
 
 ## Background

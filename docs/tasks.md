@@ -2,8 +2,11 @@
 
 ## Active
 
+- [ ] [P3] Next doctrine propagation cycle — bundle two small refinements when enough downstream value accumulates to justify a cycle: (1) **deep-modules discipline** added to `CLAUDE.md` Simplicity First + `python-prototyper.md` Step 4d (commit `8ad387e`, 2026-05-20); (2) **proword convention** added to `.claude/commands/task.md` — CONOPs/OPORDs get a 2–3 syllable noun handle; campaign-scaling doctrine preserved for future use (this session, 2026-05-23). No urgency: 23-artifact bundle shipped 4 days ago; 7 downstream repos still have unread cycles backed up.
 - [ ] [P3] Add GitHub Actions CI workflow
 - [ ] [P3] Add from_yaml round-trip tests for exponential, logarithmic, step, piecewise_linear value functions
+- [ ] [P3] Evaluate `diagnosing-defects` skill — defer per code-reviewer (bug-fix.md team template already covers the loop); revisit if team template usage data shows underuse
+- [ ] [P3] After 1–2 sessions of audit-log data, decide whether to add a Stop hook (Layer 5) or escalate to a PreToolUse hard block (Layer 6) per `.claude/skills/shift-left-testing/ENFORCEMENT.md` escalation criteria
 
 ## Blocked
 
@@ -40,3 +43,30 @@
 - [x] 2026-03-31: Add coverage config to pyproject.toml — threshold 50%, show_missing, exclude_lines
 - [x] 2026-03-31: Update from_template_to_project.md — clone-cleanup steps, logger/pathlib/coverage updates, fixed issues archived
 - [x] 2026-03-31: Rewrite README.md — template repo + upstream doctrine hub with two LOEs
+- [x] 2026-04-21: Adopt docs/reviews/YYYYMMDD_<subject>.md convention across all reporting agents
+- [x] 2026-04-21: Add decision-scientist to CLAUDE.md agent table (was missing)
+- [x] 2026-04-21: Narrow python-prototyper write scope to exclude docs/reviews/
+- [x] 2026-04-21: Fifth doctrine propagation — docs/reviews/ convention to 11 repos (3 new, 8 appended)
+- [x] 2026-04-21: Bump minimum Python version 3.10 → 3.11 in pyproject.toml, project.yaml, CLAUDE.md
+- [x] 2026-05-19: Three-agent Pass 1 review of `docs/design/hold/plan1.md` (proposer grill, code-reviewer audit, decision-scientist MAUT — reports in `docs/reviews/`)
+- [x] 2026-05-19: Add `docs/design/hold/` to .gitignore as per-repo scratch workspace
+- [x] 2026-05-19: Rename `.claude/settings.local.json` → `.claude/settings.json` (Anthropic convention)
+- [x] 2026-05-19: Write `LANGUAGE.md` (project-specific glossary; decision science + agent framework + escalation ladder + governance terms; cites Pocock's pattern, not vocabulary)
+- [x] 2026-05-19: Write `CONTEXT.md` (project identity, mission, current state, constraints, key relationships)
+- [x] 2026-05-19: Write `docs/propagation-protocol.md` (formalized the doctrine-propagation evaluation gate, batching rules, append mode, rollback)
+- [x] 2026-05-19: Build ADR system — `docs/adr/ADR-FORMAT.md` + `docs/adr/.gitkeep` + `.claude/skills/recording-architecture-decisions/SKILL.md` (Pocock's triple-filter gate)
+- [x] 2026-05-19: Build `.claude/skills/maintaining-ubiquitous-language/` skill (directory form)
+- [x] 2026-05-19: Build `.claude/skills/maintaining-project-context/` skill (directory form)
+- [x] 2026-05-19: Update `.claude/skills/SKILLS_FRAMEWORK.md` to Anthropic Dec 18 open standard (frontmatter spec, directory form, progressive disclosure, civilian/military vocabulary crosswalk)
+- [x] 2026-05-19: Upgrade `.claude/skills/shift-left-testing.md` with vertical-slicing (tracer-bullet) discipline from Pocock's tdd skill
+- [x] 2026-05-19: Resolve session-end skill/command duplication — moved reference content to `docs/session-doc-format.md`, deleted `.claude/skills/session-end.md`, updated command to reference new doc
+- [x] 2026-05-19: Wave 2 — refactor 3 legacy single-file skills to directory form with sidecar progressive disclosure: `shift-left-testing` (1242→8 files), `configuration-management` (1533→6 files), `python-venv-management` (623→3 files). All SKILL.md files <110 lines; all sidecars <400 lines. Tests still green. SKILLS_FRAMEWORK.md and .claude/README.md updated to reflect the new layout.
+- [x] 2026-05-19: Pass 4 fresh-eyes agent review — code-reviewer, decision-scientist, proposer ran in parallel before propagation. Reports in `docs/reviews/20260519_pass4_*.md`. Verdict: GO-WITH-FIXES; six pre-propagation blockers identified.
+- [x] 2026-05-19: ADR-0001 — directory-form mandatory for all new skills (`docs/adr/0001-directory-form-mandatory-for-new-skills.md`). First ADR written under the format established same session; exercises the triple-filter gate.
+- [x] 2026-05-19: Pre-propagation fixes — invert python-prototyper workflow to test-first; repoint stale `docs/design/pillars.md` ref to `CONTEXT.md` + `config/project.yaml`; correct shift-left-testing SKILL.md false v1.1.0 version-history line; remove snapshot agent count from LANGUAGE.md Roster definition; add `docs/adr/` to CONTEXT.md reading order.
+- [x] 2026-05-19: Shift-left-testing enforcement layer — A5 PostToolUse audit hook (`.claude/hooks/post-tool-shift-left-audit.sh`) wired via `.claude/settings.json`, logs `MISSING_TEST` / `OK_TEST_EXISTS` to `.claude/audits/shift-left-violations.log` (gitignored). Never blocks. `ENFORCEMENT.md` sidecar documents the gradient (probabilistic → deterministic), the hook spec, and why we don't hard-block (per MAUT in `docs/reviews/20260519_pass4_enforcement_maut.md`). CLAUDE.md Development Principle strengthened to test-first vertical-slice. Hook verified firing in-session via real Edit.
+- [x] 2026-05-19: Author the 2026-05-19 doctrine-updates.md entry (22-artifact bundle with adoption-mode master table; 469 lines). Largest propagation cycle to date. Propagation script extraction verified.
+- [x] 2026-05-19: Pass 5 fresh-eyes review of the doctrine-updates entry (code-reviewer + decision-scientist + proposer; reports in `docs/reviews/20260519_pass5_*.md`). Verdict: SHIP-WITH-FIXES. One BLOCKER (invalid bash `case` alternation in §7 example), three HIGH footguns (settings.json merge worked example, diff-before-delete on session-end skill, diff-before-replace on directory-form skills, python-prototyper substitution sites), and seven CONCERNs all applied to the entry before commit.
+- [x] 2026-05-19: Decision-scientist MAUT on propagation strategy — A6 (bundle + scripts/adopt_doctrine.py helper) ranked top at 0.760; A4 (1-week pilot to 2–3 repos first) runner-up at 0.743. A4 vs A6 fork deliberately deferred to next session.
+- [x] 2026-05-19: Pass 6 review and comprehensive rewrite of `docs/design/from_template_to_project.md` (Day-1 playbook). code-reviewer found 11 FAILs + 10 CONCERNs against current repo state; proposer redesigned the structure to 12 sections (added NEW §3 Doctrine Infrastructure + NEW §4 Test-First Enforcement Layer). 569 → 791 lines. Closes the gap where the Day-1 playbook predated the entire doctrine cycle.
+- [x] 2026-05-19: Build `scripts/adopt_doctrine.py` (A6 helper) test-first under the new shift-left enforcement layer. 9 vertical slices (one cycle each); 35 tests across 8 test classes covering all 9 functions including the fragile settings.json merge (5 cases: no file / no hooks key / other matcher / our matcher present / dry-run). End-to-end verified against a sandbox: dry-run plan correct, live run substitutes hook glob (3 sites), creates settings.json with `Write|Edit` matcher, appends gitignore, prints manual-attention checklist for the 10 judgment-required items. Idempotent re-run skips everything cleanly. Added as artifact #23 in the 2026-05-19 doctrine-updates entry (TEMPLATE-COPY mode) with new §23 subsection. Full repo: 189 → 224 tests passing.

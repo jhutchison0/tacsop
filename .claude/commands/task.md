@@ -93,7 +93,7 @@ TCS is also the **universal task specification unit** — every task within a CO
 
 Every task within the CONOP is specified at TCS detail level.
 
-**Format**: `docs/plans/conop_NNN_descriptive_name.md`
+**Format**: `docs/plans/conop_<PROWORD>_<descriptive_name>.md` — e.g., `conop_pathfinder_decision_science_gaps.md`. First line of the doc: `# CONOP PATHFINDER — Decision Science Gaps`.
 
 ### Level 4: OPORD — Operations Order
 **When**: Strategy is decided (CONOP approved), now executing a multi-wave operation.
@@ -104,6 +104,18 @@ Every task within the CONOP is specified at TCS detail level.
 - Need to track wave-by-wave completion with checkpoints
 
 Every task within the OPORD is specified at TCS detail level.
+
+**Format**: `docs/plans/opord_<PROWORD>_<descriptive_name>.md`. Often inherits the parent CONOP's proword. First line: `# OPORD PATHFINDER — <descriptive name>`.
+
+## Prowords
+
+CONOPs and OPORDs get a **proword** — a short, memorable handle so plans can be referred to by a single word in conversation instead of a filename or topic phrase. TCS items do not (too small; would dilute the signal).
+
+**Form**: 2–3 syllable concrete noun, NATO-phonetic-adjacent feel — pronounceable, unambiguous on a radio. Solo by default (WIZARD, COMPASS, PATHFINDER); modifier+noun when you want flavor (IRON WIZARD, NIGHT COMPASS).
+
+**Picking**: Roll your own. No approved word list — the whole point is the handle being memorable to the people using it. Avoid reusing a proword from an open plan; reuse is fine once that plan closes.
+
+**Scaling** (preserved for future use, not currently needed in this template): If work ever escalates above OPORD into a multi-OPORD campaign, the campaign gets a proword and child OPORDs inherit a themed family — e.g., CAMPAIGN THUNDER contains OPORD THUNDER STRIKE and OPORD THUNDER BOLT. Same pattern can name waves inside a single OPORD if useful. This convention does not apply to lower-level nouns (objectives, routes, targets) — leave those to the downstream project that actually needs them.
 
 ## Terminology: Phases vs Waves
 

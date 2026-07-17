@@ -55,54 +55,18 @@ See `/pcc` for the full checklist and output format.
 - Include these updates in the commit (amend if needed)
 
 ## Step 5: Session Documentation
-- Create a session doc in `docs/sessions/` with format `YYYYMMDD_descriptive_name.md`
-- Start with the standard header following the knowledge graph format:
-  ```markdown
-  # Session: Descriptive Title
 
-  **Date**: YYYY-MM-DD
-  **Branch**: dev
-  **Tags**: #session #domain #activity
+Create a session doc in `docs/sessions/` with format `YYYYMMDD_descriptive_name.md`.
 
-  **Documents**: [project.yaml](../../config/project.yaml) — Config this session touched
-  **Implements**: [plan.md](../plans/plan_name.md) — Plan being followed (if any)
-  **References**: [some_config.yaml](../../config/some_config.yaml) — Configs consulted
-  **Follows**: [prev_session.md](YYYYMMDD_prev.md) — Previous session (if continuing)
-  **Completes**: Active work item (from project.yaml)
-  **Requires**: [blocker.md](../design/blocker.md) — Unresolved dependency (if any)
-  **Cites**: External reference or source document
+**Format reference**: [docs/session-doc-format.md](../../docs/session-doc-format.md) — header template, knowledge-graph relationship types, tag taxonomy, body structure, diagram guidelines.
 
-  ---
-  ```
+Quick reminders:
+- Date-first filename so sessions sort chronologically.
+- Knowledge-graph header: only include relationship fields that actually apply.
+- Body must include Summary and Next Steps. Other sections (Work Completed, Key Decisions, Pillar Compliance, Commits) are added as the session warrants.
+- Prefer Mermaid over ASCII art for any non-trivial diagram (renders natively in GitHub).
 
-- **Tags** — Use canonical taxonomy:
-
-  | Category | Tags | Use for |
-  |----------|------|---------|
-  | **Type** | `#session` | Always include for session logs |
-  | **Domain** | Project-specific area tags | What area of the project |
-  | **Activity** | `#feature` `#bugfix` `#refactor` `#docs` `#setup` | Type of work |
-  | **Status** | `#complete` `#in-progress` | Work completion state |
-
-- **Relationships** — Session docs create edges to permanent docs, forming a navigable knowledge graph. Only include the relationship types that apply:
-
-  | Relationship | When to Use |
-  |--------------|-------------|
-  | `**Documents**:` | Link to system/design docs this session touched (most common) |
-  | `**Implements**:` | If following an implementation plan |
-  | `**References**:` | Other docs consulted during work (configs, background) |
-  | `**Follows**:` | If continuing a previous session |
-  | `**Completes**:` | Active work item or milestone this session finishes |
-  | `**Requires**:` | Unresolved dependency blocking future work |
-  | `**Cites**:` | External reference, source document, or prior art |
-
-- Include in the session body:
-  - Summary of work completed
-  - Key changes made (files, functions)
-  - Any diagrams if helpful (prefer Mermaid for complex diagrams)
-  - Next steps / outstanding tasks
-
-**Tip**: Search sessions with `grep -r "#domain" docs/sessions/` or `grep -r "References.*config" docs/sessions/` to find related work.
+Search related sessions with `grep -r "#domain" docs/sessions/` or `grep -r "References.*config" docs/sessions/`.
 
 ## Step 6: Evaluate Merge Readiness
 - Is this a major functional milestone?

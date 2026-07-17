@@ -4,12 +4,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Principles
 
-### Shift-Left Testing
-Every new component must include a test plan. Tests are written alongside code, not as an afterthought.
-- **Python** (`tests/`) — pytest suites for all utility modules
+### Shift-Left Testing (test-first, vertical-slice)
+Every new behavior in `src/myproject/` is driven by a **failing test written first**, followed by the **minimum implementation** that makes it pass, then the next slice. This is vertical-slice (tracer-bullet) TDD; see [`.claude/skills/shift-left-testing/VERTICAL-SLICING.md`](.claude/skills/shift-left-testing/VERTICAL-SLICING.md).
+
+Do not write a horizontal slice (all tests first, then all impl). Do not write production code without a failing test driving it.
+
+A `PostToolUse` audit hook (`.claude/hooks/post-tool-shift-left-audit.sh`) fires after every `Write`/`Edit` to `src/myproject/**/*.py` and logs evidence to `.claude/audits/shift-left-violations.log`. The hook does not block; it produces an audit trail. See [`.claude/skills/shift-left-testing/ENFORCEMENT.md`](.claude/skills/shift-left-testing/ENFORCEMENT.md) for the full enforcement gradient.
+
+- **Python** (`tests/`) — pytest suites for all utility modules.
 
 ### Simplicity First
-Make every change as simple as possible. Avoid massive or complex changes. Every change should impact as little code as necessary. When in doubt, prefer the simpler solution.
+Make every change as simple as possible. Avoid massive or complex changes. Every change should impact as little code as necessary. When in doubt, prefer the simpler solution. Prefer deep modules — small interfaces hiding meaningful implementation — over shallow ones; before declaring an interface done, ask whether each parameter is load-bearing or whether the function could derive it from one it already has.
+
+### Branching (short-lived topic branches by work shape)
+Branch on the shape of the work, not on a permanent partition of the codebase. Lead-only doc/ADR/small-refactor work lands directly on `main`. Team-deployed or multi-agent code work with an audit gate uses a short-lived `topic/<scope>-<slug>` branch, merged via merge-commit at the gate and **deleted (local + origin) immediately after merge**. No permanent domain branches. See [`.claude/skills/using-topic-branches/SKILL.md`](.claude/skills/using-topic-branches/SKILL.md), which also covers auditing standing branches.
 
 ### Session Documentation
 Document work in `docs/sessions/YYYYMMDD_*.md`. See `config/project.yaml` for phase tracking.
@@ -58,7 +66,7 @@ This is a Python project template with reusable utility modules. It provides a s
 
 ## Tech Stack
 
-- **Language**: Python (3.10+)
+- **Language**: Python (3.11+)
 - **Base Dependencies**: pyyaml, python-dotenv
 - **Optional**: pandas, openpyxl, xlsxwriter, slack-sdk, psycopg, numpy
 
@@ -129,9 +137,10 @@ Work scales through four levels. Use `/task promote` or `/task plan` to evaluate
 | Agent | Model | Writes Code? | Primary Domain |
 |---|---|---|---|
 | `test-runner` | haiku | No | All — runs pytest, reports results |
-| `code-reviewer` | inherit | No | All — reviews against pillars |
+| `code-reviewer` | inherit | No | All — reviews against pillars, writes to `docs/reviews/` |
 | `proposer` | sonnet | No | All — analyzes problems, proposes bold approaches, writes proposals |
 | `python-prototyper` | sonnet | Yes | Python implementation |
+| `decision-scientist` | inherit | No | Decision science — MAUT audits, weight validation, writes to `docs/reviews/` |
 
 ## Config Workflow
 

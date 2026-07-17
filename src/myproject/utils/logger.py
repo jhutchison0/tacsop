@@ -4,7 +4,7 @@ import logging
 import sys
 from datetime import datetime
 from pathlib import Path
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 
 class VisualConsoleHandler(logging.StreamHandler):
@@ -70,11 +70,17 @@ class LoggerSetup:
         if logger.hasHandlers():
             logger.handlers.clear()
 
-        # Resolve timezone
+        # Resolve timezone. On Windows + Python 3.9+ without the `tzdata`
+        # package installed, ZoneInfo("America/Chicago") raises
+        # ZoneInfoNotFoundError (a KeyError subclass, NOT ImportError or
+        # ValueError). The `tzdata` dep in pyproject.toml carries the data on
+        # win32; this except clause guarantees that misconfigured environments
+        # fall back gracefully rather than crash at import-time of any module
+        # that uses get_logger().
         try:
             tz = ZoneInfo(timezone)
             logging.Formatter.converter = lambda *args: datetime.now(tz).timetuple()
-        except (ImportError, ValueError):
+        except (ImportError, ValueError, ZoneInfoNotFoundError):
             tz = None
             logger.warning(
                 "Could not use timezone '%s', falling back to system default",

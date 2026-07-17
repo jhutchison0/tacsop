@@ -52,6 +52,14 @@ output/
 .DS_Store
 Thumbs.db
 
+# Claude Code
+.claude/agent-memory/
+.claude/settings.local.json
+.claude/audits/
+
+# Scratch / hold area (per-repo thinking workspace)
+docs/design/hold/
+
 # Images (uncomment if not needed in repo)
 # *.png
 # *.jpg

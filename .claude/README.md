@@ -35,11 +35,17 @@ This directory contains agent definitions, team templates, slash commands, and s
 │   └── pci.md             # /pci — pre-code inspection
 └── skills/                # Reusable procedural knowledge
     ├── SKILLS_FRAMEWORK.md
-    ├── configuration-management.md
-    ├── python-venv-management.md
-    ├── session-end.md
-    └── shift-left-testing.md
+    │
+    └── # All Level 0 skills now use directory form (Anthropic Dec 18 open standard)
+        ├── configuration-management/SKILL.md + 5 sidecars
+        ├── shift-left-testing/SKILL.md + 7 sidecars
+        ├── python-venv-management/SKILL.md + 2 sidecars
+        ├── maintaining-ubiquitous-language/SKILL.md
+        ├── maintaining-project-context/SKILL.md
+        └── recording-architecture-decisions/SKILL.md
 ```
+
+> Note: legacy single-file skills `configuration-management.md`, `shift-left-testing.md`, `python-venv-management.md`, and `session-end.md` were retired 2026-05-19. The first three migrated to directory form with sidecar progressive disclosure; `session-end.md` reference content moved to `docs/session-doc-format.md`. The `/session-end` workflow remains in `.claude/commands/session-end.md`. See [SKILLS_FRAMEWORK.md](skills/SKILLS_FRAMEWORK.md) for the full inventory.
 
 ## Agent Catalog
 
@@ -65,7 +71,9 @@ This directory contains agent definitions, team templates, slash commands, and s
 | `src/myproject/` | Read | Read | Read | **Write** | Read |
 | `tests/` | Read/Run | Read | Read | **Write** | — |
 | `config/` | Read | Read | Read | **Write** | Read |
-| `docs/` | — | **Write** (reports) | **Write** (proposals) | Write | **Write** (audits) |
+| `docs/sessions/` | — | Read | Read | Write | Read |
+| `docs/plans/` | — | Read | **Write** (proposals) | Write | Read |
+| `docs/reviews/` | — | **Write** (reports) | Write (analysis) | — | **Write** (audits) |
 | `.claude/` | — | Read | Read | — | — |
 
 **Bold** = primary owner. Regular "Write" = secondary (for tests alongside their code). Dash = no access needed.
@@ -97,7 +105,7 @@ Agents communicate through shared artifacts — no direct messaging required for
 - **Config files** — `config/project.yaml` is the shared schema contract and project state
 - **Test results** — `pytest` output validates changes and is the evidence standard for all agents
 - **Task list** — `docs/tasks.md` tracks ownership and status across agent turns
-- **Review reports** — `code-reviewer` writes findings to `docs/` for async review
+- **Review reports** — `code-reviewer` and `decision-scientist` write findings to `docs/reviews/` for async review
 
 ## Escalation Paths
 

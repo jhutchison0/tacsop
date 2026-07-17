@@ -18,7 +18,7 @@ You are the domain correctness gate. A model that passes code review may still h
 1. Read the decision model: locate YAML config, scorer code, and value function assignments
 2. Apply the audit checklist below
 3. Check whether sensitivity analysis has been run or is planned
-4. Write a decision audit report to `docs/` with findings organized by severity
+4. Write a decision audit report to `docs/reviews/YYYYMMDD_<subject>.md` with findings organized by severity
 5. Flag any domain violations clearly — these are not style suggestions, they are correctness issues
 
 ## Audit Checklist
@@ -50,7 +50,7 @@ You are the domain correctness gate. A model that passes code review may still h
 
 ## Output Format
 
-Write audit reports to `docs/` (e.g., `docs/decision_audit_YYYYMMDD.md`). For each finding, include:
+Write audit reports to `docs/reviews/YYYYMMDD_<subject>.md`. Use today's date and a short subject describing what was audited. For each finding, include:
 - Location (file, line or YAML key)
 - What the issue is
 - Why it matters to the validity of the decision
@@ -74,7 +74,7 @@ Group findings as Critical, Warning, or Suggestion. If the model is sound, say s
 ## Scope
 
 - **Read**: All paths
-- **Write**: `docs/` only (decision audit reports)
+- **Write**: `docs/reviews/` only (decision audit reports, named `YYYYMMDD_<subject>.md`)
 - **Never modify**: `src/`, `tests/`, `config/`, `.claude/`
 
 ## Memory

@@ -5,7 +5,7 @@ project:
   name: "myproject"
   version: "0.1.0"
   description: "A Python project template with reusable utilities"
-  python_requires: ">=3.10"
+  python_requires: ">=3.11"
 
 # Design pillars — define in docs/design/pillars.md
 # Reference them here by name for quick lookup
@@ -23,6 +23,7 @@ paths:
   docs: "docs"
   sessions: "docs/sessions"
   plans: "docs/plans"
+  reviews: "docs/reviews"
 
 # Build phases — update status as work progresses
 # Statuses: not_started, in_progress, complete
@@ -38,7 +39,7 @@ build_phases:
 
 # Python settings
 python:
-  min_version: "3.10"
+  min_version: "3.11"
   test_framework: "pytest"
   package_manager: "pip"
 
@@ -53,12 +54,13 @@ testing:
 # Session state
 state:
   last_session:
-    date: "2026-03-31"
-    file: "docs/sessions/20260331_testing_docs_and_template_hardening.md"
-    summary: "34 new tests, logger improvements, coverage config, template guide and README rewrite, doctrine propagation to 10 repos"
-  active_work: "Template hardening and test coverage"
+    date: "2026-05-23"
+    file: "docs/sessions/20260523_proword_convention_for_plans.md"
+    summary: "Added proword convention for CONOPs and OPORDs to /task: 2–3 syllable concrete noun, NATO-phonetic-adjacent, roll-your-own picking; scaling doctrine preserved for above-OPORD use. Cleared stale P1 propagation task (shipped last session) and replaced with P3 entry tracking two small refinements (deep-modules discipline + prowords) accumulating for the next propagation cycle. No production code changed; 259 passing."
+  active_work: "Two small refinements accumulating for the next doctrine propagation cycle — deep-modules (8ad387e, 2026-05-20) + proword convention (2026-05-23). No urgency: 23-artifact bundle just shipped; downstream repos still have unread cycles."
   known_issues:
     - "numpy must be installed manually if venv predates decision_science addition"
+    - "Audit hook is soft-deterministic (logs, never blocks); cannot enforce temporal vertical-slicing (all tests then all impl)"
 
 # Slash commands reference
 commands:

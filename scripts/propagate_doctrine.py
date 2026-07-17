@@ -14,16 +14,16 @@ import re
 import sys
 from pathlib import Path
 
-UTILS_ROOT = Path(__file__).resolve().parent.parent
-PROJECTS_DIR = UTILS_ROOT.parent.parent  # ~/projects
-DOCTRINE_FILE = UTILS_ROOT / "docs" / "doctrine-updates.md"
+TACSOP_ROOT = Path(__file__).resolve().parent.parent
+PROJECTS_DIR = TACSOP_ROOT.parent.parent  # ~/projects
+DOCTRINE_FILE = TACSOP_ROOT / "docs" / "doctrine-updates.md"
 NOTIFICATION_FILENAME = ".claude/upstream-update.md"
 
 
 def find_downstream_repos() -> list[Path]:
     """Find repos with .claude/commands/ recursively across all project directories.
 
-    A repo is any directory containing .claude/commands/. Skips utils itself
+    A repo is any directory containing .claude/commands/. Skips tacsop itself
     and filters out nested repos (e.g. git submodules inside another repo's
     subtree like lib/PageIndex).
     """
@@ -32,7 +32,7 @@ def find_downstream_repos() -> list[Path]:
         if not commands_dir.is_dir():
             continue
         repo = commands_dir.parent.parent  # .claude/commands -> .claude -> repo
-        if repo == UTILS_ROOT:
+        if repo == TACSOP_ROOT:
             continue
         repos.append(repo)
 
@@ -70,7 +70,7 @@ def build_notification(latest_entry: str) -> str:
     """Build the notification file content."""
     return f"""# Upstream Doctrine Update
 
-**Source**: [utils]({UTILS_ROOT}) — shared workflow template
+**Source**: [tacsop]({TACSOP_ROOT}) — shared workflow template
 **Action**: Review changes below and selectively merge into your project's command files.
 **Cleanup**: Delete this file after reviewing.
 

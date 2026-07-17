@@ -74,7 +74,9 @@ When a term is missing or contested, invoke the `maintaining-ubiquitous-language
 
 ## Governance & Propagation
 
-**Doctrine**: A framework-level convention or pattern intentionally maintained at the `utils` template repo and intended for adoption across downstream consumer repos. Not all changes are doctrine; only those meant to spread.
+**TACSOP**: Tactical Standing Operating Procedure — this repo's name (renamed from `utils` 2026-07-17, ADR-0002). The military term of art for the document through which a headquarters publishes the standing procedures its units operate by, and from which subordinate units derive their own local SOPs. Chosen because that is structurally what this repo does: downstream repos copy its doctrine bundle and adapt it to their local context.
+
+**Doctrine**: A framework-level convention or pattern intentionally maintained at the `tacsop` template repo and intended for adoption across downstream consumer repos. Not all changes are doctrine; only those meant to spread.
 
 **Propagation**: The process of pushing a doctrine update from this repo to downstream consumer repos via `scripts/propagate_doctrine.py`. See `docs/propagation-protocol.md`.
 

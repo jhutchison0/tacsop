@@ -73,7 +73,7 @@ This is a Python project template with reusable utility modules. It provides a s
 ## Project Structure
 
 ```
-utils/
+tacsop/
 ├── src/myproject/
 │   ├── __init__.py
 │   └── utils/                    # Reusable utility modules

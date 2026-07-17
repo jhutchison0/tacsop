@@ -10,7 +10,7 @@ How doctrine updates flow from this template repo to downstream consumer repos. 
 
 ## What Counts as Doctrine
 
-Not every change in `utils` is doctrine. A change is **doctrine** if it satisfies all three:
+Not every change in `tacsop` is doctrine. A change is **doctrine** if it satisfies all three:
 
 1. **Cross-cutting**: it changes how multiple repos *should* be set up, not just how this repo *is* set up.
 2. **Convention-bearing**: it codifies a way of working (naming, layout, agent behavior, skill structure, workflow) rather than a local utility implementation.
@@ -72,7 +72,7 @@ A single propagation cycle has six steps:
 
 The script discovers downstream repos by recursive scan of `~/projects/` for any directory containing `.claude/commands/`. Two filters apply:
 
-- **The `utils` repo itself is excluded.** Hardcoded by path equality.
+- **The `tacsop` repo itself is excluded.** Hardcoded by path equality.
 - **Nested repos are excluded.** If repo A is inside repo B, only B is notified — A is treated as a submodule or sub-checkout, not an independent consumer.
 
 **Implications**:
@@ -174,5 +174,5 @@ This list is informational. The script does not read it. Actual notification tar
 
 ---
 
-**Last Updated**: 2026-05-19
+**Last Updated**: 2026-07-17 (repo renamed `utils` → `tacsop`, ADR-0002; protocol content otherwise unchanged)
 **Authoring Skill**: none yet (candidate: future `propagating-doctrine` skill if this protocol gets enough use)

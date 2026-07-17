@@ -140,7 +140,7 @@ class TestFindDownstreamRepos:
         repo_a = _make_repo(projects_dir, "gitlab/repo_a")
         repo_b = _make_repo(projects_dir, "gitlab/repo_b")
         monkeypatch.setattr(propagate_doctrine, "PROJECTS_DIR", projects_dir)
-        monkeypatch.setattr(propagate_doctrine, "UTILS_ROOT", utils)
+        monkeypatch.setattr(propagate_doctrine, "TACSOP_ROOT", utils)
 
         result = propagate_doctrine.find_downstream_repos()
         assert repo_a in result
@@ -150,7 +150,7 @@ class TestFindDownstreamRepos:
     def test_skips_utils_itself(self, projects_dir, monkeypatch):
         utils = _make_repo(projects_dir, "github/utils")
         monkeypatch.setattr(propagate_doctrine, "PROJECTS_DIR", projects_dir)
-        monkeypatch.setattr(propagate_doctrine, "UTILS_ROOT", utils)
+        monkeypatch.setattr(propagate_doctrine, "TACSOP_ROOT", utils)
 
         result = propagate_doctrine.find_downstream_repos()
         assert utils not in result
@@ -160,7 +160,7 @@ class TestFindDownstreamRepos:
         parent = _make_repo(projects_dir, "gitlab/parent_repo")
         _make_repo(projects_dir, "gitlab/parent_repo/lib/nested_repo")
         monkeypatch.setattr(propagate_doctrine, "PROJECTS_DIR", projects_dir)
-        monkeypatch.setattr(propagate_doctrine, "UTILS_ROOT", utils)
+        monkeypatch.setattr(propagate_doctrine, "TACSOP_ROOT", utils)
 
         result = propagate_doctrine.find_downstream_repos()
         assert parent in result
@@ -169,7 +169,7 @@ class TestFindDownstreamRepos:
     def test_no_repos_returns_empty(self, projects_dir, monkeypatch):
         utils = _make_repo(projects_dir, "github/utils")
         monkeypatch.setattr(propagate_doctrine, "PROJECTS_DIR", projects_dir)
-        monkeypatch.setattr(propagate_doctrine, "UTILS_ROOT", utils)
+        monkeypatch.setattr(propagate_doctrine, "TACSOP_ROOT", utils)
 
         result = propagate_doctrine.find_downstream_repos()
         assert result == []
@@ -191,7 +191,7 @@ class TestPropagate:
         doctrine.write_text(DOCTRINE_ONE_ENTRY)
 
         monkeypatch.setattr(propagate_doctrine, "PROJECTS_DIR", projects_dir)
-        monkeypatch.setattr(propagate_doctrine, "UTILS_ROOT", utils)
+        monkeypatch.setattr(propagate_doctrine, "TACSOP_ROOT", utils)
         monkeypatch.setattr(propagate_doctrine, "DOCTRINE_FILE", doctrine)
 
         return {"repos": [repo_a, repo_b], "doctrine": doctrine}
@@ -234,7 +234,7 @@ class TestPropagate:
     def test_no_doctrine_file(self, projects_dir, monkeypatch, capsys):
         utils = _make_repo(projects_dir, "github/utils")
         monkeypatch.setattr(propagate_doctrine, "PROJECTS_DIR", projects_dir)
-        monkeypatch.setattr(propagate_doctrine, "UTILS_ROOT", utils)
+        monkeypatch.setattr(propagate_doctrine, "TACSOP_ROOT", utils)
         monkeypatch.setattr(
             propagate_doctrine, "DOCTRINE_FILE", projects_dir / "missing.md"
         )

@@ -1,6 +1,8 @@
-# utils
+# tacsop
 
-A Python project template and upstream doctrine hub for Claude Code agent workflows.
+**TACSOP** — *Tactical Standing Operating Procedure*: the document through which a headquarters publishes the standing procedures its units operate by, and from which each unit derives its own local SOP.
+
+Here: a Python project template and upstream doctrine hub for Claude Code agent workflows — the doctrinal foundation for agents and teams to operate together, and for task escalation. (Renamed from `utils` 2026-07-17; see [ADR-0002](docs/adr/0002-rename-repository-to-tacsop.md).)
 
 This repo serves two purposes:
 
@@ -60,7 +62,7 @@ The script finds all repos under `~/projects/` with `.claude/commands/` director
 ## Project Structure
 
 ```
-utils/
+tacsop/
 ├── src/myproject/
 │   ├── utils/              # Reusable utility modules
 │   │   ├── logger.py       # get_logger() — colored, timezone-aware, console or file

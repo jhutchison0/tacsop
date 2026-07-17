@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Downstream-side helper to adopt the 2026-05-19 doctrine bundle from utils.
+"""Downstream-side helper to adopt the 2026-05-19 doctrine bundle from tacsop.
 
 Copies TEMPLATE-COPY artifacts verbatim, substitutes the package name inside the
 shift-left audit hook, merges the PostToolUse block into .claude/settings.json,
@@ -10,7 +10,7 @@ Run from your downstream repo root:
 
     python scripts/adopt_doctrine.py [--upstream PATH] [--package NAME] [--dry-run] [--yes]
 
-Default --upstream is ~/projects/github/utils/. Default --package auto-detects
+Default --upstream is ~/projects/github/tacsop/. Default --package auto-detects
 from src/<pkg>/ if exactly one subdir exists; otherwise required.
 """
 
@@ -279,7 +279,7 @@ MANUAL_CHECKLIST_ITEMS = [
     ("Python 3.11 minimum bump", "§11",
      "Edit pyproject.toml + config/project.yaml + CLAUDE.md by hand; verify CI supports 3.11 first."),
     ("docs/propagation-protocol.md", "§4",
-     "SKIP unless your repo is also a propagation hub (currently only utils itself)."),
+     "SKIP unless your repo is also a propagation hub (currently only tacsop itself)."),
     (".claude/skills/session-end.md (deletion)", "§8",
      "If present, diff against docs/session-doc-format.md, move any unique content out, then delete."),
     (".claude/settings.local.json → .claude/settings.json (rename)", "§13",
@@ -348,18 +348,21 @@ def adopt(
     _print_manual_checklist()
 
 
-DEFAULT_UPSTREAM = Path.home() / "projects" / "github" / "utils"
+# The upstream hub was renamed utils → tacsop on 2026-07-17 (ADR-0002); clones
+# at the old path need `git remote set-url` and a directory rename, or pass
+# --upstream explicitly.
+DEFAULT_UPSTREAM = Path.home() / "projects" / "github" / "tacsop"
 
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
-        description="Adopt the 2026-05-19 doctrine bundle from a local utils clone.",
+        description="Adopt the 2026-05-19 doctrine bundle from a local tacsop clone.",
     )
     parser.add_argument(
         "--upstream",
         type=Path,
         default=DEFAULT_UPSTREAM,
-        help=f"Path to local utils clone (default: {DEFAULT_UPSTREAM})",
+        help=f"Path to local tacsop clone (default: {DEFAULT_UPSTREAM})",
     )
     parser.add_argument(
         "--package",
@@ -381,7 +384,7 @@ def main(argv: list[str] | None = None) -> None:
     if not upstream.is_dir():
         print(
             f"Error: --upstream path not found: {upstream}\n"
-            "Clone utils to ~/projects/github/utils/ or pass --upstream PATH.",
+            "Clone tacsop to ~/projects/github/tacsop/ or pass --upstream PATH.",
             file=sys.stderr,
         )
         sys.exit(2)

@@ -4,6 +4,61 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
+## 2026-07-17: NAME CHANGE — Upstream Hub Renamed `utils` → `tacsop`
+
+The upstream hub repository has been renamed from `utils` to **`tacsop`** (Tactical
+Standing Operating Procedure — the document through which a headquarters publishes the
+standing procedures its units operate by, and from which each unit derives its own
+local SOP). The old name described a utility library; the new name describes what the
+hub actually is: the doctrinal foundation for agent/team workflows and task escalation.
+Full rationale and candidate names in
+[`docs/adr/0002-rename-repository-to-tacsop.md`](adr/0002-rename-repository-to-tacsop.md).
+
+**This entry is standalone (breaking-change rule): it contains no other doctrine.**
+
+New canonical locations:
+
+- GitHub: `https://github.com/jhutchison0/tacsop` (old URLs redirect as long as the
+  name `utils` is never reused — it will not be)
+- Local convention: `~/projects/github/tacsop/`
+
+Nothing inside the bundle changes behavior: the `myproject` package placeholder, hook
+substitution, and settings merges are all unchanged. The only breaking edge is the
+hardcoded default upstream path in copies of `scripts/adopt_doctrine.py`.
+
+### Adoption-Mode Table
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 1 | `scripts/adopt_doctrine.py` | **PATCH-COPY** | If your repo carries a copy from the 2026-05-19 bundle, its `DEFAULT_UPSTREAM` points at `~/projects/github/utils/`, which no longer exists after the local hub clone is renamed. Re-copy the current script from the hub, or edit the one line, or always pass `--upstream PATH`. |
+| 2 | Local hub clone | **MANUAL** | Any machine with a clone of the hub needs a directory rename and remote update (steps below). |
+| 3 | Historical docs/links | **NO ACTION** | Session docs, reviews, and old notifications that link `github.com/jhutchison0/utils` keep working via GitHub's rename redirect. Do not rewrite history. |
+
+### Action required
+
+1. On each machine with a local clone of the hub:
+   ```bash
+   mv ~/projects/github/utils ~/projects/github/tacsop
+   cd ~/projects/github/tacsop
+   git remote set-url origin https://github.com/jhutchison0/tacsop.git
+   ```
+2. If your repo carries `scripts/adopt_doctrine.py`, re-copy it from
+   `~/projects/github/tacsop/scripts/adopt_doctrine.py` (its `DEFAULT_UPSTREAM` now
+   points at the new path), or pass `--upstream ~/projects/github/tacsop` on every run.
+3. If any CI job, mirror, or script of yours references the old GitHub URL directly,
+   update it to `https://github.com/jhutchison0/tacsop` rather than trusting the
+   redirect long-term.
+4. Leave historical documents unchanged.
+
+### Rollback
+
+None needed. Taking no action costs nothing until you either (a) run a stale copy of
+`adopt_doctrine.py` without `--upstream` after your local hub clone is renamed, or
+(b) depend on the redirect from a context that resolves URLs strictly. Both are fixed
+by the steps above at any later time.
+
+---
+
 ## 2026-06-28: Line-Ending Guard — `.gitattributes` as Doctrine
 
 `utils` has shipped a `.gitattributes` (`* text=auto eol=lf` + explicit text/binary

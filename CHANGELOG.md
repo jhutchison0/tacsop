@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Repository renamed `utils` → `tacsop`** (Tactical Standing Operating Procedure) per [ADR-0002](docs/adr/0002-rename-repository-to-tacsop.md). Living docs, `scripts/propagate_doctrine.py` (`UTILS_ROOT` → `TACSOP_ROOT`), and `scripts/adopt_doctrine.py` (`DEFAULT_UPSTREAM` now `~/projects/github/tacsop/`) updated. The `myproject` package placeholder and all historical docs are unchanged; old GitHub URLs redirect.
+
 ### Fixed
 - **Windows portability**: `scripts/adopt_doctrine.py` now forces UTF-8 stdio at module load so the Unicode arrows (`→`) in status messages don't crash on Windows cp1252. Caught when `heimdall-darkroom` adopted the 2026-05-19 doctrine bundle as the first Windows downstream.
 - **Windows portability**: `.claude/hooks/post-tool-shift-left-audit.sh` now normalizes Windows backslash paths to forward slashes before the case-glob match. Without this, the hook silently no-op'd on Windows because `*/src/<pkg>/*.py` could not match `C:\…\src\<pkg>\foo.py`. Recursive subdirectory matching also clarified in comments (case patterns match across slashes).

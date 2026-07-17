@@ -8,7 +8,7 @@ Maintained via the `maintaining-project-context` skill. Update when the project'
 
 ## Identity
 
-`utils` is a Python project template **and** a doctrine source. It serves two missions through one codebase: contributors clone it to start new projects, and existing downstream consumers receive convention updates from it via a propagation script.
+`tacsop` (Tactical Standing Operating Procedure; renamed from `utils` 2026-07-17, [ADR-0002](docs/adr/0002-rename-repository-to-tacsop.md)) is a Python project template **and** a doctrine source. It serves two missions through one codebase: contributors clone it to start new projects, and existing downstream consumers receive convention updates from it via a propagation script.
 
 The two missions are deliberately co-located. Doctrine that lives only in documentation drifts; doctrine that lives only in code becomes invisible. Keeping both in one repo forces every convention to survive contact with a working Python codebase before it is propagated.
 

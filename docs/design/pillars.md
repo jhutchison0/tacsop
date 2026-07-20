@@ -1,6 +1,6 @@
 # Design Pillars
 
-Define the core design principles that guide all development decisions for this project.
+Define the design principles that guide all development decisions for this project.
 
 ## Instructions
 

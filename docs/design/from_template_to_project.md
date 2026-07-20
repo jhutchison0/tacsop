@@ -20,9 +20,9 @@ This template gives you a working Python project scaffold with zero wasted code.
 
 What you do **not** get: a CI pipeline. That gap is documented in Section 11.
 
-**Why it exists**: Starting a Python project from scratch means making a dozen identical decisions every time — how to structure packages, how to handle optional deps, whether to use src-layout, how to set up logging, how to run parallel tasks, how to enforce TDD, what vocabulary to use. This template makes those decisions once so you can focus on the domain.
+**Why it exists**: Starting a Python project from scratch means making a dozen identical decisions every time: how to structure packages, how to handle optional deps, whether to use src-layout, how to set up logging, how to run parallel tasks, how to enforce TDD, what vocabulary to use. This template makes those decisions once so you can focus on the domain.
 
-**The model**: `config/project.yaml` is the runtime source of truth. `pyproject.toml` is the packaging source of truth. `CONTEXT.md` is the narrative source of truth (what your project IS). `LANGUAGE.md` is the vocabulary source of truth (what your terms MEAN). They do not overlap. Everything else — agents, commands, skills, hooks — is workflow infrastructure that guides how you work, not what you build.
+**The model**: `config/project.yaml` is the runtime source of truth. `pyproject.toml` is the packaging source of truth. `CONTEXT.md` is the narrative source of truth (what your project IS). `LANGUAGE.md` is the vocabulary source of truth (what your terms MEAN). They do not overlap. Everything else (agents, commands, skills, hooks) is workflow infrastructure that guides how you work, not what you build.
 
 ---
 
@@ -110,7 +110,7 @@ command -v jq || brew install jq            # macOS
 
 ### Step 4: Strip what you don't need
 
-Remove unused modules, their tests, and their dependency groups. Be ruthless — see §5 for guidance on what to keep vs. remove. The doctrine artifacts (LANGUAGE.md, CONTEXT.md, ADRs, the skills directory) are **not** candidates for removal — they get filled in (see Step 5), not deleted.
+Remove unused modules, their tests, and their dependency groups. Be ruthless; see §5 for guidance on what to keep vs. remove. The doctrine artifacts (LANGUAGE.md, CONTEXT.md, ADRs, the skills directory) are **not** candidates for removal: they get filled in (see Step 5), not deleted.
 
 ```bash
 # Example: removing geo.py
@@ -134,7 +134,7 @@ Then clean up template artifacts:
 | Remove the `all` dep group from `pyproject.toml` if it points to groups you deleted | Dead indirection |
 | Preserve `.claude/commands/`, `.claude/skills/` (copy with `-r`; directory form), `.claude/hooks/`, `.claude/teams/`, `.claude/agents/` intact | These carry workflow logic, not template scaffolding |
 
-Note that `.claude/skills/session-end.md` does not exist — it was demoted to `docs/session-doc-format.md`. If you saw a reference to it elsewhere, ignore it. Three skills (`shift-left-testing`, `configuration-management`, `python-venv-management`) are now directories — copy with `cp -r`, not `cp`.
+`.claude/skills/session-end.md` does not exist; it was demoted to `docs/session-doc-format.md`. If you saw a reference to it elsewhere, ignore it. Three skills (`shift-left-testing`, `configuration-management`, `python-venv-management`) are now directories, so copy with `cp -r`, not `cp`.
 
 ### Step 5: Fill in the doctrine artifacts (do not skip)
 
@@ -181,7 +181,7 @@ tail -1 .claude/audits/shift-left-violations.log
 pytest
 ```
 
-You should see all remaining tests pass. If anything fails, the rename step missed something — re-run the `grep -rln myproject .` and substitute.
+You should see all remaining tests pass. If anything fails, the rename step missed something, so re-run the `grep -rln myproject .` and substitute.
 
 ### Step 8: Update the task list
 
@@ -208,7 +208,7 @@ The 2026-05-19 doctrine cycle added four categories of infrastructure that every
 
 **What to do**: The template ships with the `utils` project's terms (decision science, escalation ladder, governance). Replace the example sections with your project's actual domains. Keep the meta-structure (bold term, one-line definition, `_Avoid:_` synonyms when ambiguity exists). Remove any section that does not apply to your domain.
 
-The `maintaining-ubiquitous-language` skill (`.claude/skills/maintaining-ubiquitous-language/SKILL.md`) handles ongoing maintenance — agents invoke it when new terms emerge or definitions go stale.
+The `maintaining-ubiquitous-language` skill (`.claude/skills/maintaining-ubiquitous-language/SKILL.md`) handles ongoing maintenance: agents invoke it when new terms emerge or definitions go stale.
 
 **Minimum viable LANGUAGE.md on Day 1**: delete every example section, add 3–5 terms your domain actually uses, ship it. Grow it as your vocabulary stabilizes.
 
@@ -216,7 +216,7 @@ The `maintaining-ubiquitous-language` skill (`.claude/skills/maintaining-ubiquit
 
 `CONTEXT.md` at the repo root is a one-page narrative covering project identity, mission, current state, key constraints, and the reading order for new contributors and agents. It is the first file any agent or human should read when introduced to your project.
 
-**What to do**: Replace every section's body with your project's content. The structure (Identity, Mission, Current State, Constraints, Key Relationships, Reading Order, Distinguishing Table) is intentionally preserved — it is the template's value, not the `utils`-specific content filling it.
+**What to do**: Replace every section's body with your project's content. The structure (Identity, Mission, Current State, Constraints, Key Relationships, Reading Order, Distinguishing Table) is intentionally preserved because it is the template's value, not the `utils`-specific content filling it.
 
 Critical substitution: the Constraints section currently lists `utils`'s three Pillars. Replace with your project's Pillars (see §6).
 
@@ -230,7 +230,7 @@ The template ships with:
 - `docs/adr/ADR-FORMAT.md` — the format spec.
 - `docs/adr/0001-directory-form-mandatory-for-new-skills.md` — a worked example. The decision applies to your repo because you are adopting Skills Framework v2; update the `Decision-maker(s)` field to attribute local adoption.
 
-The `recording-architecture-decisions` skill refuses to write an ADR when any filter condition fails — it will redirect you to a commit message or session doc instead.
+The `recording-architecture-decisions` skill refuses to write an ADR when any filter condition fails; it will redirect you to a commit message or session doc instead.
 
 **Day-1 action**: no new ADRs needed. ADR-0001 (re-attributed) is your starting record. Write your next ADR when the first genuinely hard-to-reverse, surprising, contested decision arises.
 
@@ -242,7 +242,7 @@ The `recording-architecture-decisions` skill refuses to write an ADR when any fi
 2. **Progressive disclosure**: SKILL.md is the entry point, stays small (target <150 lines). Topical content lives in sidecar files loaded on demand.
 3. **YAML frontmatter** on every SKILL.md (`name`, `description`, `version`, optional `allowed-tools` / `model`).
 
-Level 0 skills (`shift-left-testing`, `configuration-management`, `python-venv-management`, `maintaining-ubiquitous-language`, `maintaining-project-context`, `recording-architecture-decisions`) are portable — do not modify them. Add Level 1 project-specific skills as your domain requires.
+Level 0 skills (`shift-left-testing`, `configuration-management`, `python-venv-management`, `maintaining-ubiquitous-language`, `maintaining-project-context`, `recording-architecture-decisions`) are portable; do not modify them. Add Level 1 project-specific skills as your domain requires.
 
 ### Propagation protocol — for hub repos only
 
@@ -256,13 +256,13 @@ The `shift-left-testing` skill describes the discipline (write a failing test, t
 
 ### The PostToolUse audit hook
 
-A shell script at `.claude/hooks/post-tool-shift-left-audit.sh` fires after every `Write` or `Edit` tool call. For any edit to a file in `src/<yourpkg>/**/*.py`, the hook looks for a corresponding test file at `tests/**/test_<basename>.py`. If no test partner exists, it logs a `MISSING_TEST` entry to `.claude/audits/shift-left-violations.log` and emits a warning the agent sees in its tool result. **The hook never blocks** — it produces an audit trail, not friction.
+A shell script at `.claude/hooks/post-tool-shift-left-audit.sh` fires after every `Write` or `Edit` tool call. For any edit to a file in `src/<yourpkg>/**/*.py`, the hook looks for a corresponding test file at `tests/**/test_<basename>.py`. If no test partner exists, it logs a `MISSING_TEST` entry to `.claude/audits/shift-left-violations.log` and emits a warning the agent sees in its tool result. **The hook never blocks**: it produces an audit trail, not friction.
 
 The full enforcement gradient (probabilistic → deterministic, six layers) is documented in `.claude/skills/shift-left-testing/ENFORCEMENT.md`. Short version: hard-block hooks were rejected because false-positive risk on legitimate refactors / config edits outweighs the determinism gain, and agents route around them trivially. The soft audit produces durable evidence without false positives. Reasoning: `docs/reviews/20260519_pass4_enforcement_maut.md` (the MAUT that picked the soft design).
 
 ### The required path substitution
 
-The hook ships pre-configured for the template package name. **If you do not change this, the hook matches nothing and silently logs nothing** — no error, no warning, empty audit log. This is the worst-case failure mode flagged in the Pass 5 review: the hook appears installed but does nothing.
+The hook ships pre-configured for the template package name. **If you do not change this, the hook matches nothing and silently logs nothing**: no error, no warning, empty audit log. This is the worst-case failure mode flagged in the Pass 5 review: the hook appears installed but does nothing.
 
 Find this block in `.claude/hooks/post-tool-shift-left-audit.sh`:
 
@@ -301,7 +301,7 @@ Do these after Step 1 (rename) and as part of Step 6 in the Day-1 checklist:
 
 ### Per-developer override
 
-Any developer who needs to disable the hook locally can override in `.claude/settings.local.json` (gitignored) with `"hooks": {}`. The shipped `.claude/settings.json` is team-wide. Do not remove the hook from team config to satisfy one person's preference — use the local override.
+Any developer who needs to disable the hook locally can override in `.claude/settings.local.json` (gitignored) with `"hooks": {}`. The shipped `.claude/settings.json` is team-wide. Do not remove the hook from team config to satisfy one person's preference; use the local override.
 
 ### Reading the audit log
 
@@ -320,7 +320,7 @@ When violations accumulate (e.g., 20+ per month for the same file), `ENFORCEMENT
 
 ## 5. What to Keep, Evaluate, or Remove
 
-Every utility module is optional unless your project actually needs it. Be ruthless — dead code in a template becomes dead code in your project. **Doctrine artifacts (CONTEXT.md, LANGUAGE.md, docs/adr/, .claude/skills/, .claude/hooks/) are NOT in this category** — see §3 instead.
+Every utility module is optional unless your project actually needs it. Be ruthless: dead code in a template becomes dead code in your project. **Doctrine artifacts (CONTEXT.md, LANGUAGE.md, docs/adr/, .claude/skills/, .claude/hooks/) are NOT in this category**; see §3 instead.
 
 ### Required: Fill in for your project (not removable)
 
@@ -338,7 +338,7 @@ These ship as templates and become yours by filling in, not by deleting. Removin
 
 ### Standards (follow everywhere)
 
-**`pathlib`** — The template uses `pathlib.Path` exclusively for all filesystem operations. No `os.path` anywhere. Follow this convention in your project — use `Path` for construction, `/` for joining, `.read_text()` / `.write_text()` for I/O.
+**`pathlib`** — The template uses `pathlib.Path` exclusively for all filesystem operations. No `os.path` anywhere. Follow this convention in your project: use `Path` for construction, `/` for joining, `.read_text()` / `.write_text()` for I/O.
 
 ### Keep (universal utilities)
 
@@ -366,7 +366,7 @@ One caveat: the `Formatter.converter` assignment is a global mutation that affec
 
 **`excel.py`** — Keep if you're generating Excel reports. Handles DataFrame-to-table formatting cleanly. Requires `pandas`, `openpyxl`, `xlsxwriter`. Drop it if you're not generating Excel files.
 
-**`slack.py`** — Keep if you need Slack notifications. Thin wrapper — the whole module is 37 lines. Requires `slack-sdk`. Drop it if you're not posting to Slack.
+**`slack.py`** — Keep if you need Slack notifications. Thin wrapper: the whole module is 37 lines. Requires `slack-sdk`. Drop it if you're not posting to Slack.
 
 **`database.py`** — Keep if you need PostgreSQL + JSONB storage. Fully synchronous implementation. Requires `psycopg`. Drop it if you're using a different database or ORM.
 
@@ -396,7 +396,7 @@ To drop the subpackage cleanly:
 
 ### Filling in `config/project.yaml`
 
-Phase 1 is already marked complete — that's the template foundation. Define your actual phases starting with Phase 2:
+Phase 1 is already marked complete: that's the template foundation. Define your actual phases starting with Phase 2:
 
 ```yaml
 build_phases:
@@ -430,7 +430,7 @@ The violation example is the most important part. Without it, Pillars are aspira
 
 Aim for 3–5 Pillars. More than 5 means you haven't prioritized. Pillars that survive code review are the ones whose violation examples are specific enough to apply at PR time.
 
-(The template ships an unfilled stub at `docs/design/pillars.md` for projects that want a separate file. We recommend keeping Pillars in `CONTEXT.md` + `config/project.yaml` instead — fewer places to drift.)
+(The template ships an unfilled stub at `docs/design/pillars.md` for projects that want a separate file. We recommend keeping Pillars in `CONTEXT.md` + `config/project.yaml` instead: fewer places to drift.)
 
 ### Setting up the task list
 
@@ -448,13 +448,13 @@ Run `/task add <description>` or edit `docs/tasks.md` directly. Structure for th
 ## Completed
 ```
 
-P1 = do now, P2 = do soon, P3 = backlog. Assign when ownership is clear. Keep it honest — a task list with 40 open items is noise.
+P1 = do now, P2 = do soon, P3 = backlog. Assign when ownership is clear. Keep it honest: a task list with 40 open items is noise.
 
 ---
 
 ## 7. Your First Design Doc
 
-Before writing code for your project's first feature, write a design doc. This doesn't need to be long — it needs to answer the questions that will otherwise be answered implicitly by whoever writes the first file.
+Before writing code for your project's first feature, write a design doc. This doesn't need to be long; it needs to answer the questions that will otherwise be answered implicitly by whoever writes the first file.
 
 Use this structure in `docs/design/FEATURE_NAME.md`:
 
@@ -508,7 +508,7 @@ How will you know when this phase is done?
 
 Writing this doc surfaces disagreements before they become bugs. If you can't fill it in, you don't understand the problem well enough to write the code.
 
-**Design doc vs ADR**: the Key Decisions table in a design doc captures every decision you considered. An ADR (`docs/adr/NNNN-slug.md`) captures only decisions that pass the triple filter — hard to reverse, surprising without context, real trade-off. Most decisions from a design doc will NOT warrant an ADR — they belong in the design doc or in commit messages. Write the design doc first; write an ADR only if, on reflection, the decision satisfies all three filter conditions.
+**Design doc vs ADR**: the Key Decisions table in a design doc captures every decision you considered. An ADR (`docs/adr/NNNN-slug.md`) captures only decisions that pass the triple filter (hard to reverse, surprising without context, real trade-off). Most decisions from a design doc will NOT warrant an ADR; they belong in the design doc or in commit messages. Write the design doc first; write an ADR only if, on reflection, the decision satisfies all three filter conditions.
 
 ---
 
@@ -564,7 +564,7 @@ my_feature:
   enabled: true
 ```
 
-Then read it from Python. Don't add new YAML files — one config file keeps things findable. The `config/` directory growing to 10 files is a maintenance burden.
+Then read it from Python. Don't add new YAML files: one config file keeps things findable. The `config/` directory growing to 10 files is a maintenance burden.
 
 ### Adding new optional dependencies
 
@@ -584,7 +584,7 @@ Then document the install command in `CLAUDE.md`'s Quick Commands section.
 
 ### What .env.example should contain
 
-Every key your code reads from `os.environ`, with a dummy value and a comment explaining what it is. This file is committed. The actual `.env` is never committed. Keep them in sync — if you add a new env var, add it to `.env.example` immediately.
+Every key your code reads from `os.environ`, with a dummy value and a comment explaining what it is. This file is committed. The actual `.env` is never committed. Keep them in sync: if you add a new env var, add it to `.env.example` immediately.
 
 ---
 
@@ -594,7 +594,7 @@ Every key your code reads from `os.environ`, with a dummy value and a comment ex
 
 For every new behavior in `src/<yourpkg>/`, write the failing test first, then the minimum implementation that makes it pass, then move to the next slice. Do **not** write all tests first and then all implementation (the "horizontal slice"); the implementation gets shaped by what you *thought* the tests would need, not by what each test actually required. Rules and worked example: `.claude/skills/shift-left-testing/VERTICAL-SLICING.md`.
 
-The PostToolUse audit hook (§4) fires after every `Write`/`Edit` to `src/<yourpkg>/**/*.py` and logs to `.claude/audits/shift-left-violations.log` when no test partner exists. The hook is evidence, not friction — it produces an audit trail without blocking your work. See `.claude/skills/shift-left-testing/ENFORCEMENT.md` for the full enforcement gradient.
+The PostToolUse audit hook (§4) fires after every `Write`/`Edit` to `src/<yourpkg>/**/*.py` and logs to `.claude/audits/shift-left-violations.log` when no test partner exists. The hook is evidence, not friction: it produces an audit trail without blocking your work. See `.claude/skills/shift-left-testing/ENFORCEMENT.md` for the full enforcement gradient.
 
 ### The pattern to follow
 
@@ -629,7 +629,7 @@ This skips the entire test file gracefully when deps aren't installed, rather th
 Write tests in this order (easiest to hardest):
 
 1. Pure functions with no side effects (geo.py, math_utils.py)
-2. Functions with file I/O (logger.py — use `tmp_path` fixture)
+2. Functions with file I/O (logger.py; use `tmp_path` fixture)
 3. Functions with external deps gated by importorskip (excel.py, weights.py)
 4. Functions requiring mocks (slack.py with `unittest.mock.patch`)
 5. Database / multiprocessing (database.py, parallel.py)
@@ -645,7 +645,7 @@ pytest --cov --cov-report=html      # HTML report in htmlcov/
 
 ### Coverage target
 
-The template ships at 53% coverage with a `fail_under = 50` threshold. Ratchet this up as you add tests — aim for 80%+ on modules you actively develop. Modules behind optional dependencies (excel, slack, database) will show 0% unless those extras are installed.
+The template ships at 53% coverage with a `fail_under = 50` threshold. Ratchet this up as you add tests: aim for 80%+ on modules you actively develop. Modules behind optional dependencies (excel, slack, database) will show 0% unless those extras are installed.
 
 ---
 
@@ -666,7 +666,7 @@ flowchart LR
     G --> H[/session-end/]
 ```
 
-**session-start**: Load project config, review last session doc, check task list, verify tests pass, check for upstream doctrine updates. Don't skip — it takes 30 seconds and prevents you from working in the wrong context.
+**session-start**: Load project config, review last session doc, check task list, verify tests pass, check for upstream doctrine updates. Don't skip: it takes 30 seconds and prevents you from working in the wrong context.
 
 **session-end**: Git status review, PCC, commit with `[area]` tag, update tasks, write session doc per `docs/session-doc-format.md`. The session doc in `docs/sessions/YYYYMMDD_*.md` is your audit trail.
 
@@ -725,7 +725,7 @@ Erring toward CONOP for anything uncertain is better than erring toward Task. A 
 
 Read `.claude/README.md` before deploying a team. The key rule: every file has exactly one owner. If two agents need to touch the same file, restructure the task.
 
-**Agent levels**: Level 0 agents (`proposer`, `code-reviewer`, `python-prototyper`, `test-runner`) are portable across all projects — do not modify them. Level 1 agents (`decision-scientist` ships with the template because the `decision_science/` subpackage ships with the template) are project-specific. Add your own Level 1 agents as your domain requires; drop the ones you don't use.
+**Agent levels**: Level 0 agents (`proposer`, `code-reviewer`, `python-prototyper`, `test-runner`) are portable across all projects; do not modify them. Level 1 agents (`decision-scientist` ships with the template because the `decision_science/` subpackage ships with the template) are project-specific. Add your own Level 1 agents as your domain requires; drop the ones you don't use.
 
 ### Commit message conventions
 
@@ -766,11 +766,11 @@ The template ships with a working README.md and CHANGELOG.md describing the `uti
 
 **Keeping modules you don't need.** Dead code accumulates debt. If your project isn't doing geo work, delete `geo.py` on Day 1. Removing it later is harder.
 
-**Skipping the path substitution in the audit hook.** If `*/src/myproject/*.py` remains in `.claude/hooks/post-tool-shift-left-audit.sh` after your rename, the hook matches nothing and logs nothing. You will see no error — the hook still exits 0. Check `tail -5 .claude/audits/shift-left-violations.log` after editing any source file; if the log is empty or stale, the substitution was missed. See §4 for the bash `case` syntax warning (no parentheses for multi-package alternation).
+**Skipping the path substitution in the audit hook.** If `*/src/myproject/*.py` remains in `.claude/hooks/post-tool-shift-left-audit.sh` after your rename, the hook matches nothing and logs nothing. You will see no error, because the hook still exits 0. Check `tail -5 .claude/audits/shift-left-violations.log` after editing any source file; if the log is empty or stale, the substitution was missed. See §4 for the bash `case` syntax warning (no parentheses for multi-package alternation).
 
 **Forgetting `chmod +x` on the hook script.** Windows clones and repos with `git config core.fileMode false` lose the executable bit. `test -x .claude/hooks/post-tool-shift-left-audit.sh || chmod +x .claude/hooks/post-tool-shift-left-audit.sh` is safe to run any time.
 
-**Not installing `jq`.** The audit hook requires it. The script exits silently if `jq` is missing rather than crashing — same observable outcome as the substitution-skipped failure (empty audit log, no error).
+**Not installing `jq`.** The audit hook requires it. The script exits silently if `jq` is missing rather than crashing: same observable outcome as the substitution-skipped failure (empty audit log, no error).
 
 **Editing `.claude/settings.json` instead of `.claude/settings.local.json` for personal overrides.** The team-wide file is checked in. Personal overrides (disabling the hook for local debugging, custom env vars) belong in the local file, which is gitignored.
 
@@ -782,7 +782,7 @@ The template ships with a working README.md and CHANGELOG.md describing the `uti
 
 **Skipping session-start.** It feels like overhead until the session where you spend 20 minutes re-orienting because you forgot what was done last time.
 
-**Letting the task list grow unchecked.** A task list with 40 items is not a task list — it's a guilt log. Keep active tasks under 10. Promote complex work to plans. Archive stale tasks.
+**Letting the task list grow unchecked.** A task list with 40 items is not a task list; it's a guilt log. Keep active tasks under 10. Promote complex work to plans. Archive stale tasks.
 
 **Running PCI instead of PCC for small changes.** PCC is cheap. Run it on every push. Save PCI for big diffs and pre-merge reviews.
 

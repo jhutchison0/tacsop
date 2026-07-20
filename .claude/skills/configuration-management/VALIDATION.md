@@ -143,7 +143,7 @@ validate_config(config)
 ```
 
 **Key design choices**:
-- **Accumulate all errors, fail once.** Don't fail on the first issue — show the user every problem so they can fix all of them in one pass.
+- **Accumulate all errors, fail once.** Don't fail on the first issue; show the user every problem so they can fix all of them in one pass.
 - **Production safety checks.** Settings that are dangerous in production (auto-migrate, debug endpoints) get explicit guards.
 - **Reference the fix.** "Set `DB_PASSWORD` in .env" is more useful than "password missing."
 

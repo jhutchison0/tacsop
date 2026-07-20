@@ -36,6 +36,8 @@ You are a senior code reviewer for this Python project. Review changes against t
 - Consistency between config YAML keys and Python attribute names
 - Log level appropriateness (info vs. warning vs. error)
 
+**Prose artifacts**: review per `.claude/skills/writing-simple-and-direct/REVIEWING.md` (pass order, finding format, severity mapping).
+
 ## Output Format
 
 Write reports to `docs/reviews/YYYYMMDD_<subject>.md`. Use today's date and a short subject describing what was reviewed. Use this header:

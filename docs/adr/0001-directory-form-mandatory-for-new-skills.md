@@ -24,7 +24,7 @@ Anthropic's December 2025 open skills standard had codified a directory form (`S
 
 The Wave 2 refactor of the same session migrated all three legacy single-file skills to directory form. The question this ADR resolves is: **what rule do we propagate downstream and apply going forward?**
 
-A draft of `SKILLS_FRAMEWORK.md` v2 included a numeric trigger ("migrate at >500 lines"). The author noted in the Pass 4 review that every legacy skill we had crossed the 500-line trigger without anyone noticing — the rule self-violated until a manual audit caught it. That observation drove this decision.
+A draft of `SKILLS_FRAMEWORK.md` v2 included a numeric trigger ("migrate at >500 lines"). The author noted in the Pass 4 review that every legacy skill we had crossed the 500-line trigger without anyone noticing; the rule self-violated until a manual audit caught it. That observation drove this decision.
 
 ---
 
@@ -49,7 +49,7 @@ A line-count threshold (500 was the leading number) that mandates directory form
 Rejected because:
 - Every legacy skill in this repo crossed the 500-line trigger without anyone noticing or acting on it. The rule self-violated.
 - Authors do not reliably predict how a skill will grow; the threshold debate would recur at every PR.
-- The cost of "premature" directory form is one extra directory and one extra file — trivial. The cost of "delayed" directory form is a 1500-line monolith refactor — non-trivial.
+- The cost of "premature" directory form is one extra directory and one extra file: trivial. The cost of "delayed" directory form is a 1500-line monolith refactor: non-trivial.
 - A numeric rule invites argument; a categorical rule does not.
 
 ### Alternative B: Keep single-file as default; allow directory form when authors prefer
@@ -70,7 +70,7 @@ Slight per-skill overhead: even a 30-line skill is a directory with one file. El
 - Aligns with Anthropic's December 2025 skills open standard.
 - Progressive disclosure becomes the default frame when authoring a new skill, even when the first version is small.
 - Eliminates a recurring debate ("is this skill big enough to warrant a directory?").
-- Sidecars that capture enforcement, how-to guides, or anti-pattern catalogs are first-class — see `shift-left-testing/ENFORCEMENT.md` written the same day as this ADR for a concrete example.
+- Sidecars that capture enforcement, how-to guides, or anti-pattern catalogs are first-class; see `shift-left-testing/ENFORCEMENT.md` written the same day as this ADR for a concrete example.
 
 ### Negative
 
@@ -94,3 +94,9 @@ Slight per-skill overhead: even a 30-line skill is a directory with one file. El
 - [`.claude/skills/shift-left-testing/ENFORCEMENT.md`](../../.claude/skills/shift-left-testing/ENFORCEMENT.md) — first sidecar authored under this ADR's rule.
 - Anthropic, Skills Open Standard (December 2025) — directory form with frontmatter.
 - Matt Pocock, [`mattpocock/skills`](https://github.com/mattpocock/skills) — the prior-art that established directory-form as production-tested.
+
+---
+
+## Amendments
+
+- **2026-07-20**: Punctuation-only style edits (2026-07-19 sweep, `docs/reviews/20260719_writing_style_sweep.md`) applied while field-testing the new `writing-simple-and-direct` skill. Lead-approved exception to the append-only rule; decision content, status, and dates unchanged. This note is the append that records it.

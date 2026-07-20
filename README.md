@@ -1,8 +1,8 @@
 # tacsop
 
-**TACSOP** — *Tactical Standing Operating Procedure*: the document through which a headquarters publishes the standing procedures its units operate by, and from which each unit derives its own local SOP.
+**TACSOP** (*Tactical Standing Operating Procedure*): the document through which a headquarters publishes the standing procedures its units operate by, and from which each unit derives its own local SOP.
 
-Here: a Python project template and upstream doctrine hub for Claude Code agent workflows — the doctrinal foundation for agents and teams to operate together, and for task escalation. (Renamed from `utils` 2026-07-17; see [ADR-0002](docs/adr/0002-rename-repository-to-tacsop.md).)
+Here: a Python project template and upstream doctrine hub for Claude Code agent workflows. It is the doctrinal foundation for agents and teams to operate together, and for task escalation. (Renamed from `utils` 2026-07-17; see [ADR-0002](docs/adr/0002-rename-repository-to-tacsop.md).)
 
 This repo serves two purposes:
 
@@ -57,7 +57,7 @@ python scripts/propagate_doctrine.py --dry-run # preview without writing
 # 3. Downstream repos see the update on their next /session-start
 ```
 
-The script finds all repos under `~/projects/` with `.claude/commands/` directories. Updates append to existing notifications — repos that haven't reviewed earlier updates won't lose them.
+The script finds all repos under `~/projects/` with `.claude/commands/` directories. Updates append to existing notifications, so repos that haven't reviewed earlier updates won't lose them.
 
 ## Project Structure
 
@@ -107,4 +107,4 @@ pytest -k test_name        # Run specific tests
 
 ## License
 
-GPL v3 — See [LICENSE](LICENSE) for details.
+Apache-2.0. See [LICENSE](LICENSE) for details.

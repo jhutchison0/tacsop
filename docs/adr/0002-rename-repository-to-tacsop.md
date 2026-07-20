@@ -18,7 +18,7 @@ All three filter conditions pass. ADR is warranted.
 
 ## Context
 
-This repo began as a personal grab-bag of Python utilities — `utils` was accurate. It has since grown a second, now-primary identity: the **upstream doctrine hub** for a family of downstream repos. It carries the agent framework, team templates, the task-escalation ladder (Task → TCS → CONOP → OPORD), the skills framework, the shift-left enforcement layer, and the propagation machinery (`propagate_doctrine.py` / `adopt_doctrine.py`) that pushes conventions to 10+ consumer repos.
+This repo began as a personal grab-bag of Python utilities; `utils` was accurate. It has since grown a second, now-primary identity: the **upstream doctrine hub** for a family of downstream repos. It carries the agent framework, team templates, the task-escalation ladder (Task → TCS → CONOP → OPORD), the skills framework, the shift-left enforcement layer, and the propagation machinery (`propagate_doctrine.py` / `adopt_doctrine.py`) that pushes conventions to 10+ consumer repos.
 
 The repo is about to be shared with colleagues. `utils` misdescribes the repo to a first-time reader (it suggests a utility library, which is now the minority of its value), collides with one of the most generic words in software, and is nearly un-searchable. The name should state the primary function: **the doctrinal foundation for agents and teams to operate together, and for task escalation.**
 
@@ -30,11 +30,11 @@ The repo's vocabulary is already deliberately military (doctrine, CONOP, OPORD, 
 
 Rename the GitHub repository `jhutchison0/utils` → **`jhutchison0/tacsop`**.
 
-**TACSOP** — *Tactical Standing Operating Procedure* — is the document through which a headquarters publishes the standing procedures by which its units operate, and from which subordinate units derive their own local SOPs. That is structurally what this repo does: downstream repos copy the doctrine bundle and adapt it to their local context (package-name substitution in hooks, per-repo settings merges). The name is a term of art, not an allusion.
+**TACSOP** (*Tactical Standing Operating Procedure*) is the document through which a headquarters publishes the standing procedures by which its units operate, and from which subordinate units derive their own local SOPs. That is structurally what this repo does: downstream repos copy the doctrine bundle and adapt it to their local context (package-name substitution in hooks, per-repo settings merges). The name is a term of art, not an allusion.
 
 Scope boundaries, decided deliberately:
 
-- **Repo identity only.** The `myproject` package placeholder (`src/myproject/`, `config/project.yaml` `name:`, the hook's package glob) is template content that downstream adopters substitute — it stays.
+- **Repo identity only.** The `myproject` package placeholder (`src/myproject/`, `config/project.yaml` `name:`, the hook's package glob) is template content that downstream adopters substitute; it stays.
 - **Historical documents are untouched.** `docs/sessions/`, `docs/reviews/`, and prior `doctrine-updates.md` entries keep the old name and old URLs; GitHub's rename redirect keeps those links live.
 - **The name `utils` is never reused** under this account. Creating a new repo with that name would break every historical redirect at once.
 - Living documents (README, CONTEXT.md, LANGUAGE.md, propagation-protocol.md, CLAUDE.md) and the two propagation scripts are updated; the rename is announced downstream via a `doctrine-updates.md` entry propagated through the system itself.
@@ -45,7 +45,7 @@ Scope boundaries, decided deliberately:
 
 ### Alternative A: `goldbook`
 
-Homage to the 101st Airborne's Gold Book — the division's standards publication, and a personal touchstone (a copy sits on the decision-maker's desk as a reminder of standards put into excellent practice). Rejected: it honors the inspiration rather than describing the function, and it is unit-specific — the reference lands only for readers who know the 101st. The emotional pull was real, which is exactly why function had to win.
+Homage to the 101st Airborne's Gold Book: the division's standards publication, and a personal touchstone (a copy sits on the decision-maker's desk as a reminder of standards put into excellent practice). Rejected: it honors the inspiration rather than describing the function, and it is unit-specific; the reference lands only for readers who know the 101st. The emotional pull was real, which is exactly why function had to win.
 
 ### Alternative B: `sandtable` (parked, not rejected)
 
@@ -53,11 +53,11 @@ A sand table is a rehearsal and wargaming exercise. Appealing image, but it name
 
 ### Alternative C: `guidon` (parked, not rejected)
 
-The genuine runner-up. A guidon is the pennant marking a company's identity and rallying point — evocative of downstream repos aligning on an upstream standard, a real English word, warmer than an acronym. Rejected for the repo because the metaphor breaks at the repo's distinguishing feature: a guidon names the *relationship* (rally to the standard), not the *content*, and guidons are singular — nobody copies a guidon, whereas this repo's entire mechanism is that its contents are copied and locally adapted. Parked for a possible future artifact where singularity is the point — e.g., a registry of downstream repos and their adoption status (the formation that follows the standard).
+The genuine runner-up. A guidon is the pennant marking a company's identity and rallying point: evocative of downstream repos aligning on an upstream standard, a real English word, warmer than an acronym. Rejected for the repo because the metaphor breaks at the repo's distinguishing feature: a guidon names the *relationship* (rally to the standard), not the *content*, and guidons are singular; nobody copies a guidon, whereas this repo's entire mechanism is that its contents are copied and locally adapted. Parked for a possible future artifact where singularity is the point: e.g., a registry of downstream repos and their adoption status (the formation that follows the standard).
 
 ### Alternative D: `tacsop` (selected)
 
-Function-accurate (see Decision), consistent with the repo's established vocabulary, and a rare token — unique on GitHub, unambiguously greppable, no namesake noise. Its one real cost: opaque to readers without a military background. Accepted deliberately; the README's first line carries a civilian gloss, and for a repo whose thesis is "standards, written down, enforced, and propagated," the acronym-shaped name *is* the brand.
+Function-accurate (see Decision), consistent with the repo's established vocabulary, and a rare token: unique on GitHub, unambiguously greppable, no namesake noise. Its one real cost: opaque to readers without a military background. Accepted deliberately; the README's first line carries a civilian gloss, and for a repo whose thesis is "standards, written down, enforced, and propagated," the acronym-shaped name *is* the brand.
 
 ---
 
@@ -66,7 +66,7 @@ Function-accurate (see Decision), consistent with the repo's established vocabul
 ### Positive
 
 - The name states the repo's primary function to the audience it is about to meet.
-- Announcing the rename via `doctrine-updates.md` and `propagate_doctrine.py` makes the rename a live demonstration of the propagation architecture — every downstream repo learns the new name at its next `/session-start` through the system itself.
+- Announcing the rename via `doctrine-updates.md` and `propagate_doctrine.py` makes the rename a live demonstration of the propagation architecture: every downstream repo learns the new name at its next `/session-start` through the system itself.
 - `tacsop` is uniquely greppable across machines, docs, and conversations in a way `utils` never was.
 - Two strong names (`sandtable`, `guidon`) remain available for future artifacts whose metaphors they actually fit.
 
@@ -92,3 +92,9 @@ Function-accurate (see Decision), consistent with the repo's established vocabul
 - [`scripts/propagate_doctrine.py`](../../scripts/propagate_doctrine.py), [`scripts/adopt_doctrine.py`](../../scripts/adopt_doctrine.py) — the two code locations affected.
 - [`CONTEXT.md`](../../CONTEXT.md) — the dual-identity (template + doctrine hub) statement that motivates the new name.
 - `docs/doctrine-updates.md` — 2026-07-17 entry announces the rename downstream.
+
+---
+
+## Amendments
+
+- **2026-07-20**: Punctuation-only style edits (2026-07-19 sweep, `docs/reviews/20260719_writing_style_sweep.md`) applied while field-testing the new `writing-simple-and-direct` skill. Lead-approved exception to the append-only rule; decision content, status, and dates unchanged. This note is the append that records it.

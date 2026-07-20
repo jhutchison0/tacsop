@@ -63,3 +63,6 @@ docs/design/hold/
 # Images (uncomment if not needed in repo)
 # *.png
 # *.jpg
+
+# Hypothesis local example database; @example pins in test code are the durable record
+.hypothesis/

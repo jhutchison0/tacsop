@@ -6,7 +6,7 @@ version: "1.0.0"
 
 # Maintaining Project Context
 
-CONTEXT.md is a one-page narrative of what a project is, what it cares about, and the constraints on how it operates. It is the file you would hand to a new contributor — human or agent — who has 60 seconds to understand the project well enough to act in alignment with it.
+CONTEXT.md is a one-page narrative of what a project is, what it cares about, and the constraints on how it operates. It is the file you would hand to a new contributor (human or agent) who has 60 seconds to understand the project well enough to act in alignment with it.
 
 Adapted from Matt Pocock's `grill-with-docs` pattern, distinct from LANGUAGE.md (which defines terms) and `config/project.yaml` (which holds machine-readable state).
 
@@ -14,7 +14,7 @@ Adapted from Matt Pocock's `grill-with-docs` pattern, distinct from LANGUAGE.md 
 
 Invoke this skill when:
 
-- Significant new work begins — a new phase, a new mission, a structural change to how the project relates to its consumers.
+- Significant new work begins: a new phase, a new mission, a structural change to how the project relates to its consumers.
 - The project's mission or scope materially shifts (not for routine task progress).
 - A new agent or human contributor needs to ramp up quickly and needs project orientation.
 - The relationship with downstream consumers changes (new repos joining, repos leaving, propagation protocol changes).
@@ -56,7 +56,7 @@ The canonical sections, in order:
 [Small table: CONTEXT vs LANGUAGE vs project.yaml vs CLAUDE.md vs sessions vs plans.]
 ```
 
-The body should fit on one or two screens. If CONTEXT.md is creeping past ~250 lines, it's drifting into spec territory — extract the detail to a design doc and link.
+The body should fit on one or two screens. If CONTEXT.md is creeping past ~250 lines, it's drifting into spec territory: extract the detail to a design doc and link.
 
 ## Distinguishing CONTEXT.md from Adjacent Artifacts
 
@@ -91,7 +91,7 @@ When CONTEXT.md needs an update:
 - A specification of any specific feature (use design docs in `docs/design/`).
 - A glossary of terms (use LANGUAGE.md).
 - A history of what changed (use `docs/sessions/` and git log).
-- A list of every constraint imaginable — only the ones that actively govern decisions.
+- A list of every constraint imaginable (only the ones that actively govern decisions belong).
 
 ## Sources
 

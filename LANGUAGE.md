@@ -26,7 +26,7 @@ When a term is missing or contested, invoke the `maintaining-ubiquitous-language
 
 **Utility**: A criterion-level or alternative-level score in [0, 1] after value-function transformation and weighting. _Avoid:_ score (use only for raw input).
 
-**MAUT**: Multi-Attribute Utility Theory — the additive-utility decision model this project implements in `src/myproject/utils/decision_science/`.
+**MAUT**: Multi-Attribute Utility Theory, the additive-utility decision model this project implements in `src/myproject/utils/decision_science/`.
 
 **Sensitivity Analysis**: A check of how the alternative ranking changes when weights or scores move. Three modes: OAT (one-at-a-time), Monte Carlo, scenario compare.
 
@@ -58,11 +58,11 @@ When a term is missing or contested, invoke the `maintaining-ubiquitous-language
 
 **Task**: One person, one session, one clear action. The smallest unit in `docs/tasks.md`. Promote upward when the work exceeds one session or requires multi-step coordination.
 
-**TCS**: Task, Condition, Standard — a structured task spec with pass/fail criteria. The universal task-detail unit inside all plan types (CONOP, OPORD). _Avoid:_ ticket, story.
+**TCS** (Task, Condition, Standard): a structured task spec with pass/fail criteria. The universal task-detail unit inside all plan types (CONOP, OPORD). _Avoid:_ ticket, story.
 
-**CONOP**: Concept of Operations — a multi-wave plan covering design decisions and parallel tracks. Lives in `docs/plans/`. _Avoid:_ design doc (already taken).
+**CONOP**: Concept of Operations, a multi-wave plan covering design decisions and parallel tracks. Lives in `docs/plans/`. _Avoid:_ design doc (already taken).
 
-**OPORD**: Operations Order — the sequential execution form of a decided strategy, organized in waves. Lives in `docs/plans/`. _Avoid:_ runbook (overloaded with ops connotations).
+**OPORD**: Operations Order, the sequential execution form of a decided strategy, organized in waves. Lives in `docs/plans/`. _Avoid:_ runbook (overloaded with ops connotations).
 
 **Wave**: A tactical parallel-execution unit inside a CONOP or OPORD where agent teams deploy. Bounded by a shared exit criterion. _Avoid:_ sprint, batch.
 
@@ -74,7 +74,7 @@ When a term is missing or contested, invoke the `maintaining-ubiquitous-language
 
 ## Governance & Propagation
 
-**TACSOP**: Tactical Standing Operating Procedure — this repo's name (renamed from `utils` 2026-07-17, ADR-0002). The military term of art for the document through which a headquarters publishes the standing procedures its units operate by, and from which subordinate units derive their own local SOPs. Chosen because that is structurally what this repo does: downstream repos copy its doctrine bundle and adapt it to their local context.
+**TACSOP**: Tactical Standing Operating Procedure, this repo's name (renamed from `utils` 2026-07-17, ADR-0002). The military term of art for the document through which a headquarters publishes the standing procedures its units operate by, and from which subordinate units derive their own local SOPs. Chosen because that is structurally what this repo does: downstream repos copy its doctrine bundle and adapt it to their local context.
 
 **Doctrine**: A framework-level convention or pattern intentionally maintained at the `tacsop` template repo and intended for adoption across downstream consumer repos. Not all changes are doctrine; only those meant to spread.
 
@@ -102,7 +102,7 @@ When a term is missing or contested, invoke the `maintaining-ubiquitous-language
 
 **CONTEXT.md**: The project's narrative identity, mission, current state, and key constraints. Companion to `LANGUAGE.md` and `config/project.yaml`. Maintained via the `maintaining-project-context` skill.
 
-**ADR**: Architecture Decision Record — a numbered file in `docs/adr/NNNN-<slug>.md` capturing one decision that satisfies the triple filter: hard to reverse AND surprising without context AND result of a real trade-off. Maintained via the `recording-architecture-decisions` skill. See `docs/adr/ADR-FORMAT.md`.
+**ADR**: Architecture Decision Record, a numbered file in `docs/adr/NNNN-<slug>.md` capturing one decision that satisfies the triple filter: hard to reverse AND surprising without context AND result of a real trade-off. Maintained via the `recording-architecture-decisions` skill. See `docs/adr/ADR-FORMAT.md`.
 
 **Triple Filter**: The gate for whether a decision warrants an ADR. All three required: hard to reverse, surprising without context, real trade-off. Source: Matt Pocock's ADR format.
 
@@ -134,9 +134,21 @@ The crosswalk is intentionally one-way: external content adopts civilian, intern
 
 **"Component"**: not used in this codebase. If imported from external prose, translate to `agent`, `skill`, `utility`, or `package` per context.
 
-**"Plan"** unqualified: prefer `TCS`, `CONOP`, or `OPORD` — they signal scope. Reserve unqualified "plan" only for genuinely informal sketches.
+**"Plan"** unqualified: prefer `TCS`, `CONOP`, or `OPORD` because they signal scope. Reserve unqualified "plan" only for genuinely informal sketches.
 
 **"Stage"**: ambiguous between phase and wave. Use one of those.
+
+---
+
+## Cruft Words (Banned in Prose Artifacts)
+
+The authoritative list for `writing-simple-and-direct` rule 5. These words are banned as filler in prose artifacts: delete one and the sentence loses nothing.
+
+leverage, utilize, robust, seamless, comprehensive, facilitate, streamline, delve, crucial, holistic
+
+Banned phrases: "it should be noted that"; "in order to" (exception: mission statements, where the phrase carries the purpose clause).
+
+**Term-of-art carve-out**: a listed word is banned as a filler modifier, not as a precise domain term. "Robust" in selection or design criteria (**Robust Pick**, robustness in sensitivity analysis) is vocabulary, not cruft. The test: if the word names a defined concept in this glossary or a measurable criterion, it stays; if deleting it loses no meaning, it goes.
 
 ---
 
@@ -153,5 +165,5 @@ When in doubt, invoke the `maintaining-ubiquitous-language` skill.
 
 ---
 
-**Last Updated**: 2026-05-19
+**Last Updated**: 2026-07-20
 **Maintained by**: The `maintaining-ubiquitous-language` skill, with human review.

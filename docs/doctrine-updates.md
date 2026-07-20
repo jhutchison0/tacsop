@@ -4,11 +4,12 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
-## 2026-07-17: NAME CHANGE (`utils` → `tacsop`) + Planning Doctrine — Plan-Format Standards, Prowords, Deep-Modules
+## 2026-07-20: NAME CHANGE (`utils` → `tacsop`) + Planning Doctrine + Writing & Testing Doctrine
 
-One combined cycle in two parts, each independently adoptable via its own
-adoption-mode table. **Part 1 is the breaking item and leads deliberately — read it
-even if you defer Part 2.** Part 2 is fully additive planning doctrine.
+One combined cycle in three parts, each independently adoptable via its own
+adoption-mode table. **Part 1 is the breaking item and leads deliberately; read it
+even if you defer the rest.** Part 2 (planning doctrine, 2026-07-17) and Part 3
+(writing and testing doctrine + relicense, 2026-07-20) are fully additive.
 
 ---
 
@@ -162,6 +163,68 @@ docs/reviews/20260717_planning_retrospective_*.md (evidence, reference-only)
 Everything in Part 2 is additive. Delete the two FORMAT files, revert the `task.md`
 merge, and drop the CLAUDE.md sentence to return to prior state; no artifact
 changes runtime behavior. Existing plans are untouched either way.
+
+---
+
+### Part 3 — Writing & Testing Doctrine: prose-style skill, property-based testing, Apache-2.0 relicense (additive)
+
+Three additions authored 2026-07-19/20, each validated in the hub before shipping.
+
+**Writing style.** A new Level 0 skill, `writing-simple-and-direct` (v1.0.0, five
+files), pins the house prose style: eight kernel rules distilled from Barzun's
+*Simple and Direct*, each with a test that catches its violation; six before/after
+example pairs; a four-pass review protocol for prose artifacts; and a per-repo
+adoption guide. The kernel also lands as a CLAUDE.md "Prose Style" section and the
+cruft-word list as a LANGUAGE.md section; the skill's `ADOPTION.md` walks through
+both plus a one-line code-reviewer checklist addition. Before shipping, the entire
+hub corpus was swept to comply (~150 edits across 31 files, verification and flags
+in `docs/reviews/20260719_writing_style_sweep.md`), so the files you copy are their
+own exemplars. Two boundary conditions, restated from `ADOPTION.md` so nobody
+over-applies the rules: existing docs are grandfathered (session docs and reviews
+are records; leave them), and document schemas outrank style (never cut a required
+section to save tokens).
+
+**Testing depth.** `shift-left-testing` goes 2.0.0 → 2.1.0 with four sidecars:
+`PROPERTY-BASED.md` (invariant testing with Hypothesis), `NUMERIC.md` (float
+tolerances, numpy/pandas assertions, injectable randomness, stochastic code),
+`REGRESSION.md` (characterization pins for legacy code, golden files, the bless
+workflow), and `SCRIPTS.md` (testing CLIs and filesystem scripts, dry-run as a
+contract, widening the audit-hook perimeter to `scripts/`). Validated by use: the
+hub's first property suite (`tests/unit/test_from_yaml_properties.py`, five tests)
+closed a standing decision-science test gap, and strategy design alone surfaced a
+real crash bug (Known Issue below). That is the sidecar doing exactly what it
+promises before it ever left the building.
+
+**License.** The hub relicensed from GPL v3 to Apache-2.0. The hub had never been
+distributed, so no copyleft obligations ever attached; the sole author relicensed
+cleanly. Template content you copy from the hub is now Apache-2.0: attribution and
+license retention (§4) instead of copyleft, plus an explicit patent grant.
+
+### Adoption-Mode Table (Part 3)
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 1 | `.claude/skills/writing-simple-and-direct/` (5 files) | **TEMPLATE-COPY** | Copy the directory, then run its `ADOPTION.md`: CLAUDE.md kernel block, LANGUAGE.md cruft list, code-reviewer checklist line. Applies without adaptation. |
+| 2 | `.claude/skills/shift-left-testing/` 2.1.0 | **TEMPLATE-COPY** | Copy the four new sidecars plus the updated `SKILL.md` (new sidecar index, `tests/golden/` + `tests/scripts/` in the layout). Fully additive over 2.0.0. |
+| 3 | Property-testing plumbing | **PATCH-COPY** | `hypothesis>=6.0` in dev extras; `.hypothesis/` in `.gitignore`; the profile block from `tests/conftest.py` (50 examples locally, 300 in CI, switched by the `CI` env var). Needed only when you write your first property test. |
+| 4 | Copies of other Level 0 skills | **NO ACTION** (or refresh) | A style-only sweep touched every skill file; meaning is unchanged. Refresh copies whenever convenient. |
+| 5 | `LICENSE` | **MANUAL** | Informational for repos with their own license. If you copied the hub's old GPL stub verbatim, replace it (with the new Apache-2.0 text or your own choice). |
+
+### Known Issue (repos carrying `decision_science`)
+
+`value_functions.exponential()` raises `ZeroDivisionError` for nonzero `|rate|`
+below ~2.2e-16, where `1 - e^(-rate)` rounds to exactly 0.0. The input satisfies
+the documented contract ("rate must be nonzero"); the crash is real. Repro:
+`exponential(50.0, low=0.0, high=100.0, rate=1e-17)`. Found during property-test
+strategy design, 2026-07-20. The upstream fix is pending a design call (extend the
+zero guard vs. fall back to linear); until it ships, avoid effectively-zero rates.
+
+### Rollback (Part 3)
+
+Everything is additive or informational. Delete the skill directory and revert the
+CLAUDE.md, LANGUAGE.md, and code-reviewer additions to drop the style doctrine.
+Delete the four sidecars and re-copy the prior `SKILL.md` to return shift-left-testing
+to 2.0.0. The relicense requires no downstream action at all.
 
 ---
 

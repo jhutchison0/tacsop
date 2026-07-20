@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **License switched from GPL v3 to Apache-2.0.** The repo was private with no distribution, so no GPL obligations were ever triggered; relicensing by the sole author is clean. Apache-2.0 fits a template repo whose content is copied into downstream projects: no copyleft friction on derivatives, attribution and license retention required (§4), explicit patent grant. `LICENSE` now carries the full canonical text (the prior file was a 22-line GPL stub), `README.md` and `pyproject.toml` (`license = "Apache-2.0"`, PEP 639; setuptools floor raised to >=77) updated to match.
 - **Repository renamed `utils` → `tacsop`** (Tactical Standing Operating Procedure) per [ADR-0002](docs/adr/0002-rename-repository-to-tacsop.md). Living docs, `scripts/propagate_doctrine.py` (`UTILS_ROOT` → `TACSOP_ROOT`), and `scripts/adopt_doctrine.py` (`DEFAULT_UPSTREAM` now `~/projects/github/tacsop/`) updated. The `myproject` package placeholder and all historical docs are unchanged; old GitHub URLs redirect.
 
 ### Fixed

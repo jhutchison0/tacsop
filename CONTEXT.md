@@ -2,7 +2,7 @@
 
 A one-page narrative of the project's identity, mission, current state, and key constraints. Uses terms defined in [LANGUAGE.md](LANGUAGE.md). For machine-readable state, see [config/project.yaml](config/project.yaml).
 
-Maintained via the `maintaining-project-context` skill. Update when the project's mission, scope, or downstream relationships materially change — not for routine task progress.
+Maintained via the `maintaining-project-context` skill. Update when the project's mission, scope, or downstream relationships materially change, not for routine task progress.
 
 ---
 
@@ -18,7 +18,7 @@ The two missions are deliberately co-located. Doctrine that lives only in docume
 
 - **Provide a working Python project template** with utility modules, test scaffolding, and a Claude Code agent framework that a contributor can clone and have running in under an hour.
 - **Source and propagate framework doctrine** to a roster of downstream consumer repos via `scripts/propagate_doctrine.py`, with append semantics so unread updates are never lost.
-- **Codify our way of working** — the design pillars, the escalation ladder, the agent roster, the skills framework — in a form that can be read, audited, and reused.
+- **Codify our way of working** (the design pillars, the escalation ladder, the agent roster, the skills framework) in a form that can be read, audited, and reused.
 
 This project is not a research artifact, not a product, and not a one-off tool. Treat changes here as having multiplicative downstream impact.
 
@@ -29,10 +29,10 @@ This project is not a research artifact, not a product, and not a one-off tool. 
 See [config/project.yaml](config/project.yaml) for canonical values. Snapshot at last update of this file:
 
 - **Version**: 0.1.0
-- **Active phase**: Phase 1 (Foundation) complete; Phase 2 deliberately undefined to be set by the current sprint.
+- **Active phase**: Phase 1 (Foundation) complete; Phase 2 deliberately undefined, to be set by the current sprint.
 - **Active work**: Agent output standardization, doctrine artifact build-out (LANGUAGE.md, CONTEXT.md, ADRs), TDD discipline upgrade.
-- **Downstream consumers**: discovered automatically by `scripts/propagate_doctrine.py` at each cycle; the most recent cycle (2026-04-21) reached 11 repos; the current discoverable roster is larger — see [docs/propagation-protocol.md](docs/propagation-protocol.md) for the snapshot.
-- **Most recent doctrine propagation**: 5th cycle (2026-04-21) — `docs/reviews/` convention adopted by 11 repos.
+- **Downstream consumers**: discovered automatically by `scripts/propagate_doctrine.py` at each cycle; the most recent cycle (2026-04-21) reached 11 repos; the current discoverable roster is larger (see [docs/propagation-protocol.md](docs/propagation-protocol.md) for the snapshot).
+- **Most recent doctrine propagation**: 5th cycle (2026-04-21); 11 repos adopted the `docs/reviews/` convention.
 
 ---
 

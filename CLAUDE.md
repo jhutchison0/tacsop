@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Development Principles
 
@@ -14,7 +14,7 @@ A `PostToolUse` audit hook (`.claude/hooks/post-tool-shift-left-audit.sh`) fires
 - **Python** (`tests/`) — pytest suites for all utility modules.
 
 ### Simplicity First
-Make every change as simple as possible. Avoid massive or complex changes. Every change should impact as little code as necessary. When in doubt, prefer the simpler solution. Prefer deep modules — small interfaces hiding meaningful implementation — over shallow ones; before declaring an interface done, ask whether each parameter is load-bearing or whether the function could derive it from one it already has.
+Make every change as simple as possible. Avoid massive or complex changes. Every change should impact as little code as necessary. When in doubt, prefer the simpler solution. Prefer deep modules (small interfaces hiding meaningful implementation) over shallow ones; before declaring an interface done, ask whether each parameter is load-bearing or whether the function could derive it from one it already has.
 
 ### Branching (short-lived topic branches by work shape)
 Branch on the shape of the work, not on a permanent partition of the codebase. Lead-only doc/ADR/small-refactor work lands directly on `main`. Team-deployed or multi-agent code work with an audit gate uses a short-lived `topic/<scope>-<slug>` branch, merged via merge-commit at the gate and **deleted (local + origin) immediately after merge**. No permanent domain branches. See [`.claude/skills/using-topic-branches/SKILL.md`](.claude/skills/using-topic-branches/SKILL.md), which also covers auditing standing branches.
@@ -24,6 +24,22 @@ Document work in `docs/sessions/YYYYMMDD_*.md`. See `config/project.yaml` for ph
 
 ### Documentation Style
 When creating diagrams in markdown documentation, **prefer Mermaid over ASCII art**. Mermaid renders natively in GitHub and provides clear, maintainable visualizations.
+
+## Prose Style
+
+All prose artifacts follow the writing-simple-and-direct skill. The kernel:
+
+1. Have a point; state it in the first sentence. No throat-clearing.
+2. Prefer the concrete word: name the file, the number, the failure.
+3. One idea per sentence. Link sentences; do not pack them.
+4. Active voice unless the actor is unknown or irrelevant.
+5. Cut cruft words. The banned list lives in LANGUAGE.md.
+6. Hedge with numbers or not at all.
+7. Read it back; if you would not say it, do not write it.
+8. No em dashes in running prose. Choose the mark that states the relationship.
+
+Schemas define what a document contains; this defines how the words go.
+Never cut a required section to save tokens.
 
 ## Environment Setup
 
@@ -124,7 +140,7 @@ tacsop/
 Work scales through four levels. Use `/task promote` or `/task plan` to evaluate:
 
 1. **Task** — One person, one session, clear action (`docs/tasks.md`)
-2. **TCS** — Multi-step with pass/fail criteria (Task, Condition, Standard) — also the universal task detail unit within all plan types
+2. **TCS** — Multi-step with pass/fail criteria (Task, Condition, Standard); also the universal task detail unit within all plan types
 3. **CONOP** — Multi-wave with design decisions and parallel tracks (`docs/plans/`)
 4. **OPORD** — Sequential execution of a decided strategy in waves (`docs/plans/`)
 

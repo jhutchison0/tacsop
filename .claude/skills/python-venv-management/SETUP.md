@@ -174,7 +174,7 @@ pip install -e ".[dev,test]"    # Multiple extras
 - Want optional dependency groups (`[dev]`, `[test]`, `[ml]`).
 - Want `pip install -e .` for editable installs of the project itself.
 
-`requirements.txt` and `pyproject.toml` can coexist — many projects keep `requirements.txt` for deployment lockfiles and `pyproject.toml` for development.
+`requirements.txt` and `pyproject.toml` can coexist: many projects keep `requirements.txt` for deployment lockfiles and `pyproject.toml` for development.
 
 ## Requirements File Organization
 
@@ -219,7 +219,7 @@ mkdocs>=1.5.0
 mkdocs-material>=9.0.0
 ```
 
-The `-r requirements.txt` line includes production deps transitively — so `pip install -r requirements-dev.txt` installs everything.
+The `-r requirements.txt` line includes production deps transitively, so `pip install -r requirements-dev.txt` installs everything.
 
 ## Pinning Strategy
 
@@ -236,7 +236,7 @@ The `-r requirements.txt` line includes production deps transitively — so `pip
 pip freeze > requirements-lock.txt
 ```
 
-This captures **all** transitive dependencies at exact versions. Use it alongside (not instead of) your hand-curated `requirements.txt` — the freeze file is the lockfile.
+This captures **all** transitive dependencies at exact versions. Use it alongside (not instead of) your hand-curated `requirements.txt`: the freeze file is the lockfile.
 
 Better still: use `pip-tools`:
 

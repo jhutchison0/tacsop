@@ -6,11 +6,11 @@
 
 ## Overview
 
-This document defines the skills framework for Claude Code in this project, aligned with the Anthropic Skills open standard. Skills are organized hierarchically to maximize reuse across projects and downstream consumers.
+A **skill** is a self-loading capability with a name and a description, aligned with the Anthropic Skills open standard. At session start, only the YAML frontmatter (`name` + `description`) is loaded into Claude's context; Anthropic measures this at roughly 30–80 tokens per skill in practice. The body of `SKILL.md` loads only when Claude judges the skill relevant; supporting files in the skill directory load only when the body references them.
 
-A **skill** is a self-loading capability with a name and a description. At session start, only the YAML frontmatter (`name` + `description`) is loaded into Claude's context — Anthropic measures this at roughly 30–80 tokens per skill in practice. The body of `SKILL.md` loads only when Claude judges the skill relevant; supporting files in the skill directory load only when the body references them.
+This is **progressive disclosure**; see [Anthropic's skills documentation](https://code.claude.com/docs/en/skills) for the canonical reference.
 
-This is **progressive disclosure** — see [Anthropic's skills documentation](https://code.claude.com/docs/en/skills) for the canonical reference.
+Skills are organized hierarchically to maximize reuse across projects and downstream consumers.
 
 ---
 
@@ -53,7 +53,7 @@ Use directory form when the skill carries reference content, examples, or script
 .claude/skills/<skill-name>.md
 ```
 
-Use single-file form for short, self-contained skills that don't need sidecar files. As of 2026-05-19 all Level 0 skills in this template have migrated to directory form — the legacy single-file form is documented for reference and remains valid for any future skill small enough not to need sidecars.
+Use single-file form for short, self-contained skills that don't need sidecar files. As of 2026-05-19 all Level 0 skills in this template have migrated to directory form; the legacy single-file form is documented for reference and remains valid for any future skill small enough not to need sidecars.
 
 ---
 
@@ -71,9 +71,9 @@ allowed-tools: ["Read", "Write", "Edit"]   # optional; restricts what the skill 
 ```
 
 **Naming rules** (from Anthropic's skill-authoring guidance):
-- Names are **gerund form** — `maintaining-ubiquitous-language`, not `ubiquitous-language-manager`.
-- Names are **kebab-case** — lowercase with hyphens.
-- Names are **action-oriented** — they describe what the skill does, not what it is.
+- Names are **gerund form**: `maintaining-ubiquitous-language`, not `ubiquitous-language-manager`.
+- Names are **kebab-case**: lowercase with hyphens.
+- Names are **action-oriented**: they describe what the skill does, not what it is.
 
 **Description rules**:
 - One sentence.
@@ -92,7 +92,7 @@ allowed-tools: ["Read", "Write", "Edit"]   # optional; restricts what the skill 
 
 **Rule**: SKILL.md body stays under 500 lines.
 
-Detailed reference content lives in sidecar files (`REFERENCE.md`, `EXAMPLES.md`, `<topic>.md`) inside the skill directory. SKILL.md cites them by relative path when needed. Sidecar files are loaded into Claude's context **only when SKILL.md body references them** — this keeps the per-skill token cost bounded.
+Detailed reference content lives in sidecar files (`REFERENCE.md`, `EXAMPLES.md`, `<topic>.md`) inside the skill directory. SKILL.md cites them by relative path when needed. Sidecar files are loaded into Claude's context **only when SKILL.md body references them**; this keeps the per-skill token cost bounded.
 
 If a skill's SKILL.md is creeping past 400 lines, the right move is usually to extract reference material into a sidecar.
 
@@ -231,13 +231,13 @@ For single-file skills, use the same structure without a directory wrapper.
 - Include project-specific references in Level 0 skills.
 - Use vague descriptions ("might work", "usually").
 - Duplicate information across skills.
-- Assume user knowledge — say what to check.
+- Assume user knowledge; say what to check.
 
 ---
 
 ## Civilian / Military Vocabulary Crosswalk
 
-This template's internal docs use military-derived vocabulary (PCC, PCI, SITREP, OPORD, CONOP, TCS, wave). Externally-shared content — anything that propagates downstream or appears in skill descriptions visible to downstream maintainers — uses the civilian equivalent.
+This template's internal docs use military-derived vocabulary (PCC, PCI, SITREP, OPORD, CONOP, TCS, wave). Externally-shared content (anything that propagates downstream or appears in skill descriptions visible to downstream maintainers) uses the civilian equivalent.
 
 | Internal (military) | External (civilian) |
 |---|---|
@@ -282,7 +282,7 @@ The full crosswalk lives in [`LANGUAGE.md`](../../LANGUAGE.md).
 | Auto-trigger or explicit `/name` | Always explicit `/name` | Linked from skills/commands |
 | Best for: reusable expertise | Best for: deterministic workflows with side effects | Best for: stable reference |
 
-**Rule of thumb**: if it has side effects (commits, file writes, destructive operations), it should be a **command**, not a skill — explicit user invocation is required. Skills are for capability that Claude can self-trigger safely.
+**Rule of thumb**: if it has side effects (commits, file writes, destructive operations), it should be a **command**, not a skill, because explicit user invocation is required. Skills are for capability that Claude can self-trigger safely.
 
 This is why `session-end`, `pcc`, `pci`, `sitrep`, `session-start`, and `task` remain commands and **are not** migrated to skills.
 
@@ -310,6 +310,11 @@ This is why `session-end`, `pcc`, `pci`, `sitrep`, `session-start`, and `task` r
 │   ├── MOCKS.md
 │   ├── FIXTURES.md
 │   ├── VERTICAL-SLICING.md
+│   ├── PROPERTY-BASED.md
+│   ├── NUMERIC.md
+│   ├── REGRESSION.md
+│   ├── SCRIPTS.md
+│   ├── ENFORCEMENT.md
 │   ├── CI.md
 │   └── ANTIPATTERNS.md
 │
@@ -326,6 +331,16 @@ This is why `session-end`, `pcc`, `pci`, `sitrep`, `session-start`, and `task` r
 │
 ├── recording-architecture-decisions/
 │   └── SKILL.md
+│
+├── using-topic-branches/
+│   └── SKILL.md
+│
+├── writing-simple-and-direct/
+│   ├── SKILL.md
+│   ├── RULES.md
+│   ├── EXAMPLES.md
+│   ├── REVIEWING.md
+│   └── ADOPTION.md
 │
 └── # Level 1 — Project-Specific
     (none — this is a template; downstream repos add as needed)
@@ -346,7 +361,7 @@ When starting a new project from this template:
 1. **Copy Level 0 skills** directly (they're universal). All current Level 0 skills are portable.
 2. **Create project-specific Level 1 skills** as needed.
 3. **Update this file** to list the project's Level 1 skills.
-4. **Never modify Level 0 content** for project-specific needs — create a Level 1 skill instead, or propose a doctrine update so all consumers benefit.
+4. **Never modify Level 0 content** for project-specific needs; create a Level 1 skill instead, or propose a doctrine update so all consumers benefit.
 5. **For LANGUAGE.md and CONTEXT.md**, start with the template files at the repo root and customize. These are project-specific by nature; the skills that maintain them are Level 0 (universal pattern, project-specific content).
 
 ---

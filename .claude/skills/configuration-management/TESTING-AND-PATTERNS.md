@@ -200,7 +200,7 @@ services:
 
 `&name` defines an anchor; `*name` references it; `<<:` merges the referenced map into the current one with explicit overrides.
 
-Use anchors for **repeated structural defaults** across siblings. Don't use them to reduce typing in unrelated places — they make YAML harder to grep.
+Use anchors for **repeated structural defaults** across siblings. Don't use them to reduce typing in unrelated places, because they make YAML harder to grep.
 
 ## Troubleshooting
 

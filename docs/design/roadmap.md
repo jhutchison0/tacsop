@@ -2,7 +2,7 @@
 
 ## Overview
 
-This roadmap defines the phased build plan for the project. Each phase has a clear deliverable and acceptance criteria. Phases are tracked in `config/project.yaml`.
+The project builds in phases, each with a clear deliverable and acceptance criteria. Phases are tracked in `config/project.yaml`.
 
 ## Phase Structure
 

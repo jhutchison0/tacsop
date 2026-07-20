@@ -6,7 +6,7 @@ Sidecar to `SKILL.md`. How to keep secrets out of git, rotate them safely, and u
 
 Two files, one committed, one ignored.
 
-`.env.example` (committed — see `STRUCTURE-AND-FILES.md` for full template):
+`.env.example` (committed; see `STRUCTURE-AND-FILES.md` for full template):
 
 ```bash
 # Template. Copy to .env and fill in real values.
@@ -54,7 +54,7 @@ api_key.txt
 token.txt
 ```
 
-The `!.env.example` line is critical — without it, the `.env*` glob would also block the template. Order matters in `.gitignore`; the negation must come after the broader rule.
+The `!.env.example` line is critical: without it, the `.env*` glob would also block the template. Order matters in `.gitignore`; the negation must come after the broader rule.
 
 ## Best Practices
 
@@ -64,7 +64,7 @@ The `!.env.example` line is critical — without it, the `.env*` glob would also
 - Use environment variables for all secrets; never hardcode.
 - Rotate secrets on a schedule (quarterly at minimum).
 - Use strong random secrets (not `"secret123"`).
-- Use a managed secret store in production — AWS Secrets Manager, HashiCorp Vault, Azure Key Vault, GCP Secret Manager.
+- Use a managed secret store in production: AWS Secrets Manager, HashiCorp Vault, Azure Key Vault, GCP Secret Manager.
 - Encrypt secrets at rest.
 - Audit who can access which secrets.
 
@@ -74,7 +74,7 @@ The `!.env.example` line is critical — without it, the `.env*` glob would also
 - Never log secrets (see "Sanitization" below).
 - Never expose secrets in error messages or stack traces.
 - Never use the same secret across environments.
-- Never share secrets via Slack, email, or other insecure channels — use a password manager or secret-sharing tool.
+- Never share secrets via Slack, email, or other insecure channels; use a password manager or secret-sharing tool.
 
 ## Secret Rotation
 
@@ -140,7 +140,7 @@ For a more general approach, walk the config dict and mask any key whose name ma
 
 ## Production Secret Stores
 
-For production deployments, `.env` files become insufficient — they don't support rotation without redeployment, they don't audit access, and they aren't easy to share between many machines.
+For production deployments, `.env` files become insufficient: they don't support rotation without redeployment, they don't audit access, and they aren't easy to share between many machines.
 
 Switch to a managed store when **any** of these become true:
 
@@ -159,7 +159,7 @@ Recommended stores by environment:
 | Multi-cloud / on-prem | HashiCorp Vault |
 | Kubernetes | External Secrets Operator with one of the above as the backend |
 
-The `ConfigLoader` (see `LOADER.md`) doesn't need to change — it still reads environment variables. The deployment system fetches secrets from the store and injects them as env vars at process start.
+The `ConfigLoader` (see `LOADER.md`) doesn't need to change: it still reads environment variables. The deployment system fetches secrets from the store and injects them as env vars at process start.
 
 ## See Also
 

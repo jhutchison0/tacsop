@@ -84,5 +84,5 @@ Loaded on demand when this SKILL.md cites them.
 ---
 
 **Maintained by**: Configuration Management Skill
-**Version**: 2.0.0 — restructured to directory form with sidecar progressive disclosure (2026-05-19)
+**Version**: 2.0.0 restructured to directory form with sidecar progressive disclosure (2026-05-19)
 **Previous version**: 1.0.0 single-file at `.claude/skills/configuration-management.md`, replaced by this directory.

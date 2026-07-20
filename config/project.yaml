@@ -35,7 +35,7 @@ build_phases:
   phase_2:
     name: "TODO"
     status: "not_started"
-    deliverable: "TODO — define your next phase"
+    deliverable: "TODO: define your next phase"
 
 # Python settings
 python:

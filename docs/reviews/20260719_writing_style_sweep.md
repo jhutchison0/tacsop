@@ -53,3 +53,4 @@ This sweep deliberately overrides the skill's grandfathering clause for one reas
 
 - Flag 1 resolved: the lead blessed the accepted-ADR edits as a one-time exception while field-testing the skill. Amendment notes appended to ADR-0001 and ADR-0002 record it.
 - ADOPTION step 2 landed: the cruft list is now in `LANGUAGE.md` with a term-of-art carve-out (a listed word used as a defined selection or design criterion, e.g. "robust", is vocabulary, not cruft).
+- Residue claim corrected (2026-07-20, found during quest-engine adoption): the Verification grep missed rule 8 matches in running prose in `.claude/commands/task.md` (lines 5 and 72, the promote additions, the Level 3 Format line, and the whole Prowords section) and in the outside-fence prose of `docs/plans/CONOP-FORMAT.md` (7) and `OPORD-FORMAT.md` (4). All fixed in the same-day commit carrying this note. Fenced template blocks, headings, and list-lead separators keep their exemptions.

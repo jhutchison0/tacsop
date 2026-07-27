@@ -54,10 +54,10 @@ testing:
 # Session state
 state:
   last_session:
-    date: "2026-07-20"
-    file: "docs/sessions/20260720_prose_doctrine_hypothesis_relicense.md"
-    summary: "Cycle 7 shipped as three parts and propagated to 14 repos from this box. Reviewed and hardened the lead's two skill updates (writing-simple-and-direct v1.0.0, shift-left-testing 2.1.0), swept the corpus to the new prose style (~150 edits, 31 files), ran skill adoption in-repo, piloted Hypothesis (5 property tests, 268 passing, 1 real bug found), relicensed GPL v3 stub to Apache-2.0."
-  active_work: "Cycle 7 propagation from remaining machines (work/home/laptop clones); exponential() tiny-rate fix pending a design call; 0.2.0 version cut queued."
+    date: "2026-07-26"
+    file: "docs/sessions/20260726_veil_engine_bootstrap.md"
+    summary: "veil-engine bootstrapped from the template @5f70a48: import, rename, strip, day-one CI, doctrine artifacts, CONOP LANTERN in debate; 4 commits pushed; 200 tests green. Day-1 playbook exercised; Cycle-7 drift found and filed as P2 (the delete-docs/plans step would kill the CONOP/OPORD formats). Roster updated."
+  active_work: "Day-1 playbook drift fix (P2); Cycle 7 propagation from remaining machines (work/home/laptop clones); exponential() tiny-rate fix pending a design call; 0.2.0 version cut queued."
   known_issues:
     - "numpy must be installed manually if venv predates decision_science addition"
     - "Audit hook is soft-deterministic (logs, never blocks); cannot enforce temporal vertical-slicing (all tests then all impl)"

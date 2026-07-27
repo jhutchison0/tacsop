@@ -166,9 +166,9 @@ Triggers:
 
 ## Roster
 
-Current known downstream consumers (as of 2026-05-19, by name only — discovery is automatic):
+Current known downstream consumers (as of 2026-07-26, by name only — discovery is automatic):
 
-`paperboy`, `fema_cria`, `flood_model`, `rmi-reboot`, `shark`, `agent-eval`, `beesly-equilibrium`, `elephant-graveyard`, `magic-movies`, `project-megan`, `quest-engine`, `tactics-game`, `contract-knowledge-graph`, `velocity-scoring`, `fps/maut_platform`, `aar_ai_pipeline`, `ldrd2025_ai_pipeline`, `tc_hurr_risk_modeling`
+`paperboy`, `fema_cria`, `flood_model`, `rmi-reboot`, `shark`, `agent-eval`, `beesly-equilibrium`, `elephant-graveyard`, `magic-movies`, `project-megan`, `quest-engine`, `tactics-game`, `contract-knowledge-graph`, `velocity-scoring`, `fps/maut_platform`, `aar_ai_pipeline`, `ldrd2025_ai_pipeline`, `tc_hurr_risk_modeling`, `veil-engine` (bootstrapped 2026-07-26 from the template at `5f70a48`; successor to `elephant-graveyard`)
 
 This list is informational. The script does not read it. Actual notification targets are determined by filesystem discovery at propagation time.
 

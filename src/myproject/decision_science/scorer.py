@@ -301,7 +301,7 @@ class MAUTScorer:
         except ImportError:
             raise ImportError(
                 "pandas is required for from_weights(). "
-                "Install it with: pip install -e '.[excel]'"
+                "Install it with: uv pip install -e '.[excel]'"
             )
 
         if method not in weights_df.columns:

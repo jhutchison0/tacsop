@@ -43,13 +43,14 @@ Never cut a required section to save tokens.
 
 ## Environment Setup
 
-This project uses a Python virtual environment. **All commands must run inside the venv.**
+This project uses **uv** (Astral) for interpreters, environments, and packages. **All commands must run inside the venv.**
 
 ```bash
 # First-time setup
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e ".[dev]"
+curl -LsSf https://astral.sh/uv/install.sh | sh   # If uv is not installed
+uv python install 3.12             # uv-managed interpreter (no system coupling)
+uv venv --managed-python           # Create .venv on the managed interpreter
+uv pip install -e ".[dev]"
 cp .env.example .env               # Add your API keys
 ```
 
@@ -59,6 +60,8 @@ source .venv/bin/activate           # Activate before working
 # OR use the venv directly:
 .venv/bin/pytest                    # Run tests without activating
 ```
+
+uv venvs do not bundle pip. Run all package operations through `uv pip ...` from the project root; never `sudo pip`, never system pip.
 
 ## Quick Commands
 
@@ -70,10 +73,10 @@ pytest -x                          # Stop on first failure
 pytest --pdb                       # Debug on failure
 
 # Install optional dependencies
-pip install -e ".[excel]"          # Excel utilities (pandas, openpyxl, xlsxwriter)
-pip install -e ".[slack]"          # Slack integration
-pip install -e ".[database]"       # PostgreSQL
-pip install -e ".[all]"            # Everything
+uv pip install -e ".[excel]"       # Excel utilities (pandas, openpyxl, xlsxwriter)
+uv pip install -e ".[slack]"       # Slack integration
+uv pip install -e ".[database]"    # PostgreSQL
+uv pip install -e ".[all]"         # Everything
 ```
 
 ## Project Overview

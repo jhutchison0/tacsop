@@ -29,7 +29,7 @@ def _require_matplotlib():
     except ImportError:
         raise ImportError(
             "matplotlib is required for visualization. "
-            "Install it with: pip install -e '.[decision-science]'"
+            "Install it with: uv pip install -e '.[decision-science]'"
         )
 
 

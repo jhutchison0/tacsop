@@ -2,6 +2,7 @@
 
 import warnings
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -360,6 +361,20 @@ class TestFromWeights:
         )
         with pytest.raises(ValueError, match="missing entries"):
             MAUTScorer.from_weights(weights_df, {"quality": linear})  # speed missing
+
+    def test_missing_pandas_raises_with_uv_hint(self):
+        import builtins
+
+        real_import = builtins.__import__
+
+        def raiser(name, *args, **kwargs):
+            if name == "pandas":
+                raise ImportError("No module named 'pandas'")
+            return real_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=raiser):
+            with pytest.raises(ImportError, match="uv pip install"):
+                MAUTScorer.from_weights(object(), {"x": linear})
 
 
 class TestUtilityRangeWarning:

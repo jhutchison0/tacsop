@@ -47,7 +47,7 @@ The hard rules. Violating these requires explicit user override per change.
 
 **Hard rules**:
 - Python 3.11 minimum (bumped 2026-04-21).
-- All Python commands run inside the project venv (`.venv/`).
+- All Python commands run inside the project venv (`.venv/`). Environments are built with uv (`uv venv --managed-python`, `uv pip`); adopted 2026-08-03.
 - Agent reports write to `docs/reviews/YYYYMMDD_<subject>.md` (convention since 2026-04-21).
 - Session docs write to `docs/sessions/YYYYMMDD_<subject>.md`.
 - Plans write to `docs/plans/`.

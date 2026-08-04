@@ -261,15 +261,15 @@ class TestImportErrorGuard:
 
     def test_radar_chart_missing_matplotlib(self):
         with patch("builtins.__import__", side_effect=self._builtins_import_raiser):
-            with pytest.raises(ImportError, match="pip install"):
+            with pytest.raises(ImportError, match="uv pip install"):
                 radar_chart([_THREE_RESULTS[0]])
 
     def test_tornado_plot_missing_matplotlib(self):
         with patch("builtins.__import__", side_effect=self._builtins_import_raiser):
-            with pytest.raises(ImportError, match="pip install"):
+            with pytest.raises(ImportError, match="uv pip install"):
                 tornado_plot(_OAT_RESULT, "A")
 
     def test_rank_stability_heatmap_missing_matplotlib(self):
         with patch("builtins.__import__", side_effect=self._builtins_import_raiser):
-            with pytest.raises(ImportError, match="pip install"):
+            with pytest.raises(ImportError, match="uv pip install"):
                 rank_stability_heatmap(_MC_RESULT)

@@ -4,6 +4,134 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
+## 2026-08-03: Environment Doctrine — uv Replaces pip/venv/pyenv/conda (Drop-In)
+
+**uv** (Astral, written in Rust) is now the environment engine for every repo in this
+doctrine family: one tool for interpreters, virtual environments, and packages. This
+cycle is the **drop-in** adoption level: command surfaces change, `pyproject.toml` does
+not, and no lockfile appears. The uv-native level (`uv sync`, committed `uv.lock`,
+`uv run`) is deliberately deferred to a later cycle and will get its own ADR; drop-in
+is forward-compatible with it.
+
+The doctrine in three rules:
+
+1. **uv is the only environment engine.** `uv venv --managed-python` creates
+   environments; `uv pip ...` does all package operations. Never `sudo pip`, never
+   system pip.
+2. **Venvs build on uv-managed interpreters.** Without `--managed-python`, `uv venv`
+   grabs whatever Python it finds first on `PATH` (pyenv shim, conda, system). A venv
+   symlinked into an incumbent's install dies with it; a managed interpreter survives.
+3. **Incumbents are removed last.** conda/miniforge/pyenv come off a machine only
+   after every venv built on their interpreters has been rebuilt and parity-tested.
+   Removal first bricks every one of those venvs.
+
+Why: measured on the hub (WSL2, warm cache), a full rebuild of the tacsop environment
+with all extras took under 30 seconds including the interpreter download; the
+`.[all]` install alone took 8 seconds where pip took minutes. The managed-interpreter
+model also ends the class of breakage where a pyenv/conda removal or system Python
+upgrade silently kills every venv on the machine (the hub found 5 of 9 sibling venvs
+exposed this way).
+
+### Adoption-Mode Table
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 1 | uv itself | **MANUAL** | Per machine: `curl -LsSf https://astral.sh/uv/install.sh \| sh` (installs to `~/.local/bin`). |
+| 2 | Your repo's `.venv` | **MANUAL** | Rebuild on a managed interpreter; parity-test (steps below). |
+| 3 | `.claude/skills/python-venv-management/` (SKILL.md + 2 sidecars) | **TEMPLATE-COPY** | v3.0.0 rebuilt on uv; replaces v2.0.0 wholesale. Includes the incumbent-migration order and a new uv failure-mode table. |
+| 4 | `.claude/skills/shift-left-testing/CI.md` | **TEMPLATE-COPY** | CI pattern moves from `actions/setup-python` + pip to `astral-sh/setup-uv` with built-in caching. If you PATCHed your copy, port the four uv hunks instead. |
+| 5 | `CLAUDE.md` Environment Setup + Quick Commands | **PATCH** | Setup block becomes `uv python install` / `uv venv --managed-python` / `uv pip install -e ".[dev]"`. `.venv/bin/pytest` and `source .venv/bin/activate` are unchanged. |
+| 6 | `README.md` / setup docs | **PATCH** | Same substitution as #5. |
+| 7 | `config/project.yaml` | **PATCH** | `python.package_manager: "pip"` → `"uv"` (config is the source of truth; say what is true). |
+| 8 | In-code install hints (`pip install -e '.[x]'` in error messages) | **PATCH** | Hub did this test-first: guard tests assert `match="uv pip install"`, then the message strings change. Copy the pattern if your guards are tested. |
+| 9 | conda / miniforge / pyenv | **MANUAL, LAST** | Remove only after step 5 of the sequence below passes on every repo on that machine. |
+
+### Action required (the migration sequence, per machine)
+
+1. **Install uv** and confirm: `uv --version`.
+2. **Map the blast radius** — every venv coupled to an incumbent interpreter. Find
+   venvs by their `pyvenv.cfg` marker, never by directory name: a `.venv/`-only glob
+   missed 5 of 10 venvs on the first machine migrated (alternate names like
+   `.venv-training/` and bare `venv/`, plus repos outside the main projects
+   directory).
+   ```bash
+   find ~/projects -maxdepth 4 -name pyvenv.cfg | while read c; do
+     echo "$(dirname "$c"): $(grep ^home "$c")"
+   done
+   ```
+   Any `home` resolving into `~/.pyenv/`, `~/miniforge3/`, `~/miniconda3/`, or
+   `~/anaconda3/` is on the rebuild list. Record it.
+3. **Per repo on the list**: record the current test pass count and freeze the old
+   venv as insurance, then rebuild:
+   ```bash
+   .venv/bin/pip list --format=freeze > /tmp/<repo>.freeze.txt
+   uv python install 3.12          # or the repo's pinned version
+   uv venv --clear --managed-python
+   uv pip install -e ".[dev]"      # plus the extras the repo actually uses
+   .venv/bin/pytest                # parity: pass count must match the recorded one
+   ```
+   (`uv venv --clear` beats `rm -rf`: it refuses to replace a directory that is not
+   actually a virtual environment.) A shortfall means the old venv held something the
+   repo's spec never listed, not a uv defect. The first machine hit three classes:
+   a package absent from `requirements.txt` (48 tests silently uncollected), an
+   unbounded major (`mcp>=1.0` resolving to 2.0.0, which moved the imported API),
+   and a documented editable install that had never actually worked. Diff the freeze
+   against `uv pip list` to close the gap, then file the spec fix in that repo.
+4. **Adopt the artifacts** (#3–#8 above) in the repo.
+5. **Verify the machine is clean**: rerun the step-2 loop; nothing may resolve into an
+   incumbent path.
+6. **Remove the incumbents** — the only destructive step, which is why it is last:
+   ```bash
+   # pyenv
+   rm -rf ~/.pyenv    # plus its init lines in ~/.bashrc / ~/.zshrc / ~/.profile
+   # conda / miniforge
+   conda init --reverse
+   rm -rf ~/miniforge3 ~/miniconda3 ~/anaconda3
+   ```
+
+### Footguns found in the field
+
+- **uv venvs do not bundle pip.** `.venv/bin/pip` does not exist. Grep your scripts,
+  Makefiles, and hooks for `.venv/bin/pip` or in-venv `pip` calls and route them
+  through `uv pip`. If a tool genuinely needs in-venv pip, `uv venv --seed`.
+- **Do not commit `.python-version` yet.** uv reads it, but pyenv reads the same file
+  and errors on specs it lacks. Commit it only when every machine cloning the repo is
+  off pyenv.
+- **`uv venv` without `--managed-python` recreates the coupling** this cycle exists to
+  remove. The hub hit this on its first attempt: uv silently picked the pyenv shim.
+
+### Rollback
+
+Fully reversible until step 6. `python3 -m venv .venv` + `pip install -e ".[dev]"`
+still works at any point before the incumbents are removed; after step 6, rollback
+means reinstalling the incumbent, which is why step 5's verification gates it.
+
+### Files (tacsop)
+
+```
+.claude/skills/python-venv-management/SKILL.md            (3.0.0, rewritten on uv)
+.claude/skills/python-venv-management/SETUP.md            (rewritten: uv patterns, uv python, migration order)
+.claude/skills/python-venv-management/TROUBLESHOOTING.md  (rewritten: uv failure modes)
+.claude/skills/shift-left-testing/CI.md                   (setup-uv workflow, cache section, xdist install line)
+CLAUDE.md                                                 (Environment Setup, Quick Commands)
+README.md                                                 (setup block)
+CONTEXT.md                                                (hard-rules line)
+config/project.yaml                                       (package_manager: uv; stale numpy known-issue removed)
+src/myproject/decision_science/scorer.py                  (install hint → uv pip)
+src/myproject/decision_science/visualization.py           (install hint → uv pip)
+tests/unit/test_scorer.py                                 (new pandas-guard test, uv hint asserted)
+tests/unit/test_visualization.py                          (guard matches tightened to "uv pip install")
+```
+
+Hub verification: 269 tests passing on a uv-built venv over uv-managed CPython
+3.12.13. Field verification (first machine, 2026-08-03): the `pyvenv.cfg` sweep found
+10 venvs across 9 repos where the name-based glob saw 5; 8 rebuilt on managed
+interpreters at exact test parity, 6,898 passing tests total; 2 torch/CUDA venvs
+consciously deferred with saved freezes (one held an expired March nightly no tool
+could reproduce). pyenv was then removed and every rebuilt suite re-verified green.
+
+---
+
 ## 2026-07-20: NAME CHANGE (`utils` → `tacsop`) + Planning Doctrine + Writing & Testing Doctrine
 
 One combined cycle in three parts, each independently adoptable via its own

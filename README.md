@@ -31,10 +31,11 @@ rm -rf .git && git init
 mv src/myproject src/my_new_project
 # Update references in: pyproject.toml, config/project.yaml, CLAUDE.md, tests/
 
-# Set up environment
-python3 -m venv .venv
+# Set up environment (uv: https://docs.astral.sh/uv/)
+uv python install 3.12
+uv venv --managed-python
+uv pip install -e ".[dev]"
 source .venv/bin/activate
-pip install -e ".[dev]"
 
 # Verify
 pytest

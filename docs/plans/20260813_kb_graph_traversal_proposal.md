@@ -5,7 +5,7 @@
 **Type**: Design proposal (debate stage, precedes implementation)
 **Branch**: `topic/kb-graph-traversal`
 **Follows**: [docs/reviews/20260813_kb_graph_tool_evaluation.md](../reviews/20260813_kb_graph_tool_evaluation.md) (session lead's graphify supply-chain evaluation; read it first)
-**Status**: Draft, for code-reviewer challenge
+**Status**: Accepted (Approach B shipped as Wave 0 of CONOP WHETSTONE, 2026-08-14; the deferred-build spec in Approach A, as amended, is live and governed by that CONOP's Wave 3)
 
 ---
 

@@ -9,14 +9,10 @@ Guide me through ending this development session properly.
 
 ## Step 2: Pre-Code Check (PCC)
 
-Run the standardized PCC checklist before committing:
+Run the full `/pcc` checklist before committing. The authoritative check list lives in `.claude/commands/pcc.md`; do not re-enumerate it here (an earlier copy of the list drifted from `pcc.md` and was caught 2026-08-14). Two session-end extras `/pcc` does not cover:
 
-1. **Secrets check** - No API keys, passwords, tokens in staged files
-2. **Large files check** - No model files (.bin, .pkl, .pt, .pth, .h5, .onnx, .safetensors, .parquet)
-3. **Tests pass** - Run `pytest -x -q --tb=line`
-4. **Debug artifacts** - No `print()`, `breakpoint()` left in code
-5. **Config validation** - `project.yaml` parses correctly
-6. **Git state** - Review what's staged vs unstaged
+1. **Large files** - No model files (.bin, .pkl, .pt, .pth, .h5, .onnx, .safetensors, .parquet) staged
+2. **Config validation** - `config/project.yaml` parses correctly
 
 **If PCC fails**: Fix issues before proceeding to commit.
 

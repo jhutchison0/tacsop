@@ -53,6 +53,35 @@ git status --short
 - WARN if unstaged changes exist (might forget to include them)
 - INFO showing current branch
 
+### 5. Reference Integrity (living docs)
+```bash
+# Path-shaped references in orientation surfaces must resolve.
+# Catches drift like the March-2026 case: tasks.md carrying paths to files
+# that do not exist. Allowlist covers runtime artifacts that are
+# legitimately absent (upstream-update.md, gitignored audit logs).
+{ cat CLAUDE.md CONTEXT.md README.md LANGUAGE.md .claude/README.md 2>/dev/null; \
+  sed -n '/^## Active/,/^## Completed/p' docs/tasks.md; } \
+  | grep -oE '(docs|src|tests|config|scripts|\.claude|\.github)/[A-Za-z0-9_./-]+\.[A-Za-z0-9]{2,4}' \
+  | grep -vE '^\.claude/(upstream-update\.md|audits/)' \
+  | grep -vE '^docs/(decision_audit_20260326\.md|plans/decision_science_gaps\.md|review_decision_science_waves_2_3\.md)$' \
+  | sort -u | while read -r p; do [ -e "$p" ] || echo "MISSING: $p"; done
+```
+- Second allowlist line: the three known-missing March paths, dispositioned in `docs/tasks.md` P3; remove them from the allowlist when that task closes
+- Expected output: empty. WARN on any MISSING line, and record the run's count in the session doc (it is metric M2 in `.claude/skills/traversing-the-knowledge-base/SKILL.md`; an unrecorded run is indistinguishable from an unrun check)
+- Any MISSING line is caught drift and fires that skill's build trigger
+
+### 6. Gate-Surface Separation
+```bash
+# Gate surfaces (checks, hooks, settings) change alone, per CONOP WHETSTONE D4:
+# never bundled with work those gates judge.
+staged=$(git diff --cached --name-only)
+gates=$(echo "$staged" | grep -E '^\.claude/(hooks/|settings\.json|commands/(pcc|pci)\.md)' || true)
+if [ -n "$gates" ] && [ "$(echo "$staged" | grep -c .)" -ne "$(echo "$gates" | grep -c .)" ]; then
+  echo "WARN: gate surfaces staged with other files; split into a [gate] commit:"; echo "$gates"
+fi
+```
+- WARN only; the fix is two commits, with the gate change isolated and tagged `[gate]`
+
 ## Output Format
 
 ```
@@ -87,6 +116,8 @@ PCC Status: NOT READY - 1 failure, resolve before pushing
 | Tests | `pytest` all pass | Block push |
 | Debug | No breakpoint/pdb/print in staged code | Warn only |
 | Git state | Clean or intentional | Info only |
+| Reference integrity | Zero MISSING paths in living docs (allowlist current) | Warn only |
+| Gate separation | Gate surfaces staged alone (`[gate]` commit) | Warn only |
 
 ## Integration
 

@@ -58,11 +58,14 @@ git status --short
 # Path-shaped references in orientation surfaces must resolve.
 # Catches drift like the March-2026 case: tasks.md carrying paths to files
 # that do not exist. Allowlist covers runtime artifacts that are
-# legitimately absent (upstream-update.md, gitignored audit logs).
+# legitimately absent (the two upstream notification files, gitignored audit logs).
+# Extension bound is {2,8}, not {2,4}: a 4-cap truncates .geojson/.service/.shtml
+# and then reports the truncated path as MISSING (found by the launch-control
+# canary 2026-08-17, where it produced 3 false positives against real files).
 { cat CLAUDE.md CONTEXT.md README.md LANGUAGE.md .claude/README.md 2>/dev/null; \
   sed -n '/^## Active/,/^## Completed/p' docs/tasks.md; } \
-  | grep -oE '(docs|src|tests|config|scripts|\.claude|\.github)/[A-Za-z0-9_./-]+\.[A-Za-z0-9]{2,4}' \
-  | grep -vE '^\.claude/(upstream-update\.md|audits/)' \
+  | grep -oE '(docs|src|tests|config|scripts|\.claude|\.github)/[A-Za-z0-9_./-]+\.[A-Za-z0-9]{2,8}' \
+  | grep -vE '^\.claude/(upstream-update\.md|upstream-lesson\.md|audits/)' \
   | grep -vE '^docs/(decision_audit_20260326\.md|plans/decision_science_gaps\.md|review_decision_science_waves_2_3\.md)$' \
   | sort -u | while read -r p; do [ -e "$p" ] || echo "MISSING: $p"; done
 ```

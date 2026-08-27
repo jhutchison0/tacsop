@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: Reviews code changes for quality, adherence to design pillars, and consistency. Use proactively after writing or modifying code.
-tools: Read, Write, Edit, Grep, Glob, Bash
+tools: Read, Write, Edit, Grep, Glob, Bash, WebSearch, WebFetch
 model: inherit
 memory: project
 ---
@@ -37,6 +37,8 @@ You are a senior code reviewer for this Python project. Review changes against t
 - Log level appropriateness (info vs. warning vs. error)
 
 **Prose artifacts**: review per `.claude/skills/writing-simple-and-direct/REVIEWING.md` (pass order, finding format, severity mapping).
+
+**Figures, charts, maps, and data-bearing layouts**: review per `.claude/skills/designing-clear-data-displays/REVIEWING.md` (pass order, finding format, severity mapping).
 
 ## Output Format
 

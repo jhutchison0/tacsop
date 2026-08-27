@@ -42,7 +42,11 @@ This directory contains agent definitions, team templates, slash commands, and s
         ├── python-venv-management/SKILL.md + 2 sidecars
         ├── maintaining-ubiquitous-language/SKILL.md
         ├── maintaining-project-context/SKILL.md
-        └── recording-architecture-decisions/SKILL.md
+        ├── recording-architecture-decisions/SKILL.md
+        ├── using-topic-branches/SKILL.md
+        ├── writing-simple-and-direct/SKILL.md + 4 sidecars
+        ├── designing-clear-data-displays/SKILL.md + 4 sidecars
+        └── traversing-the-knowledge-base/SKILL.md
 ```
 
 > Note: legacy single-file skills `configuration-management.md`, `shift-left-testing.md`, `python-venv-management.md`, and `session-end.md` were retired 2026-05-19. The first three migrated to directory form with sidecar progressive disclosure; `session-end.md` reference content moved to `docs/session-doc-format.md`. The `/session-end` workflow remains in `.claude/commands/session-end.md`. See [SKILLS_FRAMEWORK.md](skills/SKILLS_FRAMEWORK.md) for the full inventory.
@@ -100,7 +104,7 @@ Team compositions live in `.claude/teams/`. Use `/task promote` or `/task plan` 
 
 ## Inter-Agent Communication
 
-Agents communicate through shared artifacts — no direct messaging required for most workflows:
+Agents communicate through shared artifacts; no direct messaging is required for most workflows:
 
 - **Config files** — `config/project.yaml` is the shared schema contract and project state
 - **Test results** — `pytest` output validates changes and is the evidence standard for all agents
@@ -136,13 +140,13 @@ The `/task` command manages the tactical layer and includes an escalation ladder
 
 ## Adding Project-Specific Agents
 
-This is a **Level 0** template — the four agents here are portable and generic. When the template becomes a real project:
+This is a **Level 0** template; the agents here are portable and generic. When the template becomes a real project:
 
 1. Create a Level 1 agent file in `.claude/agents/` scoped to your domain
 2. Add it to the Agent Catalog and Scope Matrix tables above
 3. Update the agent table in `CLAUDE.md`
 4. Add it to relevant team templates in `.claude/teams/`
 
-Keep Level 0 agents (`test-runner`, `code-reviewer`, `python-prototyper`) unchanged — they are portable across projects and should not accumulate project-specific knowledge.
+Keep Level 0 agents (`test-runner`, `code-reviewer`, `proposer`, `python-prototyper`) unchanged: they are portable across projects and should not accumulate project-specific knowledge. A `tools:` line is capability, not knowledge; adding `WebSearch, WebFetch` so a proposer can verify a source is within Level 0.
 
 See `.claude/skills/SKILLS_FRAMEWORK.md` for the Level 0/Level 1 distinction and porting guidance.

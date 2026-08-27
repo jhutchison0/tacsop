@@ -54,10 +54,10 @@ testing:
 # Session state
 state:
   last_session:
-    date: "2026-08-03"
-    file: "docs/sessions/20260803_uv_environment_doctrine.md"
-    summary: "uv drop-in doctrine: tacsop converted (269 tests), python-venv-management 3.0.0, entry authored then field-verified on this box (pyvenv.cfg sweep found 10 venvs vs 5 by name-glob; 8 rebuilt at exact parity, 6,898 tests; pyenv retired), corrected from findings, propagated to 15 repos; 3 sibling spec bugs fixed and committed in place."
-  active_work: "uv migration on work/home/laptop (fold into P1 rename visits); Cycle 7 propagation from those machines; Day-1 playbook rewrite (P2, now includes uv steps); exponential() tiny-rate fix pending a design call; 0.2.0 version cut queued (uv doctrine now in Unreleased)."
+    date: "2026-08-27"
+    file: "docs/sessions/20260827_figure_style_doctrine_from_stx_server.md"
+    summary: "Figure Style doctrine: designing-clear-data-displays (Tufte, 1.1.0) copied whole from stx-server and wired; stx-server's three hub-upward items applied (research tools on two agents, audit-hook import-grep fallback test-first, writing-skill hand-off); 33-lesson harvest (first D10 intake from a non-canary repo); 2026-08-27 doctrine entry authored and pre-flighted, dry run 16 repos, live propagation pending the user's go; 27 em dashes swept from four template docs; skills inventories completed."
+  active_work: "Propagate the 2026-08-27 entry (dry run 16 repos; user's go pending); harvest veil-engine's six pending upward lessons; WHETSTONE Wave 1 window (session 1 of 5 logged 2026-08-27); uv migration and P1 rename on work/home/laptop; Day-1 playbook rewrite (P2, now carries stx-server's bootstrap-audit findings); decide the five March docs (present on this box); 0.2.0 cut."
   known_issues:
     - "Audit hook is soft-deterministic (logs, never blocks); cannot enforce temporal vertical-slicing (all tests then all impl)"
     - "exponential() raises ZeroDivisionError for nonzero |rate| < ~2.2e-16 (Active task; repro in docs/tasks.md)"

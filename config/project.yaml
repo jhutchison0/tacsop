@@ -54,10 +54,10 @@ testing:
 # Session state
 state:
   last_session:
-    date: "2026-08-03"
-    file: "docs/sessions/20260803_uv_environment_doctrine.md"
-    summary: "uv drop-in doctrine: tacsop converted (269 tests), python-venv-management 3.0.0, entry authored then field-verified on this box (pyvenv.cfg sweep found 10 venvs vs 5 by name-glob; 8 rebuilt at exact parity, 6,898 tests; pyenv retired), corrected from findings, propagated to 15 repos; 3 sibling spec bugs fixed and committed in place."
-  active_work: "uv migration on work/home/laptop (fold into P1 rename visits); Cycle 7 propagation from those machines; Day-1 playbook rewrite (P2, now includes uv steps); exponential() tiny-rate fix pending a design call; 0.2.0 version cut queued (uv doctrine now in Unreleased)."
+    date: "2026-08-28"
+    file: "docs/sessions/20260828_cross_repo_feedback_loop_check.md"
+    summary: "Cross-repo feedback loop check for the presentation: stx-server's designing-clear-data-displays byte-identical, 0 commits since our copy; its traversal-skill use scanned (2 of 5 session docs carry the line, six traversals in one review, both lines pass a cross-repo M3 check); A6 read on both canaries (veil-engine 6 of 6 captured; tactics-game no sessions); delta harvest lessons 34 to 41; the acknowledgment gap found (stx-server's three hub-upward lines open after the hub applied them); the bottom-up and recursion questions answered in the session doc."
+  active_work: "Propagate the 2026-08-27 entry (dry run 16 repos; user's go pending; decide the one acknowledgment line first); harvest veil-engine's six captured lessons (13 days); route delta lessons 34 to 41 at their cycles; WHETSTONE Wave 1 window (session 2 of 5 logged 2026-08-28); uv migration and P1 rename on work/home/laptop; Day-1 playbook rewrite (P2); decide the five March docs; 0.2.0 cut."
   known_issues:
     - "Audit hook is soft-deterministic (logs, never blocks); cannot enforce temporal vertical-slicing (all tests then all impl)"
     - "exponential() raises ZeroDivisionError for nonzero |rate| < ~2.2e-16 (Active task; repro in docs/tasks.md)"

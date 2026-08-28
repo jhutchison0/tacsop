@@ -4,6 +4,175 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
+## 2026-08-27: Figure Style Doctrine (designing-clear-data-displays) + Research Tools + Audit-Hook Fallback
+
+Three parts, each independently adoptable through its own table. **Part 1 is the
+headline**: a Level 0 skill for data displays, the twin of `writing-simple-and-direct`,
+built downstream in `stx-server` on 2026-08-27 and copied into the hub whole. Parts 2
+and 3 are two small fixes the same repo routed upstream. Audience: every downstream repo;
+Part 2 has one stated opt-out. All three are additive; nothing breaks.
+
+Credit: `stx-server` built the skill (proposal, adversarial challenge, 26 numbered lead
+decisions, two gate reviews, an outside feedback round; 34 Tufte quotations verified by
+fetch) to settle a label-collision bug on a field map, then measured the fix in a headless
+browser: 12 collisions before, 0 after, font unchanged. The hub's harvest of that repo's
+eight sessions is `docs/reviews/20260827_stx_server_lessons_harvest.md`.
+
+### Part 1: Figure Style, the `designing-clear-data-displays` skill (1.1.0)
+
+Every chart, figure, map, table, or data-bearing layout now follows eight rules, the way
+every prose artifact follows the writing kernel:
+
+1. Show the data; erase ink that carries none, within reason.
+2. Label the data where it lives; a key the eye must decode fails.
+3. Make every distinction as subtle as it can be and still be seen.
+4. Two marks too close make a third; move one, do not shrink both.
+5. Show the effect at its true size: lie factor between 0.95 and 1.05.
+6. Answer "compared to what?"; small multiples over one lonely chart.
+7. Document the display: title, source, units, scale on the figure.
+8. Content counts most: simple design, intense content.
+
+Before the eight: could a table or a sentence carry these numbers? Under about twenty,
+a table usually does. The skill is Tufte's material as named rules with sources and
+tests, not a persona: `RULES.md` expands each rule with the failure it counters, its
+source (primary or secondary, marked), and the test that catches it; `EXAMPLES.md` gives
+six generic before/after pairs including the one that grows (documentation is data-ink);
+`REVIEWING.md` is a five-pass review protocol with a finding format that requires a
+redraw; `ADOPTION.md` is the install procedure below.
+
+Two boundary conditions, restated so no consumer over-applies the rules:
+
+- **Grandfathering**: adoption triggers no sweep. A figure a change touches, or a queued
+  task names, gets the full pass order; a display the app still renders is not a record.
+- **UX rules outrank style**: a repo's own UX or accessibility rules can require a less
+  dense display, a larger label, or a sentence in place of a table. State the override in
+  CLAUDE.md, the pillars, or the plan's decision table; do not ignore the rule. The skill
+  governs only how the ink goes. (`stx-server` states its Kid-First override in one
+  sentence under the kernel; copy that shape.)
+
+#### Adoption-Mode Table (Part 1)
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 1 | `.claude/skills/designing-clear-data-displays/` (SKILL.md + `RULES.md`, `EXAMPLES.md`, `REVIEWING.md`, `ADOPTION.md`) | **TEMPLATE-COPY** | All five files, 409 lines, no repo names. Level 0: copy, never edit locally; route fixes upstream. |
+| 2 | `CLAUDE.md` Figure Style section | **PATCH** | Paste the block in `ADOPTION.md` step 1 beside Prose Style. Add one sentence naming your UX override if you have one. |
+| 3 | `.claude/agents/code-reviewer.md` | **PATCH** | One checklist line beside the prose line (`ADOPTION.md` step 2). |
+| 4 | `.claude/skills/SKILLS_FRAMEWORK.md`, `.claude/README.md` | **PATCH** | Index entry and tree line (`ADOPTION.md` step 3). While there: the description rule now reads "one to three sentences" (was "one"; two shipped skills carry three). |
+| 5 | `.claude/skills/writing-simple-and-direct/SKILL.md` | **TEMPLATE-COPY** (1.0.1) or **PATCH** | One scope sentence: a chart that could be a table or a sentence is the figure skill's pre-question, not the prose skill's tokens to cut. Copy the file, or add the sentence after "Never cut a required section to save tokens." and bump the version. |
+| 6 | A headless-browser layout probe | **OPTIONAL, LATER** | `ADOPTION.md` step 4. No dependency today; the seam exists. |
+
+#### Action required (Part 1)
+
+1. Copy the skill directory from the hub:
+   ```bash
+   cp -r ~/projects/github/tacsop/.claude/skills/designing-clear-data-displays .claude/skills/
+   diff -r ~/projects/github/tacsop/.claude/skills/designing-clear-data-displays .claude/skills/designing-clear-data-displays && echo identical
+   ```
+2. Open `.claude/skills/designing-clear-data-displays/ADOPTION.md` and run its steps 1
+   to 3: the CLAUDE.md block, the reviewer line, the two index entries.
+3. If your repo has a UX or accessibility rule that outranks density, add one sentence
+   under the CLAUDE.md block naming it as a decided trade-off.
+4. Copy `writing-simple-and-direct/SKILL.md` (1.0.1) from the hub, or add the one scope
+   sentence by hand.
+5. Do not sweep existing figures. The next change that touches one gets the review.
+
+Expected outcome: the code reviewer, on the next change that draws anything, produces
+findings in the `REVIEWING.md` format (severity, rule, element by coordinate or selector,
+concrete redraw). A finding without a redraw is a complaint, not a finding.
+
+### Part 2: Research tools on the two Level 0 reasoning agents
+
+`proposer` and `code-reviewer` gain `WebSearch, WebFetch` in their `tools:` lines so a
+proposal can cite a source it fetched and a challenge can re-fetch it. The Level 0 rule
+(keep them unchanged; they "should not accumulate project-specific knowledge")
+guards knowledge, not capability; `.claude/README.md` now says so. First use: every
+quotation in the Tufte skill traces to a fetched page or names the secondary source that
+carries it, and the proposer left two rules out rather than invent their wording. A
+ledger that excludes is worth more than one that fills in.
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 7 | `.claude/agents/proposer.md`, `.claude/agents/code-reviewer.md` | **PATCH** | `tools: Read, Write, Edit, Grep, Glob, Bash, WebSearch, WebFetch` |
+| 8 | `.claude/README.md` Level 0 paragraph | **PATCH** | The capability-versus-knowledge sentence, or copy the hub paragraph. |
+
+Action required: edit the two `tools:` lines. Skip this part if your repo forbids
+network access from agents; the skill in Part 1 does not depend on it.
+
+### Part 3: Audit hook import-grep fallback
+
+The shift-left audit hook looked for a test partner only by name
+(`tests/**/test_<module>.py`). A repo that names its suites by feature
+(`test_demo.py` exercising `app.main`) logged 27 false `MISSING_TEST` lines in one
+execution-phase, and noise that large trains everyone to ignore the log. After the name
+lookup misses, the hook now greps `tests/**/test_*.py` for an import of the module
+(`from pkg.mod import`, `import pkg.mod`, or `from pkg import mod`) before logging. It
+still never blocks and still exits 0 on every path.
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 9 | `.claude/hooks/post-tool-shift-left-audit.sh` | **TEMPLATE-COPY** then re-glob, or **PATCH** | If your copy is otherwise unpatched: copy the hub file and change `src/myproject/` to your package on the `case` line (`scripts/adopt_doctrine.py` does this substitution). If you patched it: port the one `if [ -z "$test_partners" ]` block that precedes the `MISSING_TEST` branch. Keep the executable bit: `git update-index --chmod=+x`. |
+| 10 | `.claude/skills/shift-left-testing/ENFORCEMENT.md` | **TEMPLATE-COPY** | Step 4 and the limitations list describe the two-stage lookup. |
+| 11 | `tests/unit/test_shift_left_hook.py` | **HUB-ONLY** | Nine tests (three behaviors) drive the hook with a JSON payload in a throwaway git repo. They assume `src/myproject/`; copy only if you change that path to your package. |
+
+Action required:
+
+1. Apply #9 and #10.
+2. Verify from a shell (needs `jq` and `git`; replace `app/main.py` with a module you have, since the hook exits silently when the path's directory does not exist):
+   ```bash
+   printf '%s' '{"tool_name":"Edit","tool_input":{"file_path":"'"$PWD"'/src/app/main.py"}}' | bash .claude/hooks/post-tool-shift-left-audit.sh
+   tail -1 .claude/audits/shift-left-violations.log
+   ```
+   A module that some `test_*.py` imports logs `OK_TEST_EXISTS` with that file as partner.
+
+### Also fixed in the hub, mirror if you copied these files
+
+- Running-prose em dashes in four template-copied docs (`docs/plans/CONOP-FORMAT.md`,
+  `docs/plans/OPORD-FORMAT.md`, `docs/session-doc-format.md`, `.claude/README.md`):
+  27 replaced per prose rule 8. Found by `stx-server`'s bootstrap audit, which could not
+  fix hub copies locally without forking doctrine. TEMPLATE-COPY the four files if yours
+  are unpatched; headings, table cells, and list-label separators were exempt and are
+  untouched.
+- `.claude/skills/shift-left-testing/SCRIPTS.md` line 3 no longer says "in this repo"
+  about hub scripts.
+- The hub's own skills trees (`.claude/README.md`, `SKILLS_FRAMEWORK.md`) listed six of
+  nine Level 0 skills; both now match the directory. Check yours.
+
+### Rollback
+
+All three parts are additive and reversible by deletion. Part 1: remove the skill
+directory, the CLAUDE.md section, the reviewer line, and the index entries; revert the
+one sentence in the writing skill. Part 2: remove the two tool names. Part 3: restore
+the prior hook (the name-only lookup is the `find` line that remains; delete the
+fallback block). Nothing downstream depends on any of the three once removed.
+
+### Files (tacsop)
+
+```
+.claude/skills/designing-clear-data-displays/SKILL.md          (1.1.0, copied whole from stx-server)
+.claude/skills/designing-clear-data-displays/RULES.md
+.claude/skills/designing-clear-data-displays/EXAMPLES.md
+.claude/skills/designing-clear-data-displays/REVIEWING.md
+.claude/skills/designing-clear-data-displays/ADOPTION.md
+.claude/skills/writing-simple-and-direct/SKILL.md              (1.0.1: the hand-off sentence)
+.claude/skills/SKILLS_FRAMEWORK.md                             (entry, tree, description rule)
+.claude/skills/shift-left-testing/ENFORCEMENT.md               (step 4, limitations)
+.claude/skills/shift-left-testing/SCRIPTS.md                   (line 3)
+.claude/agents/code-reviewer.md                                (figure checklist line; tools)
+.claude/agents/proposer.md                                     (tools)
+.claude/hooks/post-tool-shift-left-audit.sh                    (import-grep fallback)
+.claude/README.md                                              (skills tree; Level 0 paragraph; 3 dashes)
+CLAUDE.md                                                      (Figure Style section)
+docs/plans/CONOP-FORMAT.md                                     (9 dashes)
+docs/plans/OPORD-FORMAT.md                                     (9 dashes)
+docs/session-doc-format.md                                     (6 dashes)
+docs/reviews/20260827_stx_server_lessons_harvest.md            (new: 33 lessons with provenance)
+tests/unit/test_shift_left_hook.py                             (new: 9 tests, first written failing)
+CHANGELOG.md
+```
+
+Hub verification: 278 tests passing (269 + 9 hook tests), `bash -n` clean on the hook,
+skill bundle byte-identical to `stx-server` at its `307d195`.
+
 ## 2026-08-21: Knowledge-Graph Traversal — Walk the Link Graph Before You Grep
 
 Your docs already form a graph. Session docs declare typed edges (`Follows`, `Documents`,

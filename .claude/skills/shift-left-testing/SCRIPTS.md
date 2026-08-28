@@ -1,6 +1,6 @@
 # SCRIPTS — Testing CLIs, Scripts, and the Enforcement Perimeter
 
-Sidecar to `SKILL.md`. The audit hook watches `src/myproject/**/*.py`. Nothing watches `scripts/`. In this repo that perimeter gap contains the highest-blast-radius code we have: `propagate_doctrine.py` writes into every downstream repo, and `adopt_doctrine.py` rewrites files inside a consumer's working tree. This file covers how to test script code, and how to bring `scripts/` inside the perimeter.
+Sidecar to `SKILL.md`. The audit hook watches `src/<package>/**/*.py`. Nothing watches `scripts/`. In the hub repo, for example, that perimeter gap contains the highest-blast-radius code it has: `propagate_doctrine.py` writes into every downstream repo, and `adopt_doctrine.py` rewrites files inside a consumer's working tree. This file covers how to test script code, and how to bring `scripts/` inside the perimeter.
 
 ## Structure Scripts for Testability
 

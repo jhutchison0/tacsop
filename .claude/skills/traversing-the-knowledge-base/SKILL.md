@@ -39,6 +39,11 @@ grep -rln "$(basename <path>)" --include="*.md" . | grep -v ".venv"
 
 **5. Integrity: do the references still resolve?** `/pcc` check 5 runs this over the orientation surfaces (CLAUDE.md, CONTEXT.md, README.md, LANGUAGE.md, `.claude/README.md`, active tasks). Expected output: empty (the 3 known-missing March paths are allowlisted pending their `docs/tasks.md` disposition). Any MISSING line is a finding: record the check's count in the session doc, and a nonzero count fires the build trigger below.
 
+Check 5 has three blind spots, listed in `.claude/commands/pcc.md` under the check: it cannot
+see directory references, it resolves every path against the repo root, and a missing surface
+costs coverage silently. A zero is clean only within those. Two foreign-corpus runs
+(`contract-knowledge-graph` 2026-08-21, `aar_ai_pipeline` 2026-08-22) found all three.
+
 ## What grep cannot do here
 
 `orphans()` (nothing links to a doc) and full-corpus `validate()` need the whole file universe enumerated first. Those are deferred to a ~150-line utility slice specified in `docs/plans/20260813_kb_graph_traversal_proposal.md` (as amended 2026-08-14). Build trigger, either condition: an agent demonstrably misses an edge this skill's recipes should have surfaced, or `/pcc` check 5 reports a MISSING path beyond the baseline. When the trigger fires, build test-first per shift-left doctrine; do not build before.

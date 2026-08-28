@@ -4,6 +4,262 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
+## 2026-08-21: Knowledge-Graph Traversal — Walk the Link Graph Before You Grep
+
+Your docs already form a graph. Session docs declare typed edges (`Follows`, `Documents`,
+`Implements`, `References`, `Completes`, `Requires`, `Cites`), every doc names others by
+link or bare path, and `CONTEXT.md` hand-maintains a Reading Order. Keyword search finds
+words. Traversal finds structure: where a rule came from, what depends on it, and what an
+edit will break. This cycle ships the recipes for walking that graph, plus one
+pre-commit-check that fails when the graph's references stop resolving.
+
+**Audience: the subset of repos that use the typed session-doc header convention** from
+`docs/session-doc-format.md` (propagated 2026-05-19). If your session docs do not carry
+those headers, artifact 1 has nothing to walk. Artifacts 2 and 3 stand alone and apply to
+any repo.
+
+Three artifacts:
+
+1. **`.claude/skills/traversing-the-knowledge-base/SKILL.md` (1.0.0)** — five traversals:
+   lineage (walk `Follows` both directions), blast radius (inbound references before you
+   edit a living doc), neighbors (outbound and inbound, never one alone), provenance (chase
+   the path between two docs from both ends), and integrity. Carries an evidence-line
+   convention and a falsifiable five-session success criterion so the skill can be retired
+   on data rather than kept on sentiment.
+2. **Pre-commit-check 5, reference integrity** — path-shaped references in the orientation
+   surfaces must resolve. Expected output is empty; any `MISSING:` line is caught drift.
+3. **Pre-commit-check 6, gate-surface separation** — gate surfaces (hooks, settings, the
+   check definitions themselves) change in their own commit, never bundled with the work
+   those gates judge. A gate and the thing it grades must not move together.
+
+### Why this is doctrine
+
+Cross-cutting and convention-bearing. It codifies how to navigate a corpus and how to prove
+a reference still points at something, in any repo that keeps docs. It is not a utility
+implementation; there is no code to install.
+
+### The evidence
+
+Check 5 was run against a downstream repo for the first time on 2026-08-21. It returned
+**25 unresolved references, 20 of them in that repo's README**: documented quick-start
+commands pointing at scripts and modules that a restructure had moved or deleted. The
+README still read as authoritative. Nothing in that repo's workflow had been able to notice,
+because no check had ever asked whether the paths resolved. That is the failure mode this
+check exists to catch, and it caught it on first contact with a repo it was not written for.
+
+### Adoption-Mode Table
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 1 | `.claude/skills/traversing-the-knowledge-base/SKILL.md` | **CUSTOMIZE** | Recipes copy verbatim. The edge-count table and the five-session criterion are hub-specific numbers; recount for your corpus or delete the table. |
+| 2 | Pre-commit-check 5 (reference integrity) | **CUSTOMIZE** | The surface list and the `docs/tasks.md` section range are repo-specific. See step 3; this is the step most likely to ship inert. |
+| 3 | Pre-commit-check 6 (gate-surface separation) | **TEMPLATE-COPY** | The path regex matches the standard `.claude/` layout. Adjust only if your gate surfaces live elsewhere. |
+
+### Action Required
+
+1. **Copy the skill.** Create `.claude/skills/traversing-the-knowledge-base/` and copy
+   `SKILL.md` from tacsop. Then correct two hub-specific things inside it: the edge-count
+   snapshot table (recount against your corpus, or delete the table and keep the prose), and
+   the five-session window dates in the success criterion.
+
+2. **Point something at the skill.** A skill nothing references is a skill nobody loads. Add
+   it to your `CLAUDE.md` skill list and to the `CONTEXT.md` Reading Order.
+
+3. **Add check 5 to `.claude/commands/pcc.md`, then run it before you trust it.** Copy the
+   block from tacsop's `pcc.md` §5 and make three edits:
+   - **Drop tacsop's allowlist line for the three March decision-science paths.** It is a
+     hub-local disposition and will silently hide real findings in your repo.
+   - **Fix the `docs/tasks.md` section range.** The shipped `sed -n '/^## Active/,/^## Completed/p'`
+     assumes headings named exactly `## Active` and `## Completed`. If your tasks file names
+     them differently, `sed` matches the start prefix and then runs to end of file, silently
+     scanning sections you meant to exclude. Print the range and eyeball it before wiring the
+     check.
+   - **Confirm the five orientation surfaces exist.** `cat` on a missing file is swallowed by
+     `2>/dev/null`, so an absent `CONTEXT.md` costs you coverage with no error.
+
+   Then run the block by hand. **Expect a nonzero first result.** Record that number as your
+   baseline and either fix the references or allowlist them with a comment naming the
+   disposition. Do not wire a check whose output you have not read.
+
+4. **Add check 6 to `.claude/commands/pcc.md`.** Copy tacsop's §6 verbatim unless your gate
+   surfaces sit outside `.claude/hooks/`, `.claude/settings.json`, and the check files.
+
+5. **Record traversals when you run them.** One line in the session doc under Work Completed:
+   `KB-graph: <traversal run> → <what it changed or confirmed>`. Without this line the skill
+   cannot be evaluated and should be dropped at its window close.
+
+### A warning this cycle is built on
+
+In May 2026 the hub shipped an audit-hook glob that could not fire, because bash `case` does
+not support `**`. A downstream repo found it during adoption, fixed it locally, and the fix
+never came back upstream. Check 5 is the same class of artifact: a one-liner that looks
+correct and can be inert. Step 3 asks you to run it by hand for that reason. **If it is wrong
+in your repo, say so upstream.** A correction that stays local is a correction the rest of the
+fleet pays for again.
+
+### Rollback
+
+Fully reversible, no migration. Delete `.claude/skills/traversing-the-knowledge-base/`, remove
+the two check sections from `.claude/commands/pcc.md`, and drop the skill from `CLAUDE.md` and
+`CONTEXT.md`. Nothing else reads them. Recorded `KB-graph:` lines in past session docs are
+inert prose and can stay.
+
+### Version Note
+
+No tacsop version dependency. The skill is a single markdown file and the checks are shell
+one-liners in a command file. Nothing here requires a specific `propagate_doctrine.py` or
+`adopt_doctrine.py` version, and `adopt_doctrine.py` does not handle this cycle: all three
+artifacts are CUSTOMIZE or need a by-hand read, so copy them yourself.
+
+---
+
+### Amendments (2026-08-22, from the `aar_ai_pipeline` field run)
+
+Check 5 ran against a second foreign corpus, `aar_ai_pipeline` on its `dev` branch. It
+reported **2 MISSING where the honest count is 6**, and the four it missed were in the same
+CLAUDE.md table as the one it caught. The gap is the check's, not the repo's. Three
+corrections and one new artifact follow. **If you took this entry before 2026-08-22, this
+section is your delta.**
+
+**Correction 1 (check 5): a reference to a directory is invisible to the check.** The regex
+ends in `\.[A-Za-z0-9]{2,4}`, so it only matches paths carrying a file extension.
+`aar_ai_pipeline`'s CLAUDE.md names five agent-infrastructure paths in one table:
+`.claude/README.md`, `.claude/agents/`, `.claude/teams/`, `.claude/commands/`, and
+`.claude/skills/`. All five are absent from the repo. Check 5 reported one. Add a second
+pass for directory-shaped references:
+
+```bash
+{ cat CLAUDE.md CONTEXT.md README.md LANGUAGE.md .claude/README.md 2>/dev/null; } \
+  | grep -oE '(docs|src|tests|config|scripts|\.claude|\.github)/[A-Za-z0-9_./-]*/' \
+  | sort -u | while read -r p; do [ -d "$p" ] || echo "MISSING-DIR: $p"; done
+```
+
+**Correction 2 (check 5): every path resolves against the repo root, so a documented `cd`
+breaks it.** `aar_ai_pipeline`'s task list carries
+`cd graph_builder && ... python scripts/extract_performance_ratings.py`. The file exists, at
+`graph_builder/scripts/extract_performance_ratings.py`. Check 5 called it MISSING. Same root
+cause as the cross-repo false positive recorded upstream on 2026-08-21: the check has no
+notion of a base directory. Treat a MISSING line drawn from a command example as suspect and
+resolve it by hand before editing the doc it came from.
+
+**Correction 3 (check 5): the shipped `sed` range failed again, in a second repo, silently.**
+`aar_ai_pipeline` names its task sections `## Active Sprint`, `## Pending`, and
+`## Recently Completed`. The shipped `/^## Active/,/^## Completed/p` matched the start prefix,
+found no `## Completed`, and ran to end of file: **51 lines captured where the correct range
+is 18**. Two foreign repos, two failures, no error raised in either. Step 3's by-hand run is
+not optional, and this correction is the reason.
+
+**New artifact 4: `.claude/` must be versioned somewhere, and there are two valid places.**
+
+`aar_ai_pipeline` gitignores `.claude/` wholesale (its commit `1020a43`, 2026-03-23). A repo
+shared with outside collaborators is often scoped deliberately to the deliverable, with
+internal workflow tooling kept out of the shared tree. That is a reasonable call and this
+cycle does not argue with it. What it does argue with is **ignoring `.claude/` and stopping
+there**, because the directory then exists on exactly one machine and is backed up by nothing.
+
+The cost is already banked in `aar_ai_pipeline`, and it is measurable. Its session doc
+`20260326_upstream_doctrine_sync.md` records a doctrine-adoption session that created
+`.claude/agents/proposer.md` and modified `.claude/commands/session-start.md`,
+`.claude/commands/task.md`, `.claude/teams/feature-development.md`, and `.claude/README.md`.
+The commit that session produced, `d31eea9`, contains **none of those five files**: it carries
+`CLAUDE.md`, `config/project.yaml`, `tasks/todo.md`, `.gitignore`, three plans, and the
+session doc. Across the entire history, only 6 `.claude/` paths ever existed, all commands,
+all removed by `1020a43`. `agents/`, `teams/`, `skills/`, and `.claude/README.md` have never
+been in the repository at any commit. The clone inspected on 2026-08-22 has no `.claude/` at
+all. **The session doc is a record of work that the repository cannot produce.**
+
+So the rule is not "track it in this repo". The rule is:
+
+> **`.claude/` is source. It is reviewed, versioned, and recoverable, or it is lost. Choose
+> where it is versioned; do not choose not to version it.**
+
+**Mode A, track in-repo (default).** Track everything under `.claude/` except three paths:
+
+```gitignore
+.claude/agent-memory/        # per-machine agent state
+.claude/settings.local.json  # per-user override; settings.json IS tracked
+.claude/audits/              # hook-generated logs, regenerate on demand
+```
+
+This is what the hub does and has always done: tacsop tracks 51 files under `.claude/` and
+ignores exactly those three. Same shape as the `.gitattributes` entry of 2026-06-28, a
+practice the hub had shipped for months and never wrote down, so downstream never adopted it.
+
+**Mode B, private sidecar (repos whose shared tree is scoped to the deliverable).** Keep
+`.claude/` out of the shared repo and version it in its own private repository, cloned into
+place:
+
+```bash
+git clone <private-remote> .claude     # .claude/ stays in the shared repo's .gitignore
+```
+
+The shared repo is unchanged and its ignore rule keeps doing its job. The sidecar carries its
+own history, review, and backup. Discovery is unaffected: `propagate_doctrine.py` scans the
+filesystem for `.claude/commands`, computes the consumer as `commands_dir.parent.parent`, and
+never inspects git, so a sidecar clone at `.claude/` is discovered as the shared repo exactly
+as an in-repo `.claude/` would be. The nested-repo filter does not fire, because the sidecar
+is not itself a discovered consumer.
+
+One consequence for check 5: in a Mode B repo, run it on a machine with the sidecar checked out. Without the sidecar the `.claude/` references in `CLAUDE.md` do not resolve and the check reports them as drift, which they are not.
+
+Mode B has one failure mode worth a guard: the sidecar is invisible to the shared repo's
+tooling, so nothing warns you when it is missing, stale, or unpushed. Add its status to
+`/session-start`, and push it on the same cadence as the shared repo.
+
+**Either mode satisfies this artifact. Neither is optional.** A repo in Mode B whose sidecar
+does not exist yet is in the same position as `aar_ai_pipeline`: the ignore rule is doing its
+job, and nothing is saving the directory it excludes.
+
+### Amended Adoption-Mode Table
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 4 | `.claude/` versioning (Mode A in-repo, or Mode B private sidecar) | **CUSTOMIZE** | Pick the mode that fits your repo. Do it **first**; artifacts 1 through 3 write into `.claude/` and are unsaved in either mode until this is settled. |
+
+### Amended Action Required
+
+**Step 0 (new, do this before step 1).** Establish where your `.claude/` is versioned.
+
+```bash
+grep -n 'claude' .gitignore
+git ls-files .claude | wc -l                    # in-repo tracking
+git -C .claude rev-parse --is-inside-work-tree  # sidecar present?
+```
+
+If the ignore rule is present and both checks come back empty, every artifact in this cycle
+would land in a directory nothing versions. Pick a mode:
+
+*Mode A, track in-repo.* Replace a blanket `.claude/` ignore with the three-line block above,
+then:
+
+```bash
+git add .claude && git status   # review the staged list; do not trust it
+```
+
+Read that list rather than committing it blind. `settings.local.json` stays ignored for a
+reason, and a directory that has gone unversioned for months collects local-only files.
+
+*Mode B, private sidecar.* Create the private repo, then clone it into place and leave the
+shared repo's ignore rule alone:
+
+```bash
+git clone <private-remote> .claude
+git -C .claude log --oneline -1   # confirm it is a real checkout, not an empty dir
+```
+
+**If `.claude/` already exists only on one machine, recover it before doing either.** That
+machine holds the only copy. Archive it first, then adopt a mode:
+
+```bash
+tar czf ~/claude-backup-$(date +%F).tgz .claude   # run this on the machine that has it
+```
+
+**Step 3 is amended** by Corrections 1 through 3 above. Run the directory pass as well as the
+file pass, fix your `sed` range against your own section headings, and hand-verify any
+MISSING line that came from a command example before you believe it.
+
+---
+
 ## 2026-08-03: Environment Doctrine — uv Replaces pip/venv/pyenv/conda (Drop-In)
 
 **uv** (Astral, written in Rust) is now the environment engine for every repo in this

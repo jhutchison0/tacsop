@@ -80,6 +80,9 @@ The script discovers downstream repos by recursive scan of `~/projects/` for any
 - No explicit registry. A new downstream repo is auto-discovered the moment it gets a `.claude/commands/` directory.
 - A repo that adopts our template but is in a non-standard parent path (not under `~/projects/`) is invisible. This is acceptable for now but should be revisited if it ever bites.
 - A repo that intentionally opts out cannot. The only workaround is to delete its `.claude/commands/` directory, which defeats the purpose.
+- **A repo that gitignores `.claude/` is undiscoverable on any fresh clone.** Discovery reads the filesystem, not the roster, so an ignored and therefore untracked `.claude/` is absent the moment the repo is cloned somewhere new. Observed 2026-08-22 in `aar_ai_pipeline`: on the roster since before 2026-07-26, ignoring `.claude/` since commit `1020a43`, and undiscoverable in the clone at `~/projects/gitlab/ops_research/`. **Ignoring `.claude/` is often deliberate** — a repo shared with outside collaborators is commonly scoped to the deliverable, with internal workflow tooling versioned elsewhere. Discovery does not distinguish that from a repo that has simply lost its tooling, and it cannot: both look like an absent directory. The consumer-side fix is the private-sidecar mode in the 2026-08-22 amendment to the 2026-08-21 entry, which restores discovery as a side effect, because a sidecar cloned to `.claude/` puts `.claude/commands` back on disk. Until a consumer adopts one of the two modes, **hand-delivery is the only channel into it.**
+
+**Discovery is not a census.** It reports what is on this machine right now. A name absent from a discovery run may be alive on another machine, cloned without its `.claude/`, or genuinely gone, and the run cannot tell you which. Never prune the roster on a single machine's discovery output.
 
 **Open question (track in `docs/tasks.md` if it becomes pressing)**: should the script support an opt-out file (`.claude/no-propagate`)?
 
@@ -174,5 +177,5 @@ This list is informational. The script does not read it. Actual notification tar
 
 ---
 
-**Last Updated**: 2026-07-17 (repo renamed `utils` → `tacsop`, ADR-0002; protocol content otherwise unchanged)
+**Last Updated**: 2026-08-22 (Downstream Discovery: recorded the gitignored-`.claude/` failure mode and the rule that discovery is not a census, both from the `aar_ai_pipeline` traversal. Roster itself still wrong in both directions and tracked as a P2 in `docs/tasks.md`.)
 **Authoring Skill**: none yet (candidate: future `propagating-doctrine` skill if this protocol gets enough use)

@@ -70,6 +70,19 @@ git status --short
 - Expected output: empty. WARN on any MISSING line, and record the run's count in the session doc (it is metric M2 in `.claude/skills/traversing-the-knowledge-base/SKILL.md`; an unrecorded run is indistinguishable from an unrun check)
 - Any MISSING line is caught drift and fires that skill's build trigger
 
+**Three known blind spots. A clean run means clean only within them** (found in the field, 2026-08-21 `contract-knowledge-graph` and 2026-08-22 `aar_ai_pipeline`; see the amendments to the 2026-08-21 doctrine entry):
+1. **Directory references are invisible.** The regex requires a file extension, so `.claude/agents/` never matches. In `aar_ai_pipeline` this hid 4 of 5 broken references sitting in the same table as the one that was caught. Run the directory pass below alongside the file pass.
+2. **No notion of a base directory.** Every path resolves against the repo root, so a cross-repo citation and a path inside a documented `cd subdir && ...` command both report MISSING while the file exists. Hand-verify before editing the doc.
+3. **A missing surface costs coverage silently.** `cat` failures are swallowed by `2>/dev/null`; an absent `CONTEXT.md` reads the same as a clean one.
+
+```bash
+# Directory pass, covering blind spot 1. Same surfaces, no extension required.
+{ cat CLAUDE.md CONTEXT.md README.md LANGUAGE.md .claude/README.md 2>/dev/null; } \
+  | grep -oE '(docs|src|tests|config|scripts|\.claude|\.github)/[A-Za-z0-9_./-]*/' \
+  | grep -vE '^\.claude/audits/$' \
+  | sort -u | while read -r p; do [ -d "$p" ] || echo "MISSING-DIR: $p"; done
+```
+
 ### 6. Gate-Surface Separation
 ```bash
 # Gate surfaces (checks, hooks, settings) change alone, per CONOP WHETSTONE D4:

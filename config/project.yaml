@@ -55,12 +55,15 @@ testing:
 state:
   last_session:
     date: "2026-08-28"
-    file: "docs/sessions/20260828_cross_repo_feedback_loop_check.md"
-    summary: "Cross-repo feedback loop check for the presentation: stx-server's designing-clear-data-displays byte-identical, 0 commits since our copy; its traversal-skill use scanned (2 of 5 session docs carry the line, six traversals in one review, both lines pass a cross-repo M3 check); A6 read on both canaries (veil-engine 6 of 6 captured; tactics-game no sessions); delta harvest lessons 34 to 41; the acknowledgment gap found (stx-server's three hub-upward lines open after the hub applied them); the bottom-up and recursion questions answered in the session doc."
-  active_work: "Propagate the 2026-08-27 entry (dry run 16 repos; user's go pending; decide the one acknowledgment line first); harvest veil-engine's six captured lessons (13 days); route delta lessons 34 to 41 at their cycles; WHETSTONE Wave 1 window (session 2 of 5 logged 2026-08-28); uv migration and P1 rename on work/home/laptop; Day-1 playbook rewrite (P2); decide the five March docs; 0.2.0 cut."
+    file: "docs/sessions/20260828_fleet_poll_and_loop_closure_audit.md"
+    summary: "Second 2026-08-28 session, on the other machine. Merged the two boxes' Wave 1 work (three conflicts, disjoint not duplicated) and found both had numbered the same five-session window 1 and 2. Polled all 13 repos here: 9 discoverable, 4 carry the traversal skill, 3 distinct copies of it already, adoption to first organic use is 1 day where it happens. The recursion loop has closed twice for real and has three mechanical breaks: the observer is per-machine, the notification ships 1 of 12 entries, and the capture point was never shipped. Prior session that day: docs/sessions/20260828_cross_repo_feedback_loop_check.md."
+  active_work: "Push three unpushed commits. Settle the contested WHETSTONE Wave 1 session count (P1) before the exit criterion can be evaluated. Three P1 loop fixes from the 2026-08-28 poll: ship the capture point, make the notification carry the unacknowledged set, decide what the fleet ledger is. Carried from the earlier 2026-08-28 session: propagate the 2026-08-27 entry (its dry run reached 16 repos; this box's reaches 9, which is the fleet-partition finding in one number), harvest veil-engine's six captured lessons (13 days), route delta lessons 34 to 41 at their cycles. Also open: uv migration and P1 rename on work/home/laptop; Day-1 playbook rewrite (P2); decide the five March docs; 0.2.0 cut."
   known_issues:
     - "Audit hook is soft-deterministic (logs, never blocks); cannot enforce temporal vertical-slicing (all tests then all impl)"
     - "exponential() raises ZeroDivisionError for nonzero |rate| < ~2.2e-16 (Active task; repro in docs/tasks.md)"
+    - "propagate_doctrine.py emits only the most recent doctrine entry; a consumer that misses a cycle stays missed and the hub reads the same either way (P1; found downstream in ffskg 2026-08-13, reached the hub 2026-08-28)"
+    - "No participant can observe the whole fleet: discovery is per-machine and the two boxes' scans disagree 9 against 16 (P1)"
+    - "No git identity configured on this box; commits require GIT_AUTHOR_* passed explicitly"
 
 # Slash commands reference
 commands:

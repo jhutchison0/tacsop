@@ -15,6 +15,24 @@ design_pillars:
   - "Config-Driven"
   # TODO: Add your project-specific pillars
 
+# Machine roster — keyed by hostname, read by src/myproject/utils/machine.py
+#
+# Discovery is per-machine and always has been; this block is the fleet's only
+# written record of its own members. An unlisted hostname resolves to `unknown`
+# and still works, it just knows less. Add a box on first visit.
+#
+# No usernames here. Per-user namespaces are derived from $USER at runtime.
+machines:
+  titanx:
+    role: workstation
+    scope: [work, personal]
+    references:
+      lakehouse: ~/projects/gitlab/dis-data/dis-lakehouse
+  unknown:
+    role: unspecified
+    scope: [personal]
+    references: {}
+
 # Directory structure
 paths:
   source: "src/myproject"

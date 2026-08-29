@@ -196,6 +196,18 @@ These skills are portable to any software project. They contain no project names
 
 **Use when**: Drawing or reviewing any data display; writing code that places marks and labels; adopting the skill in a downstream repo.
 
+### lake-conventions (directory form)
+
+**Path**: `.claude/skills/lake-conventions/SKILL.md` + 2 sidecars (`PREFLIGHT.md`, `ADOPTION.md`).
+
+**Focus**: Reading from and writing to the DIS lakehouse: bucket tiers as maturity stages, the two path grammars, format by audience, the two companion files every dataset ships, mandatory S3 client settings, and a dev/prod split whose safe default is refusing to guess.
+
+**Key concepts**: promote landing to staging to Iceberg and never write a warehouse prefix directly, Parquet mandatory for tabular in staging, a `README.md` and a `manifest.json` in every prefix, SigV4 plus path-style plus region, thread the target through every leg of the chain, a conservative gate is still a wrong gate.
+
+**Audience**: work-remote repos that touch the lake. Not universal. The authority is the `dis-lakehouse` repo, not this skill.
+
+**Use when**: Adding or reviewing lake writes, choosing a format for a lake artifact, planning a dev-to-production promotion, or preparing a machine to do lake work.
+
 ### task management (command: `/task`)
 
 **Focus**: Military-inspired work tracking with structured escalation from tasks to operations orders.
@@ -391,6 +403,11 @@ This is why `session-end`, `pcc`, `pci`, `sitrep`, `session-start`, and `task` r
 │
 ├── traversing-the-knowledge-base/
 │   └── SKILL.md
+│
+├── lake-conventions/
+│   ├── SKILL.md
+│   ├── PREFLIGHT.md
+│   └── ADOPTION.md
 │
 └── # Level 1 — Project-Specific
     (none — this is a template; downstream repos add as needed)

@@ -46,7 +46,8 @@ This directory contains agent definitions, team templates, slash commands, and s
         ├── using-topic-branches/SKILL.md
         ├── writing-simple-and-direct/SKILL.md + 4 sidecars
         ├── designing-clear-data-displays/SKILL.md + 4 sidecars
-        └── traversing-the-knowledge-base/SKILL.md
+        ├── traversing-the-knowledge-base/SKILL.md
+        └── lake-conventions/SKILL.md + 2 sidecars
 ```
 
 > Note: legacy single-file skills `configuration-management.md`, `shift-left-testing.md`, `python-venv-management.md`, and `session-end.md` were retired 2026-05-19. The first three migrated to directory form with sidecar progressive disclosure; `session-end.md` reference content moved to `docs/session-doc-format.md`. The `/session-end` workflow remains in `.claude/commands/session-end.md`. See [SKILLS_FRAMEWORK.md](skills/SKILLS_FRAMEWORK.md) for the full inventory.

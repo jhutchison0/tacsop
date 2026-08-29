@@ -4,6 +4,213 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
+## 2026-08-29: Machine Identity + Lake Conventions (work repos)
+
+Two parts. **Part 1 is universal**: every repo learns which machine it is running
+on. **Part 2 is for work-remote repos only** and points them at the lakehouse SOP,
+with a skill and a preflight for the repos that write to the lake.
+
+Audience: Part 1, every downstream repo. Part 2, only repos whose git remote is a
+work host. If your remote is `github.com`, take Part 1 and skip Part 2 entirely.
+
+Reversible: both parts are additive. Rollback for each is below.
+
+Credit: Part 2's skill is `launch-control`'s. It wrote `lake-conventions` 1.0.0 on
+2026-07-27, the hub never knew, and this cycle harvests it. The dev/prod section is
+drawn from what that repo learned by writing to the production bucket for five days.
+
+### Part 1: Machine identity
+
+Every machine distinction in this fleet has been prose written by whoever was at the
+keyboard. No config key, no env var, no roster column, no session-doc field. On
+2026-08-28 two boxes numbered the same WHETSTONE window independently and collided,
+because neither could name itself.
+
+A machine cannot be a config dimension until it is a name.
+
+#### Adoption-Mode Table (Part 1)
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 1 | `config/project.yaml` `machines:` block | **CUSTOMIZE** | Add only the hosts this repo is cloned on. Keep the `unknown` entry verbatim. |
+| 2 | `src/<pkg>/utils/machine.py` | **TEMPLATE-COPY** | Rename the package in the import. No other repo-specific content. |
+| 3 | `tests/unit/test_machine.py` | **TEMPLATE-COPY** | Same rename. |
+| 4 | `.claude/commands/session-start.md` Step 1.5 | **PATCH** | New step plus one line in the Step 5 summary. |
+
+#### Action required (Part 1)
+
+1. **Add the roster** to `config/project.yaml`, above `paths:`:
+
+```yaml
+machines:
+  <your-hostname>:
+    role: workstation
+    scope: [work, personal]
+    references: {}
+  unknown:
+    role: unspecified
+    scope: [personal]
+    references: {}
+```
+
+   Get the hostname from `hostname`. **No usernames anywhere in this block.**
+   Per-user namespaces are derived from `$USER` at runtime. A committed username
+   means a config edit per operator, which is where `launch-control` ended up.
+
+2. **Copy the module and its test**, fixing the package name in the import:
+
+```bash
+cp <hub>/src/myproject/utils/machine.py src/<your-pkg>/utils/
+cp <hub>/tests/unit/test_machine.py tests/unit/
+pytest tests/unit/test_machine.py
+```
+
+3. **Add Step 1.5 to `.claude/commands/session-start.md`**, before Step 2:
+
+```markdown
+## Step 1.5: Identify the Machine
+
+    .venv/bin/python -m <pkg-path>.utils.machine
+
+Prints one line. Report it. If the host is not in the roster, say so and offer
+to add it. Do not add it silently.
+```
+
+   Then add `**Machine**` as item 1 of the Step 5 summary list and renumber.
+
+**Expected outcome**: `/session-start` opens by naming the box. An unlisted host
+prints its own name and says it is not in the roster. It never errors.
+
+**Why committed rather than a per-machine dotfile.** A dotfile avoids drift across
+repos and would also leave the fleet with no written record of its own members,
+which is the open problem: discovery is per-machine and no participant sees the
+whole fleet. A roster in version control is the first artifact about a machine that
+survives that machine being switched off. The duplication is real, bounded, and the
+price of the fleet being able to describe itself.
+
+### Part 2: Lake conventions, and the reference SOP
+
+**Work repos only.**
+
+`dis-lakehouse` is the standard operating procedure for sharing data to the lake at
+work. Clone it to `~/projects/gitlab/dis-data/dis-lakehouse` on every work machine.
+It is the authority on bucket tiers, path grammars, file formats, and the metadata
+contract. **Work repos that touch the lake must reference it rather than restating
+it**, because it moves and a copy does not.
+
+#### Adoption-Mode Table (Part 2)
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 5 | `dis-lakehouse` clone | **CUSTOMIZE** | Clone once per work machine. Record its path in the `machines:` roster under `references.lakehouse`. |
+| 6 | `.claude/skills/lake-conventions/` (SKILL.md, PREFLIGHT.md, ADOPTION.md) | **TEMPLATE-COPY** | Level 0: copy whole, never edit locally, route fixes upstream. |
+| 7 | `CLAUDE.md` reference line | **PATCH** | One paragraph naming the skill and the reference repo. |
+| 8 | `CONTEXT.md` Reading Order | **PATCH** | One numbered entry. |
+| 9 | `scripts/lake_preflight.py` + its test | **CONDITIONAL** | Only for repos that WRITE to the lake. Skip for read-only consumers. |
+
+#### Action required (Part 2)
+
+1. **Clone the reference repo** on this machine and record the path:
+
+```yaml
+machines:
+  <your-hostname>:
+    references:
+      lakehouse: ~/projects/gitlab/dis-data/dis-lakehouse
+```
+
+2. **Copy the skill** and verify it landed clean:
+
+```bash
+cp -r <hub>/.claude/skills/lake-conventions .claude/skills/
+diff -r <hub>/.claude/skills/lake-conventions .claude/skills/lake-conventions && echo identical
+```
+
+3. **Point something at it.** A skill nothing references is a skill nobody loads.
+   Add to `CLAUDE.md`:
+
+> Data going to or coming from the lake follows `.claude/skills/lake-conventions/`.
+> The authoritative source is the `dis-lakehouse` repo, on work machines at the path
+> in `config/project.yaml` under `machines.<host>.references.lakehouse`.
+
+   Add a matching line to the `CONTEXT.md` Reading Order.
+
+4. **If the repo writes to the lake**, copy the preflight and run it once:
+
+```bash
+cp <hub>/scripts/lake_preflight.py scripts/
+cp <hub>/tests/unit/test_lake_preflight.py tests/unit/
+python scripts/lake_preflight.py --target dev
+```
+
+   **Expect a nonzero first result.** Most repos have no credentials in the shell
+   and have never declared their legs. Read every line before wiring it into
+   anything. Do not add a check whose output you have not read.
+
+**Expected outcome**: the skill loads by description, the preflight refuses a bare
+invocation, and a partially threaded chain is named before it runs rather than
+found in the lake afterwards.
+
+### The evidence this cycle is built on
+
+`launch-control` threaded its `--lake-profile` flag through the engine and stage1
+but not stage2. One process in the chain loaded production config while its siblings
+ran in dev. Nothing errored. It wrote to the live `staging` bucket for five days and
+was caught only by someone inspecting the lake by hand. The same class of failure
+recurred a month later in a different driver.
+
+That is why `lake_preflight.py` takes the legs and checks each one, and why a bare
+invocation is an error rather than a default. In that repo, bare meant production in
+every entry point but one.
+
+Separately, and worth knowing before anyone stores a large local cache: 713 GB of
+uncontrolled cache once filled a shared work host to zero bytes free and locked a
+colleague out of the box.
+
+### A conflict this cycle does not resolve
+
+`launch-control`'s `CONTEXT.md` and its local `configuration-management` sidecar both
+list profile layers as an anti-pattern that "will fail code review". Its shipped
+`lake_config.py` implements exactly that, with a deep merge. The anti-rule descends
+from this hub's own `configuration-management` skill.
+
+This entry blesses no profile mechanism. It says only that the target must be named
+explicitly at every entry point and that an unknown name is an error. How a repo
+stores its targets is its own call until the hub decides. Whoever reconciles the
+anti-rule should do it as an ADR, not in passing.
+
+### Rollback
+
+Part 1: delete the `machines:` block, `machine.py`, its test, and Step 1.5. Nothing
+else reads them.
+
+Part 2: delete `.claude/skills/lake-conventions/`, `scripts/lake_preflight.py` and
+its test, and the `CLAUDE.md` and `CONTEXT.md` lines. Keep the `machines:` block; it
+is useful on its own.
+
+### Files (tacsop)
+
+```
+config/project.yaml                              (machines: roster)
+src/myproject/utils/machine.py                   (new: resolve_machine, describe)
+tests/unit/test_machine.py                       (new: 6 tests)
+scripts/lake_preflight.py                        (new: 6 checks, main(argv))
+tests/unit/test_lake_preflight.py                (new: 24 tests)
+.claude/skills/lake-conventions/SKILL.md         (new: harvested, generalized)
+.claude/skills/lake-conventions/PREFLIGHT.md     (new)
+.claude/skills/lake-conventions/ADOPTION.md      (new)
+.claude/commands/session-start.md                (Step 1.5; summary item 1)
+.claude/skills/SKILLS_FRAMEWORK.md               (skill block; inventory tree)
+.claude/README.md                                (skills tree)
+CONTEXT.md                                       (Reading Order entry 8)
+```
+
+Hub verification: 270 tests passing, up from 240. Preflight run on `titanx` reports
+the reference repo present and 7 days old, and correctly names the unthreaded leg in
+a three-leg chain.
+
+---
+
 ## 2026-08-27: Figure Style Doctrine (designing-clear-data-displays) + Research Tools + Audit-Hook Fallback
 
 Three parts, each independently adoptable through its own table. **Part 1 is the

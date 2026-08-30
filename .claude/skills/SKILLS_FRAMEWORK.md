@@ -198,15 +198,15 @@ These skills are portable to any software project. They contain no project names
 
 ### lake-conventions (directory form)
 
-**Path**: `.claude/skills/lake-conventions/SKILL.md` + 2 sidecars (`PREFLIGHT.md`, `ADOPTION.md`).
+**Path**: `.claude/skills/lake-conventions/SKILL.md` + 3 sidecars (`PREFLIGHT.md`, `ADOPTION.md`, `HOME-STORAGE.md`).
 
-**Focus**: Reading from and writing to the DIS lakehouse: bucket tiers as maturity stages, the two path grammars, format by audience, the two companion files every dataset ships, mandatory S3 client settings, and a dev/prod split whose safe default is refusing to guess.
+**Focus**: The two storage systems this fleet writes to. For the work lakehouse: bucket tiers as maturity stages, the two path grammars, format by audience, the two companion files every dataset ships, mandatory S3 client settings, and a dev/prod split whose safe default is refusing to guess. For personal projects: `HOME-STORAGE.md`, writing bulk data to home network storage with no address in git.
 
-**Key concepts**: promote landing to staging to Iceberg and never write a warehouse prefix directly, Parquet mandatory for tabular in staging, a `README.md` and a `manifest.json` in every prefix, SigV4 plus path-style plus region, thread the target through every leg of the chain, a conservative gate is still a wrong gate.
+**Key concepts**: promote landing to staging to Iceberg and never write a warehouse prefix directly, Parquet mandatory for tabular in staging, a `README.md` and a `manifest.json` in every prefix, SigV4 plus path-style plus region, thread the target through every leg of the chain, a conservative gate is still a wrong gate; scope selects the storage system, committed config points at code and docs while only the environment points at data, required variable with loud failure, never an embedded database over SMB, a mirror with deletions is not backup.
 
-**Audience**: work-remote repos that touch the lake. Not universal. The authority is the `dis-lakehouse` repo, not this skill.
+**Audience**: work-remote repos that touch the lake, and personal repos that write bulk data to home storage. The lake authority is the `dis-lakehouse` repo, not this skill; home storage has no authoritative repo and says so.
 
-**Use when**: Adding or reviewing lake writes, choosing a format for a lake artifact, planning a dev-to-production promotion, or preparing a machine to do lake work.
+**Use when**: Adding or reviewing lake or home-storage writes, choosing a format for a stored artifact, planning a dev-to-production promotion, or preparing a machine to do storage work.
 
 ### task management (command: `/task`)
 
@@ -407,7 +407,8 @@ This is why `session-end`, `pcc`, `pci`, `sitrep`, `session-start`, and `task` r
 ├── lake-conventions/
 │   ├── SKILL.md
 │   ├── PREFLIGHT.md
-│   └── ADOPTION.md
+│   ├── ADOPTION.md
+│   └── HOME-STORAGE.md
 │
 └── # Level 1 — Project-Specific
     (none — this is a template; downstream repos add as needed)

@@ -1,7 +1,7 @@
 ---
 name: lake-conventions
-description: Conventions for reading from and writing to the DIS lakehouse: bucket tiers, path grammars, file formats, the two companion files every dataset ships, and the dev/prod split. Use when adding or reviewing any code that writes to the lake, choosing a format for a lake artifact, planning a dev-to-production promotion, or preparing a machine to do lake work.
-version: "1.0.0"
+description: Conventions for the two storage systems this fleet writes to. For the work lakehouse: bucket tiers, path grammars, file formats, the two companion files every dataset ships, and the dev/prod split. For personal projects on personal-scoped machines, HOME-STORAGE.md covers writing bulk data to home network storage with no address in git. Use when adding or reviewing any code that writes to the lake or to home storage, choosing a format for a stored artifact, planning a dev-to-production promotion, or preparing a machine to do storage work.
+version: "1.1.0"
 ---
 
 # Lake conventions
@@ -18,6 +18,14 @@ upstream wins**, and the disagreement is a bug in this file worth fixing.
 Read `PREFLIGHT.md` before a first run on a new machine. Read `ADOPTION.md`
 once per repo.
 
+**Which storage system?** The project's scope selects it: work-scoped data
+goes to the lake, personal-scoped data goes to home storage, and crossing
+that line is a human decision made explicitly, never a fallback or a
+convenience. A personal project (`project.scope: personal` in
+`config/project.yaml`, on a rostered machine with `personal` scope) reads
+`HOME-STORAGE.md` instead of the lake sections below. Everything below this
+line is the lake.
+
 ## When to use
 
 - Adding or reviewing code that writes to the lake
@@ -25,6 +33,7 @@ once per repo.
 - Planning a promotion from development to production
 - Auditing an existing surface for format or path drift
 - Preparing a machine to do lake work (then run `scripts/lake_preflight.py`)
+- Writing a personal project's bulk data to home storage (read `HOME-STORAGE.md`)
 
 ## Buckets are maturity tiers, not environments
 
@@ -160,6 +169,17 @@ deployment tree over the prose when they disagree.
 
 ## Version History
 
+- **1.1.0** (2026-08-30): Home-storage coverage as a new sidecar,
+  `HOME-STORAGE.md`, for personal projects on personal-scoped machines.
+  Harvested from a gitignored local storage doc and generalized: every
+  hostname, share name, pool name, and drive path removed. Keeps the
+  three-address-forms rule, roots-from-environment with a required-variable
+  loud-failure pattern (no address defaults, role-named `HOME_<ROLE>_ROOT`
+  variables), the embedded-database-over-SMB hazard, mirror-is-not-backup,
+  address-by-name, least-privilege credentials, and bulk-data-to-device.
+  `config/project.yaml` gains an optional `project.scope` field (absent
+  means work); the routing paragraph above reads it alongside the machine
+  roster's scope.
 - **1.0.0** (2026-08-29): Initial, in the hub. Harvested from `launch-control`'s
   local `lake-conventions` 1.0.0 (2026-07-27), which covered format-by-bucket
   and the `_tmp/` scratch namespace for one repo. Generalized: repo-specific

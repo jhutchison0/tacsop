@@ -6,6 +6,10 @@ project:
   version: "0.1.0"
   description: "A Python project template with reusable utilities"
   python_requires: ">=3.11"
+  # scope: personal | work — the project's nature, read by the storage
+  # routing rule in .claude/skills/lake-conventions/. Absent means work
+  # (lake-only; home storage stays closed). The hub is a template and
+  # declares neither.
 
 # Design pillars — define in docs/design/pillars.md
 # Reference them here by name for quick lookup
@@ -28,6 +32,11 @@ machines:
     scope: [work, personal]
     references:
       lakehouse: ~/projects/gitlab/dis-data/dis-lakehouse
+  Nidhogg:
+    role: workstation
+    scope: [personal]
+    references:
+      home_storage: ~/projects/github/tacsop/docs/design/hold/STORAGE.md
   unknown:
     role: unspecified
     scope: [personal]

@@ -4,6 +4,116 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
+## 2026-08-30: Home Storage for Personal Repos (`lake-conventions` 1.1.0)
+
+The 2026-08-29 entry scoped `lake-conventions` to work repos and said personal
+repos should "skip Part 2 entirely." This entry retires that skip. The skill now
+covers both storage systems the fleet writes to, and the new sidecar,
+`HOME-STORAGE.md`, is for the personal side: writing bulk data to home network
+storage with **no address in git**.
+
+Audience: personal repos (git remote on a public host such as `github.com`)
+that write bulk data. Work repos: no action; refresh your Level 0 copy of the
+skill whenever convenient and nothing in your behavior changes, because the
+routing gate below stays closed for you. Fully additive; rollback below.
+
+### The governing rule
+
+A personal project gets access to home storage. None of the actual addresses
+go into git. The committed skill advises agents where to look; each machine's
+environment and local configuration carry the real paths.
+
+Two supporting lines, both falsifiable:
+
+- **Routing**: the project's scope selects the storage system. Work-scoped
+  data goes to the lake, personal-scoped data goes to home storage, and
+  crossing that line is a human decision made explicitly, never a fallback or
+  a convenience.
+- **Boundary**: committed config may point at code and docs (tilde-relative,
+  no usernames). Only the environment points at data. Anything that resolves
+  over a network (a UNC path, a hostname, an IP, a mount endpoint) never goes
+  in git, in any file, in any role. A committed variable name that embeds a
+  hostname is half an address in git; name variables by role
+  (`HOME_MEDIA_ROOT`), never by host.
+
+### Adoption-Mode Table
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 1 | `.claude/skills/lake-conventions/` (now SKILL.md + 3 sidecars) | **TEMPLATE-COPY** | Level 0: copy whole, never edit locally, route fixes upstream. Replaces 1.0.0 wholesale. |
+| 2 | `config/project.yaml` `project.scope` | **CUSTOMIZE** | Personal repos declare `scope: personal` under `project:`. Absent means work; home storage stays closed. |
+| 3 | `.env.example` `HOME_*` names | **PATCH** | Names with placeholder values only. Real values go in `.env` per machine, which is never committed. |
+| 4 | `machines.<host>.references.home_storage` | **CONDITIONAL** | Only if the machine has a local topology doc; a docs pointer is allowed in the roster, a data root is not. |
+
+### Action required (personal repos only)
+
+1. Re-copy the skill from the hub and verify:
+
+```bash
+cp -r ~/projects/github/tacsop/.claude/skills/lake-conventions .claude/skills/
+diff -r ~/projects/github/tacsop/.claude/skills/lake-conventions .claude/skills/lake-conventions && echo identical
+```
+
+2. Declare `scope: personal` under `project:` in `config/project.yaml`. The
+   gate in `HOME-STORAGE.md` also requires the machine to be in the
+   `machines:` roster with `personal` scope; an unknown machine is not a
+   personal machine, so add the box first.
+3. Add the role-named variables to `.env.example` with placeholder values and
+   to `.env` with real ones. In code, read them with the required-variable
+   loud-failure pattern in `HOME-STORAGE.md`. **Never an address default**:
+   a fallback address in `os.environ.get` puts the address in git and trades
+   a clear error for a network timeout.
+4. Update the `CLAUDE.md` reference line and `CONTEXT.md` Reading Order entry
+   to the two-audience wording in the skill's `ADOPTION.md` step 2.
+5. Read the six paid-for rules in `HOME-STORAGE.md` before the first write.
+   The two that bite hardest: never run an embedded database (SQLite, DuckDB,
+   Kuzu, on-disk vector stores) against an SMB share, and treat a mirror with
+   deletions as availability, not backup.
+
+**Expected outcome**: the skill loads for storage work in both audiences; a
+personal repo's code fails loudly when a `HOME_*` variable is unset; and no
+committed file in the repo can name the storage host, because nothing needs to.
+
+### What this entry does not do
+
+- No preflight coverage. `scripts/lake_preflight.py` checks nothing about home
+  storage and says so; a home-storage preflight waits until a real run defines
+  what it must mirror.
+- No authoritative reference repo. The lake has `dis-lakehouse`; home storage
+  has only the skill and each machine's local topology doc, and the skill says
+  so plainly rather than implying an authority that is not on any disk.
+- No blessing of any share layout. Roles (corpus of record, store replicas,
+  kept artifacts) are an example shape; the actual names are addresses and
+  live with the machine.
+
+### Rollback
+
+Delete `HOME-STORAGE.md` (or re-copy the skill at 1.0.0), drop `project.scope`
+from `config/project.yaml`, the `HOME_*` lines from `.env.example`, and any
+`references.home_storage` roster line. Nothing else reads them.
+
+### Files (tacsop)
+
+```
+.claude/skills/lake-conventions/HOME-STORAGE.md   (new sidecar)
+.claude/skills/lake-conventions/SKILL.md          (1.1.0: routing paragraph, description)
+.claude/skills/lake-conventions/ADOPTION.md       (two audiences; step 6)
+config/project.yaml                               (project.scope documented; this box rostered)
+.env.example                                      (HOME_* names, placeholder values)
+.claude/skills/SKILLS_FRAMEWORK.md                (entry + tree)
+.claude/README.md                                 (skills tree)
+CONTEXT.md                                        (Reading Order entry 8)
+docs/reviews/20260830_home_storage_proposal.md    (new: proposer)
+docs/reviews/20260830_home_storage_review.md      (new: code-reviewer, GO-WITH-FIXES)
+```
+
+Hub verification: source material reviewed by proposer and code-reviewer in
+parallel before writing; all eight fix items applied, including replacing the
+source doc's address-default env pattern, which violated this entry's own
+boundary line. 269 tests passing; no code changed.
+
+---
+
 ## 2026-08-29: Machine Identity + Lake Conventions (work repos)
 
 Two parts. **Part 1 is universal**: every repo learns which machine it is running

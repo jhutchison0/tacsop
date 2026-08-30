@@ -60,16 +60,20 @@ class TestResolveMachine:
         assert result.known is False
         assert result.scope == ("personal",)
 
-    def test_reference_paths_expand_to_absolute(self, roster, monkeypatch):
+    def test_reference_paths_expand_to_absolute(self, roster, monkeypatch, tmp_path):
         _at_host(monkeypatch, "titanx")
-        monkeypatch.setenv("HOME", "/home/someone")
+        # expanduser reads HOME on POSIX and USERPROFILE on Windows; set both
+        # so the test controls expansion on either platform.
+        fake_home = tmp_path / "home" / "someone"
+        monkeypatch.setenv("HOME", str(fake_home))
+        monkeypatch.setenv("USERPROFILE", str(fake_home))
 
         result = machine.resolve_machine()
 
         lakehouse = result.references["lakehouse"]
         assert lakehouse.is_absolute()
         assert "~" not in str(lakehouse)
-        assert str(lakehouse).endswith("projects/gitlab/dis-data/dis-lakehouse")
+        assert lakehouse == fake_home / "projects/gitlab/dis-data/dis-lakehouse"
 
     def test_machine_without_references_gets_empty_mapping(self, roster, monkeypatch):
         _at_host(monkeypatch, "some-new-laptop")

@@ -26,7 +26,7 @@ When a term is missing or contested, invoke the `maintaining-ubiquitous-language
 
 **Utility**: A criterion-level or alternative-level score in [0, 1] after value-function transformation and weighting. _Avoid:_ score (use only for raw input).
 
-**MAUT**: Multi-Attribute Utility Theory, the additive-utility decision model this project implements in `src/myproject/utils/decision_science/`.
+**MAUT**: Multi-Attribute Utility Theory, the additive-utility decision model this project implements in `src/myproject/decision_science/`.
 
 **Sensitivity Analysis**: A check of how the alternative ranking changes when weights or scores move. Three modes: OAT (one-at-a-time), Monte Carlo, scenario compare.
 

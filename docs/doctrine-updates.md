@@ -4,6 +4,748 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
+## 2026-08-30: Home Storage for Personal Repos (`lake-conventions` 1.1.0)
+
+The 2026-08-29 entry scoped `lake-conventions` to work repos and said personal
+repos should "skip Part 2 entirely." This entry retires that skip. The skill now
+covers both storage systems the fleet writes to, and the new sidecar,
+`HOME-STORAGE.md`, is for the personal side: writing bulk data to home network
+storage with **no address in git**.
+
+Audience: personal repos (git remote on a public host such as `github.com`)
+that write bulk data. Work repos: no action; refresh your Level 0 copy of the
+skill whenever convenient and nothing in your behavior changes, because the
+routing gate below stays closed for you. Fully additive; rollback below.
+
+### The governing rule
+
+A personal project gets access to home storage. None of the actual addresses
+go into git. The committed skill advises agents where to look; each machine's
+environment and local configuration carry the real paths.
+
+Two supporting lines, both falsifiable:
+
+- **Routing**: the project's scope selects the storage system. Work-scoped
+  data goes to the lake, personal-scoped data goes to home storage, and
+  crossing that line is a human decision made explicitly, never a fallback or
+  a convenience.
+- **Boundary**: committed config may point at code and docs (tilde-relative,
+  no usernames). Only the environment points at data. Anything that resolves
+  over a network (a UNC path, a hostname, an IP, a mount endpoint) never goes
+  in git, in any file, in any role. A committed variable name that embeds a
+  hostname is half an address in git; name variables by role
+  (`HOME_MEDIA_ROOT`), never by host.
+
+### Adoption-Mode Table
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 1 | `.claude/skills/lake-conventions/` (now SKILL.md + 3 sidecars) | **TEMPLATE-COPY** | Level 0: copy whole, never edit locally, route fixes upstream. Replaces 1.0.0 wholesale. |
+| 2 | `config/project.yaml` `project.scope` | **CUSTOMIZE** | Personal repos declare `scope: personal` under `project:`. Absent means work; home storage stays closed. |
+| 3 | `.env.example` `HOME_*` names | **PATCH** | Names with placeholder values only. Real values go in `.env` per machine, which is never committed. |
+| 4 | `machines.<host>.references.home_storage` | **CONDITIONAL** | Only if the machine has a local topology doc; a docs pointer is allowed in the roster, a data root is not. |
+
+### Action required (personal repos only)
+
+1. Re-copy the skill from the hub and verify:
+
+```bash
+cp -r ~/projects/github/tacsop/.claude/skills/lake-conventions .claude/skills/
+diff -r ~/projects/github/tacsop/.claude/skills/lake-conventions .claude/skills/lake-conventions && echo identical
+```
+
+2. Declare `scope: personal` under `project:` in `config/project.yaml`. The
+   gate in `HOME-STORAGE.md` also requires the machine to be in the
+   `machines:` roster with `personal` scope; an unknown machine is not a
+   personal machine, so add the box first.
+3. Add the role-named variables to `.env.example` with placeholder values and
+   to `.env` with real ones. In code, read them with the required-variable
+   loud-failure pattern in `HOME-STORAGE.md`. **Never an address default**:
+   a fallback address in `os.environ.get` puts the address in git and trades
+   a clear error for a network timeout.
+4. Update the `CLAUDE.md` reference line and `CONTEXT.md` Reading Order entry
+   to the two-audience wording in the skill's `ADOPTION.md` step 2.
+5. Read the six paid-for rules in `HOME-STORAGE.md` before the first write.
+   The two that bite hardest: never run an embedded database (SQLite, DuckDB,
+   Kuzu, on-disk vector stores) against an SMB share, and treat a mirror with
+   deletions as availability, not backup.
+
+**Expected outcome**: the skill loads for storage work in both audiences; a
+personal repo's code fails loudly when a `HOME_*` variable is unset; and no
+committed file in the repo can name the storage host, because nothing needs to.
+
+### What this entry does not do
+
+- No preflight coverage. `scripts/lake_preflight.py` checks nothing about home
+  storage and says so; a home-storage preflight waits until a real run defines
+  what it must mirror.
+- No authoritative reference repo. The lake has `dis-lakehouse`; home storage
+  has only the skill and each machine's local topology doc, and the skill says
+  so plainly rather than implying an authority that is not on any disk.
+- No blessing of any share layout. Roles (corpus of record, store replicas,
+  kept artifacts) are an example shape; the actual names are addresses and
+  live with the machine.
+
+### Rollback
+
+Delete `HOME-STORAGE.md` (or re-copy the skill at 1.0.0), drop `project.scope`
+from `config/project.yaml`, the `HOME_*` lines from `.env.example`, and any
+`references.home_storage` roster line. Nothing else reads them.
+
+### Files (tacsop)
+
+```
+.claude/skills/lake-conventions/HOME-STORAGE.md   (new sidecar)
+.claude/skills/lake-conventions/SKILL.md          (1.1.0: routing paragraph, description)
+.claude/skills/lake-conventions/ADOPTION.md       (two audiences; step 6)
+config/project.yaml                               (project.scope documented; this box rostered)
+.env.example                                      (HOME_* names, placeholder values)
+.claude/skills/SKILLS_FRAMEWORK.md                (entry + tree)
+.claude/README.md                                 (skills tree)
+CONTEXT.md                                        (Reading Order entry 8)
+docs/reviews/20260830_home_storage_proposal.md    (new: proposer)
+docs/reviews/20260830_home_storage_review.md      (new: code-reviewer, GO-WITH-FIXES)
+```
+
+Hub verification: source material reviewed by proposer and code-reviewer in
+parallel before writing; all eight fix items applied, including replacing the
+source doc's address-default env pattern, which violated this entry's own
+boundary line. 269 tests passing; no code changed.
+
+---
+
+## 2026-08-29: Machine Identity + Lake Conventions (work repos)
+
+Two parts. **Part 1 is universal**: every repo learns which machine it is running
+on. **Part 2 is for work-remote repos only** and points them at the lakehouse SOP,
+with a skill and a preflight for the repos that write to the lake.
+
+Audience: Part 1, every downstream repo. Part 2, only repos whose git remote is a
+work host. If your remote is `github.com`, take Part 1 and skip Part 2 entirely.
+
+Reversible: both parts are additive. Rollback for each is below.
+
+Credit: Part 2's skill is `launch-control`'s. It wrote `lake-conventions` 1.0.0 on
+2026-07-27, the hub never knew, and this cycle harvests it. The dev/prod section is
+drawn from what that repo learned by writing to the production bucket for five days.
+
+### Part 1: Machine identity
+
+Every machine distinction in this fleet has been prose written by whoever was at the
+keyboard. No config key, no env var, no roster column, no session-doc field. On
+2026-08-28 two boxes numbered the same WHETSTONE window independently and collided,
+because neither could name itself.
+
+A machine cannot be a config dimension until it is a name.
+
+#### Adoption-Mode Table (Part 1)
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 1 | `config/project.yaml` `machines:` block | **CUSTOMIZE** | Add only the hosts this repo is cloned on. Keep the `unknown` entry verbatim. |
+| 2 | `src/<pkg>/utils/machine.py` | **TEMPLATE-COPY** | Rename the package in the import. No other repo-specific content. |
+| 3 | `tests/unit/test_machine.py` | **TEMPLATE-COPY** | Same rename. |
+| 4 | `.claude/commands/session-start.md` Step 1.5 | **PATCH** | New step plus one line in the Step 5 summary. |
+
+#### Action required (Part 1)
+
+1. **Add the roster** to `config/project.yaml`, above `paths:`:
+
+```yaml
+machines:
+  <your-hostname>:
+    role: workstation
+    scope: [work, personal]
+    references: {}
+  unknown:
+    role: unspecified
+    scope: [personal]
+    references: {}
+```
+
+   Get the hostname from `hostname`. **No usernames anywhere in this block.**
+   Per-user namespaces are derived from `$USER` at runtime. A committed username
+   means a config edit per operator, which is where `launch-control` ended up.
+
+2. **Copy the module and its test**, fixing the package name in the import:
+
+```bash
+cp <hub>/src/myproject/utils/machine.py src/<your-pkg>/utils/
+cp <hub>/tests/unit/test_machine.py tests/unit/
+pytest tests/unit/test_machine.py
+```
+
+3. **Add Step 1.5 to `.claude/commands/session-start.md`**, before Step 2:
+
+```markdown
+## Step 1.5: Identify the Machine
+
+    .venv/bin/python -m <pkg-path>.utils.machine
+
+Prints one line. Report it. If the host is not in the roster, say so and offer
+to add it. Do not add it silently.
+```
+
+   Then add `**Machine**` as item 1 of the Step 5 summary list and renumber.
+
+**Expected outcome**: `/session-start` opens by naming the box. An unlisted host
+prints its own name and says it is not in the roster. It never errors.
+
+**Why committed rather than a per-machine dotfile.** A dotfile avoids drift across
+repos and would also leave the fleet with no written record of its own members,
+which is the open problem: discovery is per-machine and no participant sees the
+whole fleet. A roster in version control is the first artifact about a machine that
+survives that machine being switched off. The duplication is real, bounded, and the
+price of the fleet being able to describe itself.
+
+### Part 2: Lake conventions, and the reference SOP
+
+**Work repos only.**
+
+`dis-lakehouse` is the standard operating procedure for sharing data to the lake at
+work. Clone it to `~/projects/gitlab/dis-data/dis-lakehouse` on every work machine.
+It is the authority on bucket tiers, path grammars, file formats, and the metadata
+contract. **Work repos that touch the lake must reference it rather than restating
+it**, because it moves and a copy does not.
+
+#### Adoption-Mode Table (Part 2)
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 5 | `dis-lakehouse` clone | **CUSTOMIZE** | Clone once per work machine. Record its path in the `machines:` roster under `references.lakehouse`. |
+| 6 | `.claude/skills/lake-conventions/` (SKILL.md, PREFLIGHT.md, ADOPTION.md) | **TEMPLATE-COPY** | Level 0: copy whole, never edit locally, route fixes upstream. |
+| 7 | `CLAUDE.md` reference line | **PATCH** | One paragraph naming the skill and the reference repo. |
+| 8 | `CONTEXT.md` Reading Order | **PATCH** | One numbered entry. |
+| 9 | `scripts/lake_preflight.py` + its test | **CONDITIONAL** | Only for repos that WRITE to the lake. Skip for read-only consumers. |
+
+#### Action required (Part 2)
+
+1. **Clone the reference repo** on this machine and record the path:
+
+```yaml
+machines:
+  <your-hostname>:
+    references:
+      lakehouse: ~/projects/gitlab/dis-data/dis-lakehouse
+```
+
+2. **Copy the skill** and verify it landed clean:
+
+```bash
+cp -r <hub>/.claude/skills/lake-conventions .claude/skills/
+diff -r <hub>/.claude/skills/lake-conventions .claude/skills/lake-conventions && echo identical
+```
+
+3. **Point something at it.** A skill nothing references is a skill nobody loads.
+   Add to `CLAUDE.md`:
+
+> Data going to or coming from the lake follows `.claude/skills/lake-conventions/`.
+> The authoritative source is the `dis-lakehouse` repo, on work machines at the path
+> in `config/project.yaml` under `machines.<host>.references.lakehouse`.
+
+   Add a matching line to the `CONTEXT.md` Reading Order.
+
+4. **If the repo writes to the lake**, copy the preflight and run it once:
+
+```bash
+cp <hub>/scripts/lake_preflight.py scripts/
+cp <hub>/tests/unit/test_lake_preflight.py tests/unit/
+python scripts/lake_preflight.py --target dev
+```
+
+   **Expect a nonzero first result.** Most repos have no credentials in the shell
+   and have never declared their legs. Read every line before wiring it into
+   anything. Do not add a check whose output you have not read.
+
+**Expected outcome**: the skill loads by description, the preflight refuses a bare
+invocation, and a partially threaded chain is named before it runs rather than
+found in the lake afterwards.
+
+### The evidence this cycle is built on
+
+`launch-control` threaded its `--lake-profile` flag through the engine and stage1
+but not stage2. One process in the chain loaded production config while its siblings
+ran in dev. Nothing errored. It wrote to the live `staging` bucket for five days and
+was caught only by someone inspecting the lake by hand. The same class of failure
+recurred a month later in a different driver.
+
+That is why `lake_preflight.py` takes the legs and checks each one, and why a bare
+invocation is an error rather than a default. In that repo, bare meant production in
+every entry point but one.
+
+Separately, and worth knowing before anyone stores a large local cache: 713 GB of
+uncontrolled cache once filled a shared work host to zero bytes free and locked a
+colleague out of the box.
+
+### A conflict this cycle does not resolve
+
+`launch-control`'s `CONTEXT.md` and its local `configuration-management` sidecar both
+list profile layers as an anti-pattern that "will fail code review". Its shipped
+`lake_config.py` implements exactly that, with a deep merge. The anti-rule descends
+from this hub's own `configuration-management` skill.
+
+This entry blesses no profile mechanism. It says only that the target must be named
+explicitly at every entry point and that an unknown name is an error. How a repo
+stores its targets is its own call until the hub decides. Whoever reconciles the
+anti-rule should do it as an ADR, not in passing.
+
+### Rollback
+
+Part 1: delete the `machines:` block, `machine.py`, its test, and Step 1.5. Nothing
+else reads them.
+
+Part 2: delete `.claude/skills/lake-conventions/`, `scripts/lake_preflight.py` and
+its test, and the `CLAUDE.md` and `CONTEXT.md` lines. Keep the `machines:` block; it
+is useful on its own.
+
+### Files (tacsop)
+
+```
+config/project.yaml                              (machines: roster)
+src/myproject/utils/machine.py                   (new: resolve_machine, describe)
+tests/unit/test_machine.py                       (new: 6 tests)
+scripts/lake_preflight.py                        (new: 6 checks, main(argv))
+tests/unit/test_lake_preflight.py                (new: 24 tests)
+.claude/skills/lake-conventions/SKILL.md         (new: harvested, generalized)
+.claude/skills/lake-conventions/PREFLIGHT.md     (new)
+.claude/skills/lake-conventions/ADOPTION.md      (new)
+.claude/commands/session-start.md                (Step 1.5; summary item 1)
+.claude/skills/SKILLS_FRAMEWORK.md               (skill block; inventory tree)
+.claude/README.md                                (skills tree)
+CONTEXT.md                                       (Reading Order entry 8)
+```
+
+Hub verification: 270 tests passing, up from 240. Preflight run on `titanx` reports
+the reference repo present and 7 days old, and correctly names the unthreaded leg in
+a three-leg chain.
+
+---
+
+## 2026-08-27: Figure Style Doctrine (designing-clear-data-displays) + Research Tools + Audit-Hook Fallback
+
+Three parts, each independently adoptable through its own table. **Part 1 is the
+headline**: a Level 0 skill for data displays, the twin of `writing-simple-and-direct`,
+built downstream in `stx-server` on 2026-08-27 and copied into the hub whole. Parts 2
+and 3 are two small fixes the same repo routed upstream. Audience: every downstream repo;
+Part 2 has one stated opt-out. All three are additive; nothing breaks.
+
+Credit: `stx-server` built the skill (proposal, adversarial challenge, 26 numbered lead
+decisions, two gate reviews, an outside feedback round; 34 Tufte quotations verified by
+fetch) to settle a label-collision bug on a field map, then measured the fix in a headless
+browser: 12 collisions before, 0 after, font unchanged. The hub's harvest of that repo's
+eight sessions is `docs/reviews/20260827_stx_server_lessons_harvest.md`.
+
+### Part 1: Figure Style, the `designing-clear-data-displays` skill (1.1.0)
+
+Every chart, figure, map, table, or data-bearing layout now follows eight rules, the way
+every prose artifact follows the writing kernel:
+
+1. Show the data; erase ink that carries none, within reason.
+2. Label the data where it lives; a key the eye must decode fails.
+3. Make every distinction as subtle as it can be and still be seen.
+4. Two marks too close make a third; move one, do not shrink both.
+5. Show the effect at its true size: lie factor between 0.95 and 1.05.
+6. Answer "compared to what?"; small multiples over one lonely chart.
+7. Document the display: title, source, units, scale on the figure.
+8. Content counts most: simple design, intense content.
+
+Before the eight: could a table or a sentence carry these numbers? Under about twenty,
+a table usually does. The skill is Tufte's material as named rules with sources and
+tests, not a persona: `RULES.md` expands each rule with the failure it counters, its
+source (primary or secondary, marked), and the test that catches it; `EXAMPLES.md` gives
+six generic before/after pairs including the one that grows (documentation is data-ink);
+`REVIEWING.md` is a five-pass review protocol with a finding format that requires a
+redraw; `ADOPTION.md` is the install procedure below.
+
+Two boundary conditions, restated so no consumer over-applies the rules:
+
+- **Grandfathering**: adoption triggers no sweep. A figure a change touches, or a queued
+  task names, gets the full pass order; a display the app still renders is not a record.
+- **UX rules outrank style**: a repo's own UX or accessibility rules can require a less
+  dense display, a larger label, or a sentence in place of a table. State the override in
+  CLAUDE.md, the pillars, or the plan's decision table; do not ignore the rule. The skill
+  governs only how the ink goes. (`stx-server` states its Kid-First override in one
+  sentence under the kernel; copy that shape.)
+
+#### Adoption-Mode Table (Part 1)
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 1 | `.claude/skills/designing-clear-data-displays/` (SKILL.md + `RULES.md`, `EXAMPLES.md`, `REVIEWING.md`, `ADOPTION.md`) | **TEMPLATE-COPY** | All five files, 409 lines, no repo names. Level 0: copy, never edit locally; route fixes upstream. |
+| 2 | `CLAUDE.md` Figure Style section | **PATCH** | Paste the block in `ADOPTION.md` step 1 beside Prose Style. Add one sentence naming your UX override if you have one. |
+| 3 | `.claude/agents/code-reviewer.md` | **PATCH** | One checklist line beside the prose line (`ADOPTION.md` step 2). |
+| 4 | `.claude/skills/SKILLS_FRAMEWORK.md`, `.claude/README.md` | **PATCH** | Index entry and tree line (`ADOPTION.md` step 3). While there: the description rule now reads "one to three sentences" (was "one"; two shipped skills carry three). |
+| 5 | `.claude/skills/writing-simple-and-direct/SKILL.md` | **TEMPLATE-COPY** (1.0.1) or **PATCH** | One scope sentence: a chart that could be a table or a sentence is the figure skill's pre-question, not the prose skill's tokens to cut. Copy the file, or add the sentence after "Never cut a required section to save tokens." and bump the version. |
+| 6 | A headless-browser layout probe | **OPTIONAL, LATER** | `ADOPTION.md` step 4. No dependency today; the seam exists. |
+
+#### Action required (Part 1)
+
+1. Copy the skill directory from the hub:
+   ```bash
+   cp -r ~/projects/github/tacsop/.claude/skills/designing-clear-data-displays .claude/skills/
+   diff -r ~/projects/github/tacsop/.claude/skills/designing-clear-data-displays .claude/skills/designing-clear-data-displays && echo identical
+   ```
+2. Open `.claude/skills/designing-clear-data-displays/ADOPTION.md` and run its steps 1
+   to 3: the CLAUDE.md block, the reviewer line, the two index entries.
+3. If your repo has a UX or accessibility rule that outranks density, add one sentence
+   under the CLAUDE.md block naming it as a decided trade-off.
+4. Copy `writing-simple-and-direct/SKILL.md` (1.0.1) from the hub, or add the one scope
+   sentence by hand.
+5. Do not sweep existing figures. The next change that touches one gets the review.
+
+Expected outcome: the code reviewer, on the next change that draws anything, produces
+findings in the `REVIEWING.md` format (severity, rule, element by coordinate or selector,
+concrete redraw). A finding without a redraw is a complaint, not a finding.
+
+### Part 2: Research tools on the two Level 0 reasoning agents
+
+`proposer` and `code-reviewer` gain `WebSearch, WebFetch` in their `tools:` lines so a
+proposal can cite a source it fetched and a challenge can re-fetch it. The Level 0 rule
+(keep them unchanged; they "should not accumulate project-specific knowledge")
+guards knowledge, not capability; `.claude/README.md` now says so. First use: every
+quotation in the Tufte skill traces to a fetched page or names the secondary source that
+carries it, and the proposer left two rules out rather than invent their wording. A
+ledger that excludes is worth more than one that fills in.
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 7 | `.claude/agents/proposer.md`, `.claude/agents/code-reviewer.md` | **PATCH** | `tools: Read, Write, Edit, Grep, Glob, Bash, WebSearch, WebFetch` |
+| 8 | `.claude/README.md` Level 0 paragraph | **PATCH** | The capability-versus-knowledge sentence, or copy the hub paragraph. |
+
+Action required: edit the two `tools:` lines. Skip this part if your repo forbids
+network access from agents; the skill in Part 1 does not depend on it.
+
+### Part 3: Audit hook import-grep fallback
+
+The shift-left audit hook looked for a test partner only by name
+(`tests/**/test_<module>.py`). A repo that names its suites by feature
+(`test_demo.py` exercising `app.main`) logged 27 false `MISSING_TEST` lines in one
+execution-phase, and noise that large trains everyone to ignore the log. After the name
+lookup misses, the hook now greps `tests/**/test_*.py` for an import of the module
+(`from pkg.mod import`, `import pkg.mod`, or `from pkg import mod`) before logging. It
+still never blocks and still exits 0 on every path.
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 9 | `.claude/hooks/post-tool-shift-left-audit.sh` | **TEMPLATE-COPY** then re-glob, or **PATCH** | If your copy is otherwise unpatched: copy the hub file and change `src/myproject/` to your package on the `case` line (`scripts/adopt_doctrine.py` does this substitution). If you patched it: port the one `if [ -z "$test_partners" ]` block that precedes the `MISSING_TEST` branch. Keep the executable bit: `git update-index --chmod=+x`. |
+| 10 | `.claude/skills/shift-left-testing/ENFORCEMENT.md` | **TEMPLATE-COPY** | Step 4 and the limitations list describe the two-stage lookup. |
+| 11 | `tests/unit/test_shift_left_hook.py` | **HUB-ONLY** | Nine tests (three behaviors) drive the hook with a JSON payload in a throwaway git repo. They assume `src/myproject/`; copy only if you change that path to your package. |
+
+Action required:
+
+1. Apply #9 and #10.
+2. Verify from a shell (needs `jq` and `git`; replace `app/main.py` with a module you have, since the hook exits silently when the path's directory does not exist):
+   ```bash
+   printf '%s' '{"tool_name":"Edit","tool_input":{"file_path":"'"$PWD"'/src/app/main.py"}}' | bash .claude/hooks/post-tool-shift-left-audit.sh
+   tail -1 .claude/audits/shift-left-violations.log
+   ```
+   A module that some `test_*.py` imports logs `OK_TEST_EXISTS` with that file as partner.
+
+### Also fixed in the hub, mirror if you copied these files
+
+- Running-prose em dashes in four template-copied docs (`docs/plans/CONOP-FORMAT.md`,
+  `docs/plans/OPORD-FORMAT.md`, `docs/session-doc-format.md`, `.claude/README.md`):
+  27 replaced per prose rule 8. Found by `stx-server`'s bootstrap audit, which could not
+  fix hub copies locally without forking doctrine. TEMPLATE-COPY the four files if yours
+  are unpatched; headings, table cells, and list-label separators were exempt and are
+  untouched.
+- `.claude/skills/shift-left-testing/SCRIPTS.md` line 3 no longer says "in this repo"
+  about hub scripts.
+- The hub's own skills trees (`.claude/README.md`, `SKILLS_FRAMEWORK.md`) listed six of
+  nine Level 0 skills; both now match the directory. Check yours.
+
+### Rollback
+
+All three parts are additive and reversible by deletion. Part 1: remove the skill
+directory, the CLAUDE.md section, the reviewer line, and the index entries; revert the
+one sentence in the writing skill. Part 2: remove the two tool names. Part 3: restore
+the prior hook (the name-only lookup is the `find` line that remains; delete the
+fallback block). Nothing downstream depends on any of the three once removed.
+
+### Files (tacsop)
+
+```
+.claude/skills/designing-clear-data-displays/SKILL.md          (1.1.0, copied whole from stx-server)
+.claude/skills/designing-clear-data-displays/RULES.md
+.claude/skills/designing-clear-data-displays/EXAMPLES.md
+.claude/skills/designing-clear-data-displays/REVIEWING.md
+.claude/skills/designing-clear-data-displays/ADOPTION.md
+.claude/skills/writing-simple-and-direct/SKILL.md              (1.0.1: the hand-off sentence)
+.claude/skills/SKILLS_FRAMEWORK.md                             (entry, tree, description rule)
+.claude/skills/shift-left-testing/ENFORCEMENT.md               (step 4, limitations)
+.claude/skills/shift-left-testing/SCRIPTS.md                   (line 3)
+.claude/agents/code-reviewer.md                                (figure checklist line; tools)
+.claude/agents/proposer.md                                     (tools)
+.claude/hooks/post-tool-shift-left-audit.sh                    (import-grep fallback)
+.claude/README.md                                              (skills tree; Level 0 paragraph; 3 dashes)
+CLAUDE.md                                                      (Figure Style section)
+docs/plans/CONOP-FORMAT.md                                     (9 dashes)
+docs/plans/OPORD-FORMAT.md                                     (9 dashes)
+docs/session-doc-format.md                                     (6 dashes)
+docs/reviews/20260827_stx_server_lessons_harvest.md            (new: 33 lessons with provenance)
+tests/unit/test_shift_left_hook.py                             (new: 9 tests, first written failing)
+CHANGELOG.md
+```
+
+Hub verification: 278 tests passing (269 + 9 hook tests), `bash -n` clean on the hook,
+skill bundle byte-identical to `stx-server` at its `307d195`.
+
+## 2026-08-21: Knowledge-Graph Traversal — Walk the Link Graph Before You Grep
+
+Your docs already form a graph. Session docs declare typed edges (`Follows`, `Documents`,
+`Implements`, `References`, `Completes`, `Requires`, `Cites`), every doc names others by
+link or bare path, and `CONTEXT.md` hand-maintains a Reading Order. Keyword search finds
+words. Traversal finds structure: where a rule came from, what depends on it, and what an
+edit will break. This cycle ships the recipes for walking that graph, plus one
+pre-commit-check that fails when the graph's references stop resolving.
+
+**Audience: the subset of repos that use the typed session-doc header convention** from
+`docs/session-doc-format.md` (propagated 2026-05-19). If your session docs do not carry
+those headers, artifact 1 has nothing to walk. Artifacts 2 and 3 stand alone and apply to
+any repo.
+
+Three artifacts:
+
+1. **`.claude/skills/traversing-the-knowledge-base/SKILL.md` (1.0.0)** — five traversals:
+   lineage (walk `Follows` both directions), blast radius (inbound references before you
+   edit a living doc), neighbors (outbound and inbound, never one alone), provenance (chase
+   the path between two docs from both ends), and integrity. Carries an evidence-line
+   convention and a falsifiable five-session success criterion so the skill can be retired
+   on data rather than kept on sentiment.
+2. **Pre-commit-check 5, reference integrity** — path-shaped references in the orientation
+   surfaces must resolve. Expected output is empty; any `MISSING:` line is caught drift.
+3. **Pre-commit-check 6, gate-surface separation** — gate surfaces (hooks, settings, the
+   check definitions themselves) change in their own commit, never bundled with the work
+   those gates judge. A gate and the thing it grades must not move together.
+
+### Why this is doctrine
+
+Cross-cutting and convention-bearing. It codifies how to navigate a corpus and how to prove
+a reference still points at something, in any repo that keeps docs. It is not a utility
+implementation; there is no code to install.
+
+### The evidence
+
+Check 5 was run against a downstream repo for the first time on 2026-08-21. It returned
+**25 unresolved references, 20 of them in that repo's README**: documented quick-start
+commands pointing at scripts and modules that a restructure had moved or deleted. The
+README still read as authoritative. Nothing in that repo's workflow had been able to notice,
+because no check had ever asked whether the paths resolved. That is the failure mode this
+check exists to catch, and it caught it on first contact with a repo it was not written for.
+
+### Adoption-Mode Table
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 1 | `.claude/skills/traversing-the-knowledge-base/SKILL.md` | **CUSTOMIZE** | Recipes copy verbatim. The edge-count table and the five-session criterion are hub-specific numbers; recount for your corpus or delete the table. |
+| 2 | Pre-commit-check 5 (reference integrity) | **CUSTOMIZE** | The surface list and the `docs/tasks.md` section range are repo-specific. See step 3; this is the step most likely to ship inert. |
+| 3 | Pre-commit-check 6 (gate-surface separation) | **TEMPLATE-COPY** | The path regex matches the standard `.claude/` layout. Adjust only if your gate surfaces live elsewhere. |
+
+### Action Required
+
+1. **Copy the skill.** Create `.claude/skills/traversing-the-knowledge-base/` and copy
+   `SKILL.md` from tacsop. Then correct two hub-specific things inside it: the edge-count
+   snapshot table (recount against your corpus, or delete the table and keep the prose), and
+   the five-session window dates in the success criterion.
+
+2. **Point something at the skill.** A skill nothing references is a skill nobody loads. Add
+   it to your `CLAUDE.md` skill list and to the `CONTEXT.md` Reading Order.
+
+3. **Add check 5 to `.claude/commands/pcc.md`, then run it before you trust it.** Copy the
+   block from tacsop's `pcc.md` §5 and make three edits:
+   - **Drop tacsop's allowlist line for the three March decision-science paths.** It is a
+     hub-local disposition and will silently hide real findings in your repo.
+   - **Fix the `docs/tasks.md` section range.** The shipped `sed -n '/^## Active/,/^## Completed/p'`
+     assumes headings named exactly `## Active` and `## Completed`. If your tasks file names
+     them differently, `sed` matches the start prefix and then runs to end of file, silently
+     scanning sections you meant to exclude. Print the range and eyeball it before wiring the
+     check.
+   - **Confirm the five orientation surfaces exist.** `cat` on a missing file is swallowed by
+     `2>/dev/null`, so an absent `CONTEXT.md` costs you coverage with no error.
+
+   Then run the block by hand. **Expect a nonzero first result.** Record that number as your
+   baseline and either fix the references or allowlist them with a comment naming the
+   disposition. Do not wire a check whose output you have not read.
+
+4. **Add check 6 to `.claude/commands/pcc.md`.** Copy tacsop's §6 verbatim unless your gate
+   surfaces sit outside `.claude/hooks/`, `.claude/settings.json`, and the check files.
+
+5. **Record traversals when you run them.** One line in the session doc under Work Completed:
+   `KB-graph: <traversal run> → <what it changed or confirmed>`. Without this line the skill
+   cannot be evaluated and should be dropped at its window close.
+
+### A warning this cycle is built on
+
+In May 2026 the hub shipped an audit-hook glob that could not fire, because bash `case` does
+not support `**`. A downstream repo found it during adoption, fixed it locally, and the fix
+never came back upstream. Check 5 is the same class of artifact: a one-liner that looks
+correct and can be inert. Step 3 asks you to run it by hand for that reason. **If it is wrong
+in your repo, say so upstream.** A correction that stays local is a correction the rest of the
+fleet pays for again.
+
+### Rollback
+
+Fully reversible, no migration. Delete `.claude/skills/traversing-the-knowledge-base/`, remove
+the two check sections from `.claude/commands/pcc.md`, and drop the skill from `CLAUDE.md` and
+`CONTEXT.md`. Nothing else reads them. Recorded `KB-graph:` lines in past session docs are
+inert prose and can stay.
+
+### Version Note
+
+No tacsop version dependency. The skill is a single markdown file and the checks are shell
+one-liners in a command file. Nothing here requires a specific `propagate_doctrine.py` or
+`adopt_doctrine.py` version, and `adopt_doctrine.py` does not handle this cycle: all three
+artifacts are CUSTOMIZE or need a by-hand read, so copy them yourself.
+
+---
+
+### Amendments (2026-08-22, from the `aar_ai_pipeline` field run)
+
+Check 5 ran against a second foreign corpus, `aar_ai_pipeline` on its `dev` branch. It
+reported **2 MISSING where the honest count is 6**, and the four it missed were in the same
+CLAUDE.md table as the one it caught. The gap is the check's, not the repo's. Three
+corrections and one new artifact follow. **If you took this entry before 2026-08-22, this
+section is your delta.**
+
+**Correction 1 (check 5): a reference to a directory is invisible to the check.** The regex
+ends in `\.[A-Za-z0-9]{2,4}`, so it only matches paths carrying a file extension.
+`aar_ai_pipeline`'s CLAUDE.md names five agent-infrastructure paths in one table:
+`.claude/README.md`, `.claude/agents/`, `.claude/teams/`, `.claude/commands/`, and
+`.claude/skills/`. All five are absent from the repo. Check 5 reported one. Add a second
+pass for directory-shaped references:
+
+```bash
+{ cat CLAUDE.md CONTEXT.md README.md LANGUAGE.md .claude/README.md 2>/dev/null; } \
+  | grep -oE '(docs|src|tests|config|scripts|\.claude|\.github)/[A-Za-z0-9_./-]*/' \
+  | sort -u | while read -r p; do [ -d "$p" ] || echo "MISSING-DIR: $p"; done
+```
+
+**Correction 2 (check 5): every path resolves against the repo root, so a documented `cd`
+breaks it.** `aar_ai_pipeline`'s task list carries
+`cd graph_builder && ... python scripts/extract_performance_ratings.py`. The file exists, at
+`graph_builder/scripts/extract_performance_ratings.py`. Check 5 called it MISSING. Same root
+cause as the cross-repo false positive recorded upstream on 2026-08-21: the check has no
+notion of a base directory. Treat a MISSING line drawn from a command example as suspect and
+resolve it by hand before editing the doc it came from.
+
+**Correction 3 (check 5): the shipped `sed` range failed again, in a second repo, silently.**
+`aar_ai_pipeline` names its task sections `## Active Sprint`, `## Pending`, and
+`## Recently Completed`. The shipped `/^## Active/,/^## Completed/p` matched the start prefix,
+found no `## Completed`, and ran to end of file: **51 lines captured where the correct range
+is 18**. Two foreign repos, two failures, no error raised in either. Step 3's by-hand run is
+not optional, and this correction is the reason.
+
+**New artifact 4: `.claude/` must be versioned somewhere, and there are two valid places.**
+
+`aar_ai_pipeline` gitignores `.claude/` wholesale (its commit `1020a43`, 2026-03-23). A repo
+shared with outside collaborators is often scoped deliberately to the deliverable, with
+internal workflow tooling kept out of the shared tree. That is a reasonable call and this
+cycle does not argue with it. What it does argue with is **ignoring `.claude/` and stopping
+there**, because the directory then exists on exactly one machine and is backed up by nothing.
+
+The cost is already banked in `aar_ai_pipeline`, and it is measurable. Its session doc
+`20260326_upstream_doctrine_sync.md` records a doctrine-adoption session that created
+`.claude/agents/proposer.md` and modified `.claude/commands/session-start.md`,
+`.claude/commands/task.md`, `.claude/teams/feature-development.md`, and `.claude/README.md`.
+The commit that session produced, `d31eea9`, contains **none of those five files**: it carries
+`CLAUDE.md`, `config/project.yaml`, `tasks/todo.md`, `.gitignore`, three plans, and the
+session doc. Across the entire history, only 6 `.claude/` paths ever existed, all commands,
+all removed by `1020a43`. `agents/`, `teams/`, `skills/`, and `.claude/README.md` have never
+been in the repository at any commit. The clone inspected on 2026-08-22 has no `.claude/` at
+all. **The session doc is a record of work that the repository cannot produce.**
+
+So the rule is not "track it in this repo". The rule is:
+
+> **`.claude/` is source. It is reviewed, versioned, and recoverable, or it is lost. Choose
+> where it is versioned; do not choose not to version it.**
+
+**Mode A, track in-repo (default).** Track everything under `.claude/` except three paths:
+
+```gitignore
+.claude/agent-memory/        # per-machine agent state
+.claude/settings.local.json  # per-user override; settings.json IS tracked
+.claude/audits/              # hook-generated logs, regenerate on demand
+```
+
+This is what the hub does and has always done: tacsop tracks 51 files under `.claude/` and
+ignores exactly those three. Same shape as the `.gitattributes` entry of 2026-06-28, a
+practice the hub had shipped for months and never wrote down, so downstream never adopted it.
+
+**Mode B, private sidecar (repos whose shared tree is scoped to the deliverable).** Keep
+`.claude/` out of the shared repo and version it in its own private repository, cloned into
+place:
+
+```bash
+git clone <private-remote> .claude     # .claude/ stays in the shared repo's .gitignore
+```
+
+The shared repo is unchanged and its ignore rule keeps doing its job. The sidecar carries its
+own history, review, and backup. Discovery is unaffected: `propagate_doctrine.py` scans the
+filesystem for `.claude/commands`, computes the consumer as `commands_dir.parent.parent`, and
+never inspects git, so a sidecar clone at `.claude/` is discovered as the shared repo exactly
+as an in-repo `.claude/` would be. The nested-repo filter does not fire, because the sidecar
+is not itself a discovered consumer.
+
+One consequence for check 5: in a Mode B repo, run it on a machine with the sidecar checked out. Without the sidecar the `.claude/` references in `CLAUDE.md` do not resolve and the check reports them as drift, which they are not.
+
+Mode B has one failure mode worth a guard: the sidecar is invisible to the shared repo's
+tooling, so nothing warns you when it is missing, stale, or unpushed. Add its status to
+`/session-start`, and push it on the same cadence as the shared repo.
+
+**Either mode satisfies this artifact. Neither is optional.** A repo in Mode B whose sidecar
+does not exist yet is in the same position as `aar_ai_pipeline`: the ignore rule is doing its
+job, and nothing is saving the directory it excludes.
+
+### Amended Adoption-Mode Table
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 4 | `.claude/` versioning (Mode A in-repo, or Mode B private sidecar) | **CUSTOMIZE** | Pick the mode that fits your repo. Do it **first**; artifacts 1 through 3 write into `.claude/` and are unsaved in either mode until this is settled. |
+
+### Amended Action Required
+
+**Step 0 (new, do this before step 1).** Establish where your `.claude/` is versioned.
+
+```bash
+grep -n 'claude' .gitignore
+git ls-files .claude | wc -l                    # in-repo tracking
+git -C .claude rev-parse --is-inside-work-tree  # sidecar present?
+```
+
+If the ignore rule is present and both checks come back empty, every artifact in this cycle
+would land in a directory nothing versions. Pick a mode:
+
+*Mode A, track in-repo.* Replace a blanket `.claude/` ignore with the three-line block above,
+then:
+
+```bash
+git add .claude && git status   # review the staged list; do not trust it
+```
+
+Read that list rather than committing it blind. `settings.local.json` stays ignored for a
+reason, and a directory that has gone unversioned for months collects local-only files.
+
+*Mode B, private sidecar.* Create the private repo, then clone it into place and leave the
+shared repo's ignore rule alone:
+
+```bash
+git clone <private-remote> .claude
+git -C .claude log --oneline -1   # confirm it is a real checkout, not an empty dir
+```
+
+**If `.claude/` already exists only on one machine, recover it before doing either.** That
+machine holds the only copy. Archive it first, then adopt a mode:
+
+```bash
+tar czf ~/claude-backup-$(date +%F).tgz .claude   # run this on the machine that has it
+```
+
+**Step 3 is amended** by Corrections 1 through 3 above. Run the directory pass as well as the
+file pass, fix your `sed` range against your own section headings, and hand-verify any
+MISSING line that came from a command example before you believe it.
+
+---
+
 ## 2026-08-03: Environment Doctrine — uv Replaces pip/venv/pyenv/conda (Drop-In)
 
 **uv** (Astral, written in Rust) is now the environment engine for every repo in this

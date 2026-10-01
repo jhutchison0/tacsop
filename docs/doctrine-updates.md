@@ -4,6 +4,85 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
+## 2026-09-18: CI Fix: `uv venv --clear` After `setup-uv` (`shift-left-testing` 2.1.1)
+
+The workflow example in `shift-left-testing/CI.md` fails on current uv, and every
+repo that copied it fails with it. The job dies in "Install dependencies" with
+exit 2, a few milliseconds in, before any test runs.
+
+The cause: `setup-uv@v5`, given a `python-version`, runs `uv venv` itself. The
+example then ran a bare `uv venv`, and current uv refuses to overwrite an existing
+environment ("A virtual environment already exists at: .venv"). Found 2026-09-18
+in `fist` on its first self-hosted run (uv 0.12.16); reproduced in the runner's
+workspace with the runner's own uv; the `.venv` was born inside the `setup-uv`
+step. It is not specific to a self-hosted runner: a hosted runner installs the
+same uv.
+
+Audience: every repo whose workflow uses `astral-sh/setup-uv` with a
+`python-version` input followed by a bare `uv venv`. A repo that installs Python
+another way (`actions/setup-python`, a container) is not affected.
+
+Reversible: a one-flag change. Rollback below.
+
+### Detect
+
+```bash
+grep -nE '^\s*uv venv\s*$' .github/workflows/*.y*ml
+```
+
+Any hit in a workflow that also uses `setup-uv` with `python-version` is the
+defect. On 2026-09-18 the hub's clones showed it in `stx-server` (`tests.yml`) and
+`veil-engine` (`ci.yml`); `fist` was fixed the same day.
+
+### Adoption-Mode Table
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 1 | `.github/workflows/*.yml` install step | **PATCH** | `uv venv` becomes `uv venv --clear`. One flag; nothing else in the step changes. |
+| 2 | `.claude/skills/shift-left-testing/` | **TEMPLATE-COPY** | Level 0: re-copy from the hub. 2.1.1 changes `CI.md` and the version lines of `SKILL.md` only. |
+| 3 | `setup-uv` cache inputs | **CONDITIONAL** | Only for a repo that runs on a self-hosted runner: `enable-cache: auto` and `cache-local-path: ~/.cache/uv`. The default cache sits under `RUNNER_TEMP`, which a self-hosted runner wipes after every job. |
+
+### Action required
+
+1. Patch the workflow:
+
+```yaml
+      - name: Install dependencies
+        # --clear: setup-uv@v5 has already run `uv venv` for python-version, and
+        # uv refuses to overwrite an existing .venv without it (exit 2).
+        run: |
+          uv venv --clear
+          uv pip install -e ".[dev]"
+```
+
+`--clear` holds whether or not the action created the environment first
+(`setup-uv` v6 makes that opt-in), so it is safe to apply without checking which
+version of the action a repo pins.
+
+2. Re-copy the skill from the hub and verify:
+
+```bash
+cp -r ~/projects/github/tacsop/.claude/skills/shift-left-testing .claude/skills/
+diff -r ~/projects/github/tacsop/.claude/skills/shift-left-testing .claude/skills/shift-left-testing && echo identical
+```
+
+3. Push, and read the run. The install step now passes; a failure after it is a
+   different defect.
+
+### One lesson that travels
+
+A dry run of a workflow's `run:` lines on your own box is not a dry run of the
+workflow. `fist`'s shell steps passed for both interpreters and the job still
+failed, because the action in front of them had already changed the workspace.
+Read what each `uses:` step does, or say the dry run covers the shell lines only.
+
+### Rollback
+
+Remove the flag. The job returns to failing on current uv, so there is no reason
+to, short of pinning uv below the release that added the refusal.
+
+---
+
 ## 2026-08-30: Home Storage for Personal Repos (`lake-conventions` 1.1.0)
 
 The 2026-08-29 entry scoped `lake-conventions` to work repos and said personal

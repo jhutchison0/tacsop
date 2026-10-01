@@ -67,7 +67,7 @@ This project uses **uv** (Astral) for interpreters, environments, and packages. 
 curl -LsSf https://astral.sh/uv/install.sh | sh   # If uv is not installed
 uv python install 3.12             # uv-managed interpreter (no system coupling)
 uv venv --managed-python           # Create .venv on the managed interpreter
-uv pip install -e ".[dev]"
+uv pip install --python .venv -e ".[dev]"
 cp .env.example .env               # Add your API keys
 ```
 
@@ -78,7 +78,7 @@ source .venv/bin/activate           # Activate before working
 .venv/bin/pytest                    # Run tests without activating
 ```
 
-uv venvs do not bundle pip. Run all package operations through `uv pip ...` from the project root; never `sudo pip`, never system pip.
+uv venvs do not bundle pip. Run every package operation from the project root as `uv pip <command> --python .venv ...`; never `sudo pip`, never system pip. Name the target every time: a `VIRTUAL_ENV` inherited from another repo's shell outranks the project's `.venv`, and a bare `uv pip install` lands there.
 
 ## Quick Commands
 
@@ -90,10 +90,10 @@ pytest -x                          # Stop on first failure
 pytest --pdb                       # Debug on failure
 
 # Install optional dependencies
-uv pip install -e ".[excel]"       # Excel utilities (pandas, openpyxl, xlsxwriter)
-uv pip install -e ".[slack]"       # Slack integration
-uv pip install -e ".[database]"    # PostgreSQL
-uv pip install -e ".[all]"         # Everything
+uv pip install --python .venv -e ".[excel]"       # Excel utilities (pandas, openpyxl, xlsxwriter)
+uv pip install --python .venv -e ".[slack]"       # Slack integration
+uv pip install --python .venv -e ".[database]"    # PostgreSQL
+uv pip install --python .venv -e ".[all]"         # Everything
 ```
 
 ## Project Overview
@@ -160,7 +160,7 @@ tacsop/
 Work scales through four levels. Use `/task promote` or `/task plan` to evaluate:
 
 1. **Task** — One person, one session, clear action (`docs/tasks.md`)
-2. **TCS** — Multi-step with pass/fail criteria (Task, Condition, Standard); also the universal task detail unit within all plan types
+2. **TCS** — Multi-step with pass/fail criteria (Task, Condition, Standard, plus a Purpose column); also the universal task detail unit within all plan types
 3. **CONOP** — Multi-wave with design decisions and parallel tracks (`docs/plans/`)
 4. **OPORD** — Sequential execution of a decided strategy in waves (`docs/plans/`)
 

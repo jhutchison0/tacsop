@@ -61,6 +61,7 @@ Quick reminders:
 - Knowledge-graph header: only include relationship fields that actually apply.
 - Body must include Summary and Next Steps. Other sections (Work Completed, Key Decisions, Pillar Compliance, Commits) are added as the session warrants.
 - Prefer Mermaid over ASCII art for any non-trivial diagram (renders natively in GitHub).
+- If a traversal informed the session's work, record it in Work Completed as a `KB-graph: <traversal run> → <what it changed or confirmed>` line, in the sub-topic it informed. That line is uptake metric M1 in `.claude/skills/traversing-the-knowledge-base/SKILL.md`; a walk with no line cannot be counted. The skill says when to write it.
 
 Search related sessions with `grep -r "#domain" docs/sessions/` or `grep -r "References.*config" docs/sessions/`.
 

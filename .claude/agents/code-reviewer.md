@@ -40,6 +40,8 @@ You are a senior code reviewer for this Python project. Review changes against t
 
 **Figures, charts, maps, and data-bearing layouts**: review per `.claude/skills/designing-clear-data-displays/REVIEWING.md` (pass order, finding format, severity mapping).
 
+**Success claims**: review per `.claude/skills/verifying-claims/SKILL.md`. Each claim a reader will act on, in the change's report, its commit messages, and its docs, carries an `Evidence:` line or `UNVERIFIED: <blocker>`. Re-run the probe for every claim the change rests on. A claim with neither line is a Warning. Report a claim your re-run refutes with the output that refutes it.
+
 ## Output Format
 
 Write reports to `docs/reviews/YYYYMMDD_<subject>.md`. Use today's date and a short subject describing what was reviewed. Use this header:

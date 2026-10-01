@@ -126,6 +126,7 @@ def test_claude_md_carries_the_kernel_verbatim():
         (".claude/skills/SKILLS_FRAMEWORK.md", "### verifying-claims (directory form)"),
         (".claude/skills/SKILLS_FRAMEWORK.md", "├── verifying-claims/"),
         (".claude/README.md", "verifying-claims/SKILL.md + 1 sidecar"),
+        (".claude/agents/code-reviewer.md", "`.claude/skills/verifying-claims/SKILL.md`"),
     ],
 )
 def test_skill_is_registered(path, needle):

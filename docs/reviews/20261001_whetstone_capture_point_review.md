@@ -365,3 +365,66 @@ The tests fail when the ask is dropped, when a copy drifts from the skill, and w
 3. N5, N6, N7 at the lead's discretion.
 
 **Round 2 verdict: GO-WITH-FIXES**
+
+---
+
+## Round 3
+
+**Date**: 2026-10-01
+**Reviewed**: `topic/whetstone-capture-point` at `23fbf17` (`7e2778b`, `23fbf17` on top of `3820b95`)
+
+**Verdict: GO.** N1 to N7 are closed. 0 Critical, 0 Warning, 3 Suggestion. None of the three needs another round.
+
+### Method
+
+Same as round 2: `git show 23fbf17:<path>`, `git diff 3820b95 23fbf17`, and a `git archive 23fbf17` export in the scratchpad. Full suite on the export: `406 passed, 1 warning in 4.09s`. Net change against `main` is unchanged in size: `git diff --numstat b1c3e36 23fbf17` gives `1 0` for `session-end.md` and `5 0` for the format doc.
+
+### Status of the round 2 findings
+
+| # | Status | Output at `23fbf17` |
+|---|---|---|
+| N1 | CLOSED | CONOP line 237: "**The boundary is a commit, not a date.** A session is prompted when the checkout it ran on holds `1ed229c`". The command as written exits 0 on the tip and 1 on `b1c3e36`. `grep -c "dated before 2026-10-01"` and `grep -c "from 2026-10-01 on"` both return 0. The 2026-10-01 session "belongs to neither class and is reported apart, as session 0 was". |
+| N2 | CLOSED | Entry heading: "The `KB-graph:` capture point, and the regime change it starts." `grep -c shipped` on the Completed line returns 0. The merge SHA can only follow the merge. |
+| N3 | CLOSED | Entry: "`1ed229c` says three lines changed in the format doc, and `git diff --numstat b1c3e36 3820b95` shows five added, three of them non-blank". Completed line: "three pin tests across `8c31948`, `1ed229c`, and `7e2778b`". |
+| N4 | CLOSED | Entry: "Placement tells the M3 verifier which edit to read the line against; it cannot show when the line was written." |
+| N5 | CLOSED | The pin reads Step 5 only (`_step5()`) and matches the ask clause. Mutant runs below. |
+| N6 | CLOSED | Format doc line 93: "per traversal that informed the work"; line 197: "Record each traversal that informed the work". `grep -c walk` on the format doc returns 0. |
+| N7 | CLOSED | Entry: "the user chose the option \"Hold Step 5.5\"". `docs/tasks.md` line 31 files the adoption-helper gap as a P3. |
+
+### Mutants against the pins at `23fbf17`
+
+| Mutant | Round 2 | Round 3 |
+|---|---|---|
+| Reminder reworded to "Do not record a ...", string kept | survived | killed: `1 failed, 2 passed` |
+| Reminder moved from Step 5 to Step 1 | survived | killed: `1 failed, 2 passed` |
+| Best-practice bullet deleted from the format doc | survived | survived: `3 passed`, as `7e2778b` says |
+| Placement clause ", in the sub-topic it informed" deleted from the reminder | not run | survived: `3 passed` |
+| Everything after the ask clause deleted from the reminder | not run | survived: `3 passed` |
+
+The five mutants killed in round 2 that I re-ran are still killed: `main`'s two docs (3 failed), the `d565df9` format doc (1 failed), the reminder deleted (1 failed), the arrow changed in the template (2 failed), the skill's format changed (3 failed).
+
+### Claims the re-run refutes
+
+One. `7e2778b` says "the pin now matches the whole instruction, from \"If a traversal informed\" on". The pin's string ends at "` line". The last two mutants above delete the rest of the instruction and all three tests pass. The pin holds the ask clause and its step. The entry's own wording is right: "the pins hold the reminder's presence and place, not its good sense".
+
+Both of `7e2778b`'s other claims hold: the two named mutants fail the new pin, and the third survives. Nothing in `23fbf17`'s message or the rewritten entry fails a re-run.
+
+### Rewriting the entry in place
+
+Yes. Line 3's rule protects the approved record that readers of `main` rely on, and the first wording never reached `main` or `origin`: no remote branch contains `3820b95`. The rewrite is its own commit on top of `3820b95`, not an amend, so both wordings stay in history and the commit message says what was done.
+
+### Suggestions
+
+**R1. The pin claim in `7e2778b`.** Either extend the `ask` string in `tests/unit/test_session_end_capture.py` by ", in the sub-topic it informed." or add a third commit-message correction to the entry beside the two it already records. The format doc's placement is pinned; the reminder's is not.
+
+**R2. `topic/overwatch-verifying-claims` still carries the first wording.** It merged `3820b95` at `2783d6e` and does not hold `23fbf17`; its copy of the CONOP is identical to `3820b95`'s. Merge this branch into `main` first, or merge `23fbf17` into that branch, so the rewritten entry is the one that lands.
+
+**R3. Three small record items.**
+
+- The Completed line says "Two review rounds". This section makes three.
+- The entry says "`8c31948` holds two of the three pin tests at the tip". `7e2778b` rewrote the body of one of them; the Completed line's three-commit attribution is the accurate one.
+- The entry quotes the chosen option as "Hold Step 5.5". The lead reports the option text as "Hold Step 5.5 (Recommended)". I cannot verify either from the repo. If the option is quoted, quote it whole: the label records that the chosen option was the recommended one.
+
+One "walk" remains in `session-end.md` line 64 ("a walk with no line cannot be counted"). The meaning is clear; no finding.
+
+**Round 3 verdict: GO**

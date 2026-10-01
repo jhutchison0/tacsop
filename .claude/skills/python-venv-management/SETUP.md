@@ -10,7 +10,7 @@ Use one `.venv/` per project for most cases:
 
 ```bash
 uv venv --managed-python
-uv pip install -r requirements.txt -r requirements-dev.txt
+uv pip install --python .venv -r requirements.txt -r requirements-dev.txt
 source .venv/bin/activate
 ```
 
@@ -32,14 +32,14 @@ Create separate environments when one of these applies:
 ```bash
 # Main development environment
 uv venv --managed-python
-uv pip install -r requirements.txt -r requirements-dev.txt
+uv pip install --python .venv -r requirements.txt -r requirements-dev.txt
 
 # Separate environment for heavy ML deps
 uv venv .venv-ml --managed-python
-VIRTUAL_ENV=.venv-ml uv pip install -r requirements-ml.txt
+uv pip install --python .venv-ml -r requirements-ml.txt
 ```
 
-Naming convention: `.venv-{suffix}/` (matches the `.gitignore` glob `.venv-*/`). `uv pip` targets `.venv` by default; point it at an alternate env with the `VIRTUAL_ENV` variable or by activating that env first.
+Naming convention: `.venv-{suffix}/` (matches the `.gitignore` glob `.venv-*/`). Every `uv pip` command names its target with `--python`. Never route one through `VIRTUAL_ENV` or an activated shell: the variable outlives the command, and the next bare `uv pip` in that shell, in any repo, installs into `.venv-ml`.
 
 ## Setup Patterns
 
@@ -66,11 +66,11 @@ if [ ! -d ".venv" ]; then
 fi
 
 echo "Installing dependencies..."
-uv pip install -r requirements.txt
+uv pip install --python .venv -r requirements.txt
 
 if [ -f "requirements-dev.txt" ]; then
     echo "Installing development dependencies..."
-    uv pip install -r requirements-dev.txt
+    uv pip install --python .venv -r requirements-dev.txt
 fi
 
 echo "Setup complete!"
@@ -93,10 +93,10 @@ venv:
 	uv venv --managed-python
 
 install: venv
-	uv pip install -r requirements.txt
+	uv pip install --python .venv -r requirements.txt
 
 dev-install: install
-	uv pip install -r requirements-dev.txt
+	uv pip install --python .venv -r requirements-dev.txt
 
 clean:
 	rm -rf $(VENV)
@@ -155,17 +155,17 @@ Usage:
 ```bash
 uv venv --managed-python
 
-uv pip install -e .                # Install project
-uv pip install -e ".[dev]"         # Install with dev deps
-uv pip install -e ".[test]"        # Install with test deps
-uv pip install -e ".[dev,test]"    # Multiple extras
+uv pip install --python .venv -e .                # Install project
+uv pip install --python .venv -e ".[dev]"         # Install with dev deps
+uv pip install --python .venv -e ".[test]"        # Install with test deps
+uv pip install --python .venv -e ".[dev,test]"    # Multiple extras
 ```
 
 **When to use pyproject.toml over requirements files**:
 - Building a distributable package.
 - Using modern Python tooling (most cases since Python 3.11).
 - Want optional dependency groups (`[dev]`, `[test]`, `[ml]`).
-- Want `uv pip install -e .` for editable installs of the project itself.
+- Want `uv pip install --python .venv -e .` for editable installs of the project itself.
 
 `requirements.txt` and `pyproject.toml` can coexist: many projects keep `requirements.txt` for deployment lockfiles and `pyproject.toml` for development.
 
@@ -212,7 +212,7 @@ mkdocs>=1.5.0
 mkdocs-material>=9.0.0
 ```
 
-The `-r requirements.txt` line includes production deps transitively, so `uv pip install -r requirements-dev.txt` installs everything.
+The `-r requirements.txt` line includes production deps transitively, so `uv pip install --python .venv -r requirements-dev.txt` installs everything.
 
 ## Pinning Strategy
 
@@ -226,7 +226,7 @@ The `-r requirements.txt` line includes production deps transitively, so `uv pip
 ### Generating Exact Pins from Current Environment
 
 ```bash
-uv pip freeze > requirements-lock.txt
+uv pip freeze --python .venv > requirements-lock.txt
 ```
 
 This captures **all** transitive dependencies at exact versions. Use it alongside (not instead of) your hand-curated `requirements.txt`: the freeze file is the lockfile.
@@ -235,7 +235,7 @@ Better still: compile pins from loose specs (uv's built-in replacement for pip-t
 
 ```bash
 uv pip compile requirements.in -o requirements.txt   # Pin all transitives
-uv pip sync requirements.txt                         # Install exactly what's listed (no more, no less)
+uv pip sync --python .venv requirements.txt                         # Install exactly what's listed (no more, no less)
 ```
 
 ## Python Version Management with uv
@@ -273,10 +273,10 @@ The incumbent's interpreters are load-bearing until every venv built on them is 
 3. **Freeze each old venv** as insurance, then **rebuild it** on a managed interpreter:
    ```bash
    .venv/bin/pip list --format=freeze > /tmp/<repo>.freeze.txt
-   uv venv --clear --managed-python && uv pip install -e ".[dev]"
+   uv venv --clear --managed-python && uv pip install --python .venv -e ".[dev]"
    ```
    `--clear` is safer than `rm -rf`: uv refuses to replace a directory that is not a venv.
-4. **Parity-test each repo** (run its test suite; compare pass counts before and after). A shortfall means the old venv held something the repo's spec never listed — diff the freeze against `uv pip list`, close the gap, and file the spec fix in that repo.
+4. **Parity-test each repo** (run its test suite; compare pass counts before and after). A shortfall means the old venv held something the repo's spec never listed — diff the freeze against `uv pip list --python .venv`, close the gap, and file the spec fix in that repo.
 5. **Only then remove the incumbent** (`pyenv`: delete `~/.pyenv` and its shell-rc init lines; conda: `conda init --reverse` then delete the install directory).
 
 Removing the incumbent first bricks every venv built on it.

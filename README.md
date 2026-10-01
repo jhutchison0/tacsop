@@ -34,7 +34,7 @@ mv src/myproject src/my_new_project
 # Set up environment (uv: https://docs.astral.sh/uv/)
 uv python install 3.12
 uv venv --managed-python
-uv pip install -e ".[dev]"
+uv pip install --python .venv -e ".[dev]"
 source .venv/bin/activate
 
 # Verify

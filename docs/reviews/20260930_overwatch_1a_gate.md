@@ -312,3 +312,171 @@ Round 1: `docs/reviews/20260930_overwatch_review.md`. Line numbers below refer t
 | W9. Unmarkable Standards | ADDRESSED | 1b `:189` (grep); 2c `:205` (surface checklist); MOP `:153` (check 5 over `git diff`) |
 | W10. Evidence table overstates | ADDRESSED | `:36-44`; Approach A cons `:92`; Wave 3 `:213`; 2b `:204` |
 | W11. O6 breaks propagation rules | ADDRESSED | O6 `:142`; 1c `:190` (marked breaking) |
+
+---
+
+## Round 2: Re-Check of `28e8482`
+
+**Date**: 2026-09-30. **Subject**: `28e8482` on top of `6039e14`. The plugin now registers through `addopts`, and the tripwire tests grew from 17 to 37. Every probe from round 1 was re-run against the new `tests/isolation.py` from the same scratch harness. Mutation runs used a scratch copy of the hub's `tests/`, `scripts/`, and `pyproject.toml`, which also passes 345 of 345 unmodified. That copy matters: the four fresh-project tests load `tests.isolation` from `HUB` through `PYTHONPATH`, so they ran against each mutant too.
+
+### Verdict: GO-WITH-FIXES
+
+0 Critical, 4 Warning, 3 Suggestion.
+
+All three round-1 Criticals are fixed and re-verified. C1: P1 and P2 are caught. C2: the swimming-analytics and megan conftest shapes pass, and the new fresh-project test fails under conftest registration (verified by switching `_register` to `pytest_plugins`). C3: 345 passed with and without `CI=1`.
+
+Four items remain before merge, each small and each with a verified fix:
+
+1. **R2-W1**: the W4 fix introduced a false positive on the box's own hostname.
+2. **R2-W2**: the `dir_fd` bullet was dropped from the cannot-see list, so `os.unlink(name, dir_fd=fd)` is now fail-open and unlisted.
+3. **R2-W3**: a lazy matplotlib import on a fresh font cache trips.
+4. **R2-W4**: the module docstring still says to register from `conftest.py`.
+
+Under the new Status Log rule (Wave 1 exit: GO-WITH-FIXES with every fix applied and the reviewer's probes re-run), round 3 re-runs P9, Q1 to Q6, and `test_lazy_mpl`.
+
+### Requested Checks
+
+**(1) Probes, round 2.** Victims sit outside the narrowed `TMPDIR`. Registration is through `addopts`.
+
+| Probe | Round 1 | Round 2 | Status |
+|---|---|---|---|
+| P1 `rmtree("<link>/")` | deleted | `IsolationError`, victim intact | CAUGHT |
+| P1b `rmtree("<link>/.")` (new) | not run | `IsolationError` | CAUGHT |
+| P2 `os.unlink("<link>/../data.bin")` | deleted | `IsolationError` | CAUGHT |
+| P2b the same, relative, after `chdir` (new) | not run | `IsolationError` | CAUGHT |
+| P3 `rmtree("victimdir", dir_fd=fd)` | deleted | refused | CAUGHT |
+| P4 `Popen(executable=rm)`; P4b `Path` argv (new) | deleted | `IsolationError` | CAUGHT |
+| P5 `["env", "rm", ...]` | deleted | deleted | FAIL-OPEN, LISTED (`ISOLATION.md:72`) |
+| P6 `os.posix_spawn` rm; P6b `os.spawnv` (new) | deleted | `IsolationError` | CAUGHT |
+| P7 rename the real dir into the sandbox, then `rmtree` | deleted | deleted | FAIL-OPEN, LISTED (`:71`) |
+| P8 `find ... -delete` | deleted | deleted | FAIL-OPEN, LISTED (`:72`) |
+| **P9 `os.unlink("data.bin", dir_fd=fd)`** (listed in round 1 at old `:69`) | not run | **deleted** | **FAIL-OPEN, UNLISTED** (R2-W2) |
+| W3 collection, `pytest_sessionfinish`, `atexit`, thread | 4 deleted | 4 deleted | FAIL-OPEN, LISTED (`:77`) |
+| W3 fixture teardown, session teardown | caught | caught | CAUGHT |
+| W4 `psycopg` to `192.0.2.1`, sync and async | `ConnectionTimeout` | `ConnectionTimeout` | FAIL-OPEN, LISTED (`:74`) |
+| W4 `gethostbyname`, `gethostbyaddr`, UDP `sendto`, `sendmsg` | no trip | `IsolationError` | CAUGHT |
+| W4 `connect(("example.invalid", 80))` DNS pre-resolution | lookup leaves | lookup leaves | FAIL-OPEN, LISTED (`:75`) |
+| W5 `config.cache.set` on a fresh checkout | false catch | `1 passed`; `.pytest_cache` built | FIXED |
+| W6 `--basetemp` outside the temp dir, absolute and relative | error | `1 passed` each | FIXED |
+| W7 raw socket to `0.0.0.0`; `"LOCALHOST"` | false catch | connects | FIXED |
+| **W7 `HTTPServer(("", 0))`, round 1's own evidence case** | false catch at `urlopen` | **false catch at construction** | **OPEN** (R2-W1) |
+| W1 hub's real `.env`, `load_dotenv(path, stream=io.StringIO(""))` | `True`, 1 of 1 keys | `False`, 0 of 1 | FIXED |
+| S2 unwritable log dir | `PermissionError` | `IsolationError`, victim intact | FIXED |
+
+**(2) Mutation table** (`pytest -q tests/unit/test_isolation.py`, one mutant per run):
+
+| Mutant | Round 1 (17 tests) | Round 2 (37 tests) |
+|---|---|---|
+| M1 arm only during call | 17 passed (survived) | 1 failed (killed) |
+| M2 no symlink resolution (`abspath`) | 17 passed (survived) | 2 failed |
+| M2b round-1 `_inside` restored | not run | 2 failed |
+| M3 refuse everything | 17 errors | 37 errors |
+| M4 no tripwire | 8 failed | 20 failed, 17 passed |
+| M5 no dotenv guard | 2 failed | 4 failed |
+| M6 dotenv blocks all | 2 failed | 2 failed |
+| **M7 never disarm** | 17 passed (survived) | **37 passed (survives)** |
+| M8 launch ignores `cwd` | 1 failed | 1 failed |
+| M9 no launch check | 2 failed | 4 failed |
+| M10 no `getaddrinfo` check | 1 failed | 1 failed |
+| M11 no log | 1 failed | 1 failed |
+| M12 any explicit dotenv path passes | 1 failed | 2 failed |
+| M13 no Hypothesis root | 1 failed | 1 failed |
+| M14 `executable` ignored / M15 no `posix_spawn` / M16 rmtree `dir_fd` not refused | not run | 1 failed each |
+| M17 no `gethostbyname`/`gethostbyaddr` / M18 no `getnameinfo` / M19 no `sendto`/`sendmsg` | not run | 2 / 1 / 2 failed |
+| M20 no `is_unspecified` / M21 no lowercase / M22 log `OSError` escapes | not run | 1 failed each |
+| M23 no basetemp root / M24 no cache mkdir / M25 round-1 stream bypass / M26 no trailing-slash branch | not run | 1 failed each |
+
+26 of 27 mutants are killed. M7 survives (R2-S1). With the plugin left out of `addopts`, the canary reports `21 failed, 16 passed`, so ISOLATION.md `:92` holds.
+
+**(3) Full suite.**
+
+| Run | Result |
+|---|---|
+| `.venv/bin/pytest -q` | `345 passed`, no tripwire log created |
+| `CI=1 .venv/bin/pytest -q` | `345 passed` |
+| Python 3.11.15, `tests/unit/test_isolation.py`, with and without `CI=1` | `37 passed` both |
+| pytest-xdist 3.8.0, `-n 2`, with and without `CI=1` | `37 passed` both |
+| Scratch copy, `TMPDIR` narrowed, fresh `MPLCONFIGDIR` outside it | `345 passed`, 0 log lines |
+
+**(4) ISOLATION.md and the Status Log.**
+
+- The cannot-see list is accurate for everything it names. I re-ran each entry above, and `:74` and `:75` match my W4 output. It is incomplete in one place: the `dir_fd` bullet from round 1 (old `:69`) is gone, and `isolation.py:121-122` still skips `os.remove` and `os.rmdir` with a `dir_fd` (R2-W2).
+- `:97` re-runs: 308 + 37 = 345, 0 catches both ways, and 37 pass on 3.11.15 and 3.12.13. The "forced matplotlib font-cache rebuild" holds only because every hub test file that uses matplotlib imports it at module level, so the rebuild runs at collection, disarmed (R2-W3).
+- Status Log entry: the counts (3 / 9 / 11; 17 to 37 tests), the four plan changes, W8 PARTIAL, and "the hub itself has no workflow yet" (`ls .github/workflows`: absent) all match the branch. Three of its claims cannot be checked from git, because one commit holds both tests and fixes: that `test-runner` found C3 independently, that the lead re-ran each Critical, and that the fixes went in test-first. That is not a finding.
+
+**The collection trade (asked).** The trade is right. A mutant that arms `pytest_collection` stops the hub suite at collection on a fresh font cache (`1 error during collection`; matplotlib's `fontlist-v3.11.0.json.matplotlib-lock` unlink). With the cache warm it passes 345. Every CI runner starts with a fresh cache, and a collection error kills the whole session. Round 1's fleet grep found no module-level deletes in any `test_*.py`. Listing it (`:77`) is the honest choice. One correction belongs with it: matplotlib's catch is not collection-only (R2-W3).
+
+### Warning
+
+**R2-W1. Lookups of the box's own hostname trip, so `socket.getfqdn()` and everything built on it raise** (`tests/isolation.py:82-91`, `:135-137`)
+
+- `socket.getfqdn()` calls `gethostbyaddr(gethostname())`, and `getfqdn("0.0.0.0")` does the same. The new `gethostbyaddr` check calls `_is_local("Nidhogg")`, which returns False.
+- Evidence (`test_fqdn.py`):
+
+  ```
+  round 2 (28e8482)                                   round 1 (6039e14)
+  Q1 socket.getfqdn():         TRIPPED gethostbyaddr 'Nidhogg'    NO-TRIP
+  Q2 email.utils.make_msgid(): TRIPPED gethostbyaddr 'Nidhogg'    NO-TRIP
+  Q3 HTTPServer(('', 0)):      TRIPPED gethostbyaddr 'Nidhogg'    NO-TRIP
+  Q4 HTTPServer(('127.0.0.1', 0)): NO-TRIP                        NO-TRIP
+  Q5 wsgiref make_server('', 0):   TRIPPED gethostbyaddr 'Nidhogg' NO-TRIP
+  Q6 gethostbyname(gethostname()): TRIPPED gethostbyname 'Nidhogg' NO-TRIP
+  ```
+
+- **Why it matters**: these are standard-library calls inside code under test. Email builders call `make_msgid`, and test servers bind `""`. This is a regression from round 1, and it is round 1's own W7 case failing earlier. Exposure today is low: the one fleet hit is `elephant-graveyard/tools/audio_analysis/knowledge_graph/__main__.py:868`, which is not on a test path. The new `test_connect_to_a_server_bound_to_all_interfaces_still_works` uses a raw socket, so it cannot see this.
+- **Fix** (verified: Q1 to Q6 all no-trip; scratch hub copy `345 passed`):
+
+  ```python
+  import socket
+  _THIS_HOST = socket.gethostname().lower()
+  ...
+  if host is None or host.lower() in ("", "localhost", _THIS_HOST):  # getfqdn() asks for this box
+  ```
+
+  Add `HTTPServer(("", 0), handler)` and `email.utils.make_msgid()` as known-good controls.
+
+**R2-W2. `os.unlink(name, dir_fd=fd)` deletes outside the allowlist, and the list no longer says so** (`isolation.py:121-122`; `ISOLATION.md:69-80`)
+
+- Evidence: P9 removed `real/test_P9.../data.bin` with no catch. Round 1's list carried this limit (`6039e14:ISOLATION.md:69`), and `28e8482` dropped the bullet while keeping the skip. `:48` now mentions only `rmtree`.
+- **Fix** (verified: P9 caught; `345 passed` with and without `CI=1`, since rmtree's inner `dir_fd` deletes resolve inside `tmp_path`):
+
+  ```python
+  path, dir_fd = args
+  if dir_fd is not None and dir_fd >= 0 and not os.path.isabs(os.fsdecode(path)):
+      try:  # Linux names the descriptor's directory; rmtree's inner calls land here
+          path = os.path.join(os.readlink(f"/proc/self/fd/{dir_fd}"), os.fsdecode(path))
+      except OSError:
+          return  # no /proc: a listed limit
+  if not _inside(path, _allow):
+      _trip(event, path)
+  ```
+
+  Either way, restore the bullet for platforms without `/proc`. With the fix, `:48`'s "cannot be resolved" becomes true only off Linux.
+
+**R2-W3. A lazy matplotlib import on a fresh font cache trips inside a test and leaves a lock file in the real cache** (`ISOLATION.md:77`, `:97`)
+
+- Evidence (`$G/proj8`, fresh `MPLCONFIGDIR` outside the narrowed temp dir, `import matplotlib.pyplot` inside the test body):
+
+  ```
+  E  tests.isolation.IsolationError: isolation tripwire: os.remove
+     '.../mplB/fontlist-v3.11.0.json.matplotlib-lock' is outside the test sandbox
+  1 failed
+  $ ls -A mplB
+  fontlist-v3.11.0.json  fontlist-v3.11.0.json.matplotlib-lock
+  --- second run: 1 passed
+  ```
+
+  `matplotlib/cbook.py` `_lock_path` unlinks its lock in a `finally`. The tripwire blocks that unlink, so the lock stays in the user's real cache dir.
+- **Why it matters**: fresh caches are every CI runner, and every matplotlib upgrade renames the cache file. The hub's tests and the fleet's tests (veil-engine, propter) import matplotlib at module level, so nothing breaks today. But `src/myproject/decision_science/visualization.py:60`, `:114`, and `:192` import it inside functions, which is the shape that trips once a test calls them first.
+- **Fix**: in ISOLATION.md, name "a library that deletes its own lock or temp file outside the sandbox on first use" as a false-catch class. Give the remedy: set `MPLCONFIGDIR` to a temp dir for the test run, or allowlist the library's cache dir. Qualify `:97`: the rebuild ran at collection.
+
+**R2-W4. The module downstream repos copy still says to register from `conftest.py`** (`tests/isolation.py:3`)
+
+- The docstring reads "A pytest plugin, registered from tests/conftest.py". That is the instruction C2 overturned, and it sits in the file adoption step 1 tells downstream repos to copy. Lines 5-7 still list only the round-1 events.
+- **Fix**: "A pytest plugin, registered through `addopts = ["-p", "tests.isolation"]` (see ISOLATION.md)". Point the event list at the ISOLATION.md table instead of repeating it.
+
+### Suggestion
+
+- **R2-S1. The disarm comment overclaims** (`tests/unit/test_isolation.py`, `test_the_hook_returns_early_when_disarmed`). Its comment says "that pytest disarms between tests is pinned by test_fixture_setup_and_teardown_deletes_are_caught's neighbours". M7 (never disarm) passes all 37, so nothing pins it. Rewrite: "Pins the early return only; no test pins the disarm between tests." Or add a fresh-project test whose conftest `pytest_sessionfinish` removes a file outside the allowlist, then assert exit 0 and the file gone.
+- **R2-S2. Missing blank line.** `tests/isolation.py:56-57` has one blank line between `_deleter_paths` and the module globals, where PEP 8 wants two. Moot once the P3 ruff decision lands.
+- **R2-S3. One sentence for both `dir_fd` cases.** Once R2-W2 lands, replace `ISOLATION.md:48`'s last sentence with a sentence that covers both cases.

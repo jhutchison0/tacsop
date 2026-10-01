@@ -1,23 +1,22 @@
 """Test-isolation tripwire: while a test runs, it may not touch the real world.
 
-A pytest plugin, registered from tests/conftest.py. Three tripwires:
+A pytest plugin. Register it through `addopts = ["-p", "tests.isolation"]` in
+pyproject.toml, never from conftest.py: pytest runs a whole conftest before it
+reads pytest_plugins. Three tripwires: deletion outside the allowlist, network
+to anything but this machine, and a `load_dotenv` that would load the repo's
+real `.env`. .claude/skills/shift-left-testing/ISOLATION.md lists the events
+each one watches and what none of them can see.
 
-- Deletion outside the allowlist raises: `os.remove`, `os.rmdir`, `shutil.rmtree`,
-  and a subprocess `rm`, `rmdir`, `unlink`, or `shred`.
-- Network to anything but loopback raises: `socket.connect`, `socket.getaddrinfo`.
-- `load_dotenv` loads nothing unless given a stream or a path inside the allowlist,
-  so the repo's real `.env` never refills a variable a test removed.
-
-The first two are one Python audit hook, armed only while a test runs (setup,
-call, and teardown). An audit hook sees the call however the caller imported
-it, which a monkeypatched function does not. Each catch appends one line to
-`.claude/audits/isolation-tripwire.log`. What the tripwire cannot see is listed
-in .claude/skills/shift-left-testing/ISOLATION.md.
+Deletion and network are one Python audit hook, armed only while a test runs
+(setup, call, and teardown). An audit hook sees the call however the caller
+imported it, which a monkeypatched function does not. Each catch appends one
+line to `.claude/audits/isolation-tripwire.log`.
 """
 
 import functools
 import ipaddress
 import os
+import socket
 import sys
 import tempfile
 from datetime import datetime
@@ -31,6 +30,7 @@ class IsolationError(RuntimeError):
 
 
 _DELETERS = frozenset({"rm", "rmdir", "unlink", "shred"})
+_THIS_HOST = socket.gethostname().lower()
 
 # Each launch event's args, as (program, argv, cwd).
 _LAUNCHES = {
@@ -41,18 +41,22 @@ _LAUNCHES = {
 }
 
 
-def _program_name(program) -> str:
-    name = os.path.basename(os.fsdecode(program)).lower()
-    return name[:-4] if name.endswith(".exe") else name
-
-
 def _deleter_paths(program, argv) -> list[str]:
     """The path arguments of a launch that runs rm, rmdir, unlink, or shred; else none."""
     argv = list(argv or [])
-    names = [p for p in (program, *argv[:1]) if p is not None]
-    if not any(_program_name(name) in _DELETERS for name in names):
+    names = {os.path.basename(os.fsdecode(p)).lower() for p in (program, *argv[:1]) if p is not None}
+    if not names & (_DELETERS | {f"{d}.exe" for d in _DELETERS}):
         return []
     return [arg for arg in map(os.fsdecode, argv[1:]) if not arg.startswith("-")]
+
+
+def _descriptor_dir(dir_fd):
+    """The directory an open descriptor names, where /proc can say; else None."""
+    try:
+        return os.readlink(f"/proc/self/fd/{dir_fd}")
+    except OSError:
+        return None
+
 
 _armed = False
 _default_allow: tuple[Path, ...] = ()
@@ -82,7 +86,7 @@ def _inside(path, roots) -> bool:
 def _is_local(host) -> bool:
     if isinstance(host, bytes):
         host = host.decode(errors="replace")
-    if host is None or host.lower() in ("", "localhost"):
+    if host is None or host.lower() in ("", "localhost", _THIS_HOST):  # getfqdn() asks for this box
         return True
     try:
         address = ipaddress.ip_address(host)
@@ -110,16 +114,15 @@ def _trip(event: str, target) -> None:
 def _audit(event: str, args: tuple) -> None:
     if not _armed:
         return
-    if event == "shutil.rmtree":
-        path, dir_fd = args[0], args[1] if len(args) > 1 else None
-        if dir_fd is not None and not os.path.isabs(os.fsdecode(path)):
-            _trip(event, path)  # relative to a descriptor: unresolvable, so refuse
-        elif not _inside(path, _allow):
-            _trip(event, path)
-    elif event in ("os.remove", "os.rmdir"):
-        path, dir_fd = args
-        if dir_fd is not None and dir_fd >= 0:
-            return  # relative to an open directory; shutil.rmtree checked the top
+    if event in ("shutil.rmtree", "os.remove", "os.rmdir"):
+        path, dir_fd = args  # os.* report a default dir_fd as -1, rmtree as None
+        if dir_fd is not None and dir_fd >= 0 and not os.path.isabs(os.fsdecode(path)):
+            base = _descriptor_dir(dir_fd)
+            if base is None:  # no /proc to name the descriptor
+                if event == "shutil.rmtree":
+                    _trip(event, path)  # refuse a tree whose top it cannot place
+                return  # os.* inside rmtree's walk; a listed limit off Linux
+            path = os.path.join(base, os.fsdecode(path))
         if not _inside(path, _allow):
             _trip(event, path)
     elif event in _LAUNCHES:

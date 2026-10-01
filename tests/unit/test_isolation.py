@@ -7,6 +7,7 @@ that only asserted "something raised" would pass on a box with no tripwire,
 because deleting a path that does not exist raises too.
 """
 
+import email.utils
 import importlib
 import io
 import os
@@ -14,6 +15,7 @@ import shutil
 import socket
 import subprocess
 import tempfile
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from shutil import rmtree as rmtree_bound_at_import
 
@@ -188,8 +190,8 @@ def test_load_dotenv_from_a_stream_still_loads(monkeypatch):
 
 
 def test_the_hook_returns_early_when_disarmed(sandbox, monkeypatch):
-    # Pins the early return only; that pytest disarms between tests is pinned by
-    # test_fixture_setup_and_teardown_deletes_are_caught's neighbours, not here.
+    # Pins the early return only. No test pins that pytest disarms between tests:
+    # the gate review's mutant M7 (never disarm) passes every test in this file.
     _, outside = sandbox
     target = outside / "f.txt"
     target.write_text("x")
@@ -304,8 +306,8 @@ def test_posix_spawn_rm_outside_allowlist_raises(sandbox):
 
 @pytest.mark.skipif(os.name == "nt", reason="rmtree dir_fd needs POSIX fd functions")
 def test_rmtree_relative_to_a_directory_descriptor_raises(sandbox, monkeypatch):
-    # The tripwire cannot resolve a name against a descriptor, so it refuses
-    # rather than guess from the working directory (here, an allowed one).
+    # The name resolves against the descriptor (through /proc on Linux; refused
+    # where it cannot be placed), never against the working directory, here allowed.
     allowed, outside = sandbox
     victim = outside / "cache"
     victim.mkdir()
@@ -490,3 +492,33 @@ def test_tmp_path_works_when_basetemp_is_outside_the_temp_dir(pytester, project)
     )
 
     pytester.runpytest_subprocess().assert_outcomes(passed=1)
+
+
+@pytest.mark.parametrize(
+    "local_call",
+    [
+        socket.getfqdn,
+        email.utils.make_msgid,
+        lambda: HTTPServer(("", 0), BaseHTTPRequestHandler).server_close(),
+    ],
+    ids=["getfqdn", "make_msgid", "HTTPServer-all-interfaces"],
+)
+def test_lookups_of_this_machines_own_name_still_work(local_call):
+    # getfqdn() asks for this box's own name, and HTTPServer and make_msgid call it.
+    local_call()
+
+
+@pytest.mark.skipif(not os.path.isdir("/proc/self/fd"), reason="needs /proc to name a descriptor")
+def test_unlink_relative_to_a_directory_descriptor_raises(sandbox, monkeypatch):
+    allowed, outside = sandbox
+    victim = outside / "data.bin"
+    victim.write_text("real data")
+    monkeypatch.chdir(allowed)  # resolving against the cwd would wrongly allow it
+    fd = os.open(outside, os.O_RDONLY)
+    try:
+        with pytest.raises(isolation.IsolationError):
+            os.unlink("data.bin", dir_fd=fd)
+    finally:
+        os.close(fd)
+
+    assert victim.exists()

@@ -63,16 +63,18 @@ Quick reminders:
 - Prefer Mermaid over ASCII art for any non-trivial diagram (renders natively in GitHub).
 - If a traversal informed the session's work, record it in Work Completed as a `KB-graph: <traversal run> → <what it changed or confirmed>` line, in the sub-topic it informed. That line is uptake metric M1 in `.claude/skills/traversing-the-knowledge-base/SKILL.md`; a walk with no line cannot be counted. The skill says when to write it.
 
+Search related sessions with `grep -r "#domain" docs/sessions/` or `grep -r "References.*config" docs/sessions/`.
+
 ### The Claims table
 
-The session doc carries a `## Claims` table: one row for each claim of success the doc makes, per the verifying-claims skill (`.claude/skills/verifying-claims/SKILL.md`).
+The session doc carries a `## Claims` table: one row for each claim a reader will act on, per the verifying-claims skill (`.claude/skills/verifying-claims/SKILL.md`).
 
 - Each row gives the claim, its state (written, tested, deployed, or observed), and what an `Evidence:` line would carry: the command and its output. A claim that could not be checked reads `UNVERIFIED: <blocker>`.
-- Re-run the probe now for every claim about the session's end state (tests pass, pushed, merged), after the Step 3 commit and push. Output from earlier in the session is stale.
-- Under the table, write `Overclaims the user caught this session: N`: the number of claims the user had to correct. Zero is a count; write it.
-- A session that claimed no outcome writes the count line alone.
-
-Search related sessions with `grep -r "#domain" docs/sessions/` or `grep -r "References.*config" docs/sessions/`.
+- Re-run the probe now for every claim about the session's end state (tests pass, pushed, merged), and name the commit each row checked. A claim about an earlier moment keeps its original output and says when it was taken.
+- The commit that carries this doc cannot be in its own table. Report that push in your final message, with its own `Evidence:` line.
+- Under the table, write `Overclaims the user caught this session: N`. Count each claim made to the user that proved false after the user corrected it or asked about it. Zero is a count; write it.
+- On the next line, write `Overclaims a reviewer caught this session: M`: claims a reviewer's re-run refuted before the user relied on them. They are not in N.
+- A session that claimed no outcome writes the two count lines alone.
 
 ## Step 6: Evaluate Merge Readiness
 - Is this a major functional milestone?

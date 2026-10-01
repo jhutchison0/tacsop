@@ -100,12 +100,14 @@ grep -r "Follows.*20260421" docs/sessions/          # Sessions continuing 2026-0
 
 | Claim | State | Evidence |
 |---|---|---|
-| <What the doc says succeeded> | written, tested, deployed, or observed | `<command>` → `<the output lines that decide it>` |
+| <A claim a reader will act on> | written, tested, deployed, or observed | `<command>` → `<the output lines that decide it>`, at `<commit>` |
 | <A claim that could not be checked> | <the state claimed> | UNVERIFIED: <blocker> |
 
 Overclaims the user caught this session: N
 
-(Required. One row per claim of success this doc makes; end-state claims re-run at close. See `.claude/skills/verifying-claims/SKILL.md`.)
+Overclaims a reviewer caught this session: M
+
+(Required. One row per claim a reader will act on; end-state claims are re-run at close. Write `\|` for a pipe inside a command. A session that claimed no outcome writes the two count lines alone. See `.claude/skills/verifying-claims/SKILL.md`.)
 
 ## Key Decisions
 
@@ -205,7 +207,7 @@ Per the project's CLAUDE.md documentation style: **prefer Mermaid over ASCII art
 - **Only include relationship fields that apply**; do not pad with placeholder links.
 - **Use the right diagram type** for the complexity at hand.
 - **Always include Summary, Claims, and Next Steps**; the rest is optional.
-- **Give every claim of success a row in `## Claims`**, and write the overclaim count under it even when it is zero. The count is how a repo measures its own overclaim rate.
+- **Give every claim a reader will act on a row in `## Claims`**, and write both overclaim counts under it even when they are zero. The first count is how a repo measures its own overclaim rate.
 - **Record each traversal that informed the work as a `KB-graph:` line** in the sub-topic it informed, above the edit it led to. It is uptake metric M1 in `.claude/skills/traversing-the-knowledge-base/SKILL.md`, and the count is taken by grep.
 - **Tag with activity and status** so sessions can be filtered by type.
 

@@ -276,7 +276,7 @@ The incumbent's interpreters are load-bearing until every venv built on them is 
    uv venv --clear --managed-python && uv pip install --python .venv -e ".[dev]"
    ```
    `--clear` is safer than `rm -rf`: uv refuses to replace a directory that is not a venv.
-4. **Parity-test each repo** (run its test suite; compare pass counts before and after). A shortfall means the old venv held something the repo's spec never listed — diff the freeze against `uv pip list --python .venv`, close the gap, and file the spec fix in that repo.
+4. **Parity-test each repo** (run its test suite; compare pass counts before and after). A shortfall means the old venv held something the repo's spec never listed: diff the freeze against `uv pip list --python .venv`, close the gap, and file the spec fix in that repo.
 5. **Only then remove the incumbent** (`pyenv`: delete `~/.pyenv` and its shell-rc init lines; conda: `conda init --reverse` then delete the install directory).
 
 Removing the incumbent first bricks every venv built on it.

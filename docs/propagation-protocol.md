@@ -41,11 +41,11 @@ A doctrine update that cannot answer all five is not ready to propagate.
 
 ## Batching Rules
 
-The propagation script extracts **only the most recent entry** in `docs/doctrine-updates.md` (`entries[0]`). This is a hard constraint of the current implementation, and it shapes how changes are batched.
+Until 2026-10-01 the script shipped only the newest entry (`entries[0]`), so four entries were never sent and three more stacked up behind it. It now sends each repo every entry it has not been sent (see Delivery Mark below). Rules 2 and 4 are unchanged: they are about what a downstream maintainer can accept or refuse, not about the transport.
 
 **Rule 1 — One propagation cycle = one entry.** If you have two unrelated changes, you have two options:
 - Combine into one entry covering both (preferred when changes are coherent or co-dependent).
-- Propagate one, wait for downstream consumption, then add and propagate the next.
+- Write two entries. Since the delivery mark, one cycle carries both; before it, the second waited a full cycle.
 
 **Rule 2 — Never let a doctrine entry mix unrelated changes.** A downstream maintainer who agrees with change A but not change B should be able to apply A and skip B cleanly. Mixing forces all-or-nothing.
 
@@ -61,8 +61,8 @@ A single propagation cycle has six steps:
 
 1. **Draft entry.** Add a `## YYYY-MM-DD: <Subject>` section to the top of `docs/doctrine-updates.md` (most recent first). Include: files changed, files added, change description, scope per audience, **Action Required** checklist.
 2. **Pre-flight review.** Run the change through the Evaluation Gate (five questions above). If any fails, fix or downgrade.
-3. **Dry run.** `python scripts/propagate_doctrine.py --dry-run` — confirm the expected repo list and notification content.
-4. **Propagate.** `python scripts/propagate_doctrine.py` — script writes `.claude/upstream-update.md` in each downstream repo (or appends if a notification already exists).
+3. **Dry run.** `python scripts/propagate_doctrine.py --dry-run` prints, per repo, how many entries it would be sent and their dates. Confirm the repo list and that no repo is sent an entry it already holds.
+4. **Propagate.** `python scripts/propagate_doctrine.py` writes `.claude/upstream-update.md` in each downstream repo, or appends to an unread one, and then updates that repo's delivery mark. A repo with no mark gets the newest entry only, unless `--since YYYY-MM-DD` names the oldest entry it may lack.
 5. **Log the cycle.** In the next session doc, record: cycle number (continuing from prior count), repo count (new vs appended), and any anomalies (missing repos, append-target mismatches).
 6. **Track unread.** Append mode means notifications accumulate until a downstream maintainer deletes the file. This is intentional — never overwrite — but it means you should check `docs/sessions/` for a doctrine consumption record before propagating again.
 
@@ -97,6 +97,20 @@ Adopted 2026-03-30. Default and only mode.
 **Why**: a downstream maintainer might not have consumed the prior notification yet. Overwriting would silently drop unread updates. Append preserves the full history of pending notifications.
 
 **Cost**: notification files can grow long if a downstream repo is consistently behind. This is a feature, not a bug — visible debt forces attention.
+
+---
+
+## Delivery Mark
+
+Adopted 2026-10-01 (CONOP OVERWATCH, transport fix).
+
+**Behavior**: after writing a repo's notification, the script records the date of the hub's newest entry in `.claude/doctrine-delivered`. The next run sends that repo every entry dated after the mark, oldest first, and skips any entry whose heading already sits in its unread notification. The mark is the hub's newest date, not the newest date sent, so an entry skipped because it was already unread is not sent again after the maintainer reviews it and deletes the file.
+
+**No mark yet**: the repo gets the newest entry only, which is right for a repo bootstrapped from the template: it already holds everything older. For an older repo that missed cycles, run once with `--since YYYY-MM-DD`, naming the oldest entry it may lack. A mark, once written, wins over `--since`.
+
+**What it records**: delivery, not review. The unread notification file still holds whatever the maintainer has not reviewed; append mode keeps it. Consumers should commit the mark, so a clone on another machine knows what this repo has been sent.
+
+**Limit**: entries are compared by date, so two entries written on the same day either both go or both wait. Same-day entries are usually propagated together anyway.
 
 ---
 

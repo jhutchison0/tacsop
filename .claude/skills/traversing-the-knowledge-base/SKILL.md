@@ -37,7 +37,7 @@ grep -rln "$(basename <path>)" --include="*.md" . | grep -v ".venv"
 
 **4. Why does this exist?** Chase the path between two docs from both ends: outbound links from A, backlinks to B, meet in the middle. Doctrine entries cite session docs; session docs cite reviews; reviews cite the evidence.
 
-**5. Integrity: do the references still resolve?** `/pcc` check 5 runs this over the orientation surfaces (CLAUDE.md, CONTEXT.md, README.md, LANGUAGE.md, `.claude/README.md`, active tasks). Expected output: empty (the 3 known-missing March paths are allowlisted pending their `docs/tasks.md` disposition). Any MISSING line is a finding: record the check's count in the session doc, and a nonzero count fires the build trigger below.
+**5. Integrity: do the references still resolve?** `/pcc` check 5 runs this over the orientation surfaces (CLAUDE.md, CONTEXT.md, README.md, LANGUAGE.md, `.claude/README.md`, active tasks). Expected output: empty. Any MISSING line is a finding: record the check's count in the session doc, and a nonzero count fires the build trigger below.
 
 Check 5 has three blind spots, listed in `.claude/commands/pcc.md` under the check: it cannot
 see directory references, it resolves every path against the repo root, and a missing surface
@@ -77,4 +77,5 @@ No cell triggers automatically; each outcome is a recorded human decision in `do
 
 ## Version History
 
+- **1.0.1** (2026-10-01): Recipe 5 no longer mentions three allowlisted March paths; that allowlist line left `/pcc` check 5 when its task closed.
 - **1.0.0** (2026-08-14): Initial. Ships proposal Approach B (`docs/plans/20260813_kb_graph_traversal_proposal.md`) with the adversarial review's corrections: falsifiable five-session criterion, neighbors defined as both directions, integrity check wired into `/pcc`.

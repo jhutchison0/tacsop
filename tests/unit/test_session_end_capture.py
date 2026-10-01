@@ -19,8 +19,14 @@ def _kb_graph_format() -> str:
     return re.search(r"^KB-graph: <.+>$", TRAVERSAL.read_text(), re.M).group(0)
 
 
+def _step5() -> str:
+    return re.search(r"^## Step 5: .*?(?=^## Step 6)", SESSION_END.read_text(), re.S | re.M).group(0)
+
+
 def test_session_end_asks_for_the_kb_graph_line():
-    assert f"`{_kb_graph_format()}`" in SESSION_END.read_text()
+    """In Step 5, where the session doc is written, and as an instruction to record."""
+    ask = f"- If a traversal informed the session's work, record it in Work Completed as a `{_kb_graph_format()}` line"
+    assert ask in _step5()
 
 
 def test_session_doc_format_shows_the_kb_graph_line():

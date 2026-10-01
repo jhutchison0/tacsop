@@ -2,10 +2,10 @@
 """Propagate doctrine updates to sibling repos.
 
 Sends each sibling repo that has a .claude/commands/ directory every entry in
-docs/doctrine-updates.md it has not been sent: appended to its notification
+docs/doctrine-updates.md it has not been offered, appended to its notification
 file (.claude/upstream-update.md), oldest first. A delivery mark
-(.claude/doctrine-delivered) records the newest entry date the hub has offered
-that repo, so the next run sends only what is newer.
+(.claude/doctrine-delivered) lists, one per line, the entry headings the hub
+has offered that repo; each run adds the hub's headings and never removes one.
 
 Usage:
     python scripts/propagate_doctrine.py [--dry-run] [--since YYYY-MM-DD]
@@ -13,6 +13,7 @@ Usage:
 --since applies to repos with no mark yet: it sends every entry from that date.
 Without it, an unmarked repo gets the newest entry only, which is right for a
 repo bootstrapped from the template (it already holds everything older).
+Exit 1 if any repo failed or the run was refused; 0 otherwise.
 """
 
 import argparse
@@ -55,39 +56,83 @@ def find_downstream_repos() -> list[Path]:
 ENTRY_HEADING = re.compile(r"^## (\d{4}-\d{2}-\d{2}):", re.MULTILINE)
 
 
+def _with_fences(text: str):
+    """Yield (line, inside_a_code_fence) for each line; fence markers count as inside."""
+    fenced = False
+    for line in text.splitlines():
+        marker = line.lstrip().startswith(("```", "~~~"))
+        if marker:
+            fenced = not fenced
+        yield line, fenced or marker
+
+
 def extract_entries(doctrine_path: Path) -> list[tuple[str, str]]:
-    """Every dated entry in the doctrine file as (date, text), newest first."""
+    """Every dated entry in the doctrine file as (date, text), in file order.
+
+    A `## ` heading starts an entry only outside a code fence. One that is not
+    dated (`## YYYY-MM-DD: Subject`) raises ValueError naming it: an entry with
+    a typo in its heading would otherwise never ship.
+    """
     if not doctrine_path.exists():
         return []
     # The header ends at the first horizontal rule; entries follow, newest first.
-    parts = re.split(r"\n---\n", doctrine_path.read_text(), maxsplit=1)
+    parts = re.split(r"\n---\n", doctrine_path.read_text(encoding="utf-8"), maxsplit=1)
     if len(parts) < 2:
         return []
-    entries = []
-    for chunk in re.split(r"\n(?=## \d{4}-\d{2}-\d{2}:)", parts[1].strip()):
-        heading = ENTRY_HEADING.match(chunk.strip())
-        if heading:
-            text = re.sub(r"\n+---\s*$", "", chunk.strip())
-            entries.append((heading.group(1), text))
-    return entries
+    entries: list[list] = []
+    for line, fenced in _with_fences(parts[1]):
+        if line.startswith("## ") and not fenced:
+            heading = ENTRY_HEADING.match(line)
+            if not heading:
+                raise ValueError(f"doctrine heading is not dated (## YYYY-MM-DD: Subject): {line!r}")
+            entries.append([heading.group(1), [line]])
+        elif entries:
+            entries[-1][1].append(line)
+    return [(date, re.sub(r"\n+---\s*$", "", "\n".join(lines).strip())) for date, lines in entries]
 
 
-def entries_to_deliver(entries, mark, since, existing) -> list[tuple[str, str]]:
-    """The entries one consumer still needs, oldest first.
+def _heading(entry: tuple[str, str]) -> str:
+    return entry[1].splitlines()[0]
 
-    A delivery mark (the newest date this consumer was sent) wins: everything
-    newer goes. With no mark, everything from `since` goes, or, with no `since`,
-    the newest entry alone. An entry whose heading already sits in the consumer's
-    unread notification is never sent twice.
+
+def _headings(text: str) -> set[str]:
+    """The dated entry headings in a notification, outside code fences."""
+    return {line for line, fenced in _with_fences(text) if not fenced and ENTRY_HEADING.match(line)}
+
+
+def read_mark(mark_file: Path) -> set[str] | None:
+    """The entry headings a repo has been offered; None if it has no mark.
+
+    Raises ValueError for a mark that is not all dated headings (garbage, a
+    BOM, git conflict markers, an empty file), so it is reported, not trusted.
     """
-    if mark:
-        wanted = [e for e in entries if e[0] > mark]
+    if not mark_file.exists():
+        return None
+    lines = [line for line in mark_file.read_text(encoding="utf-8").splitlines() if line.strip()]
+    bad = [line for line in lines if not ENTRY_HEADING.match(line)]
+    if bad or not lines:
+        raise ValueError(f"malformed delivery mark: {bad[0] if bad else 'empty'!r}")
+    return set(lines)
+
+
+def entries_to_deliver(
+    entries: list[tuple[str, str]], held: set[str] | None, since: str | None, existing: str
+) -> list[tuple[str, str]]:
+    """The entries one repo still needs, oldest first.
+
+    A mark wins: every entry whose heading it does not hold goes, whatever its
+    date. With no mark, everything from `since` goes, or, with no `since`, the
+    newest entry alone. An entry already unread in the repo's notification is
+    never sent twice.
+    """
+    if held is not None:
+        wanted = [e for e in entries if _heading(e) not in held]
     elif since:
         wanted = [e for e in entries if e[0] >= since]
     else:
         wanted = entries[:1]
-    unread = set(existing.splitlines())
-    return [e for e in reversed(wanted) if e[1].splitlines()[0] not in unread]
+    unread = _headings(existing)
+    return [e for e in reversed(wanted) if _heading(e) not in unread]
 
 
 def build_notification(latest_entry: str) -> str:
@@ -104,49 +149,63 @@ def build_notification(latest_entry: str) -> str:
 """
 
 
-def propagate(dry_run: bool = False, since: str | None = None) -> None:
-    """Send each consumer every entry it has not been sent, then mark it.
+def propagate(dry_run: bool = False, since: str | None = None) -> int:
+    """Send each repo every entry it has not been offered; return the failure count.
 
-    The mark (`.claude/doctrine-delivered`) holds the newest entry date the hub
-    has offered that consumer. It is the hub's newest date, not the newest one
-    sent, so an entry skipped because it already sat unread is not re-sent
-    after the consumer reviews and deletes the notification.
+    The mark (`.claude/doctrine-delivered`) is the set of entry headings the
+    hub has offered that repo, one per line. Each run adds the hub's current
+    headings and never removes one, so an entry skipped because it was
+    already unread, or a run from an older hub checkout, never causes a
+    re-send. One repo's failure is reported and the run moves on.
     """
     entries = extract_entries(DOCTRINE_FILE)
     if not entries:
         print("No doctrine updates found.")
-        return
+        return 0
+    newest = max(date for date, _ in entries)
+    if since and since > newest:
+        # A typo here would otherwise mark every repo delivered and send nothing.
+        raise ValueError(f"--since {since} is after the newest entry ({newest}); it would send nothing")
 
     repos = find_downstream_repos()
     if not repos:
         print("No downstream repos with .claude/commands/ found.")
-        return
+        return 0
 
+    offered = {_heading(e) for e in entries}
+    failures = 0
     for repo in repos:
         rel = repo.relative_to(PROJECTS_DIR)
         target = repo / NOTIFICATION_FILENAME
         mark_file = repo / MARK_FILENAME
-        mark = mark_file.read_text().strip() if mark_file.exists() else None
-        existing = target.read_text() if target.exists() else ""
-        due = entries_to_deliver(entries, mark, since, existing)
-        dates = ", ".join(date for date, _ in due)
-        if dry_run:
-            if due:
+        try:
+            held = read_mark(mark_file)
+            existing = target.read_text(encoding="utf-8") if target.exists() else ""
+            due = entries_to_deliver(entries, held, since, existing)
+            new_mark = (held or set()) | offered
+            dates = ", ".join(date for date, _ in due)
+            noun = "entry" if len(due) == 1 else "entries"
+            if dry_run:
                 mode = "append" if existing else "new"
-                print(f"[dry-run] Would write: {target} ({mode}): {len(due)} entries ({dates})")
+                change = f"mark {len(held) if held is not None else 'none'} -> {len(new_mark)} headings"
+                sent = f"{len(due)} {noun} ({dates}) ({mode})" if due else "nothing"
+                print(f"[dry-run] {rel}: would send {sent}; {change}")
+                continue
+            body = "\n\n---\n\n".join(text for _, text in due)
+            if not due:
+                print(f"Up to date: {rel}")
+            elif existing:
+                target.write_text(existing.rstrip() + "\n\n---\n\n" + body + "\n", encoding="utf-8")
+                print(f"Appended {len(due)} {noun} ({dates}): {rel}")
             else:
-                print(f"[dry-run] Up to date: {rel}")
-            continue
-        body = "\n\n---\n\n".join(text for _, text in due)
-        if not due:
-            print(f"Up to date: {rel}")
-        elif existing:
-            target.write_text(existing.rstrip() + "\n\n---\n\n" + body + "\n")
-            print(f"Appended {len(due)} ({dates}): {rel}")
-        else:
-            target.write_text(build_notification(body))
-            print(f"Notified {len(due)} ({dates}): {rel}")
-        mark_file.write_text(entries[0][0] + "\n")
+                target.write_text(build_notification(body), encoding="utf-8")
+                print(f"Notified {len(due)} {noun} ({dates}): {rel}")
+            if new_mark != held:
+                mark_file.write_text("\n".join(sorted(new_mark, reverse=True)) + "\n", encoding="utf-8")
+        except (OSError, UnicodeDecodeError, ValueError) as err:
+            failures += 1
+            print(f"FAILED {rel}: {err}")
+    return failures
 
 
 def _entry_date(value: str) -> str:
@@ -173,8 +232,11 @@ def main(argv: list[str] | None = None) -> int:
         help="For repos with no delivery mark: send every entry from this date",
     )
     args = parser.parse_args(argv)
-    propagate(dry_run=args.dry_run, since=args.since)
-    return 0
+    try:
+        return 1 if propagate(dry_run=args.dry_run, since=args.since) else 0
+    except ValueError as err:
+        print(f"Refused, nothing written: {err}")
+        return 1
 
 
 if __name__ == "__main__":

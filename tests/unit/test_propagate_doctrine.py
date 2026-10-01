@@ -1,5 +1,7 @@
 """Tests for scripts/propagate_doctrine.py."""
 
+import os
+import re
 import sys
 from pathlib import Path
 
@@ -259,29 +261,29 @@ def _dates(entries):
 
 
 class TestEntriesToDeliver:
-    def test_with_a_mark_delivers_everything_newer_oldest_first(self):
-        got = propagate_doctrine.entries_to_deliver(ENTRIES, mark="2026-08-21", since=None, existing="")
+    def test_with_a_mark_delivers_every_entry_not_held_oldest_first(self):
+        got = propagate_doctrine.entries_to_deliver(ENTRIES, held={"## 2026-08-21: A"}, since=None, existing="")
         assert _dates(got) == ["2026-08-30", "2026-09-18"]
 
     def test_with_no_mark_and_a_since_date_delivers_from_that_date(self):
-        got = propagate_doctrine.entries_to_deliver(ENTRIES, mark=None, since="2026-08-30", existing="")
+        got = propagate_doctrine.entries_to_deliver(ENTRIES, held=None, since="2026-08-30", existing="")
         assert _dates(got) == ["2026-08-30", "2026-09-18"]
 
     def test_with_no_mark_and_no_since_delivers_the_newest_only(self):
-        got = propagate_doctrine.entries_to_deliver(ENTRIES, mark=None, since=None, existing="")
+        got = propagate_doctrine.entries_to_deliver(ENTRIES, held=None, since=None, existing="")
         assert _dates(got) == ["2026-09-18"]
 
     def test_a_mark_wins_over_since(self):
-        got = propagate_doctrine.entries_to_deliver(ENTRIES, mark="2026-08-30", since="2026-08-21", existing="")
+        got = propagate_doctrine.entries_to_deliver(ENTRIES, held={"## 2026-08-30: B", "## 2026-08-21: A"}, since="2026-08-21", existing="")
         assert _dates(got) == ["2026-09-18"]
 
     def test_skips_entries_already_in_the_unread_notification(self):
         existing = "# Upstream Doctrine Update\n\n---\n\n## 2026-08-30: B\n\nb"
-        got = propagate_doctrine.entries_to_deliver(ENTRIES, mark=None, since="2026-08-21", existing=existing)
+        got = propagate_doctrine.entries_to_deliver(ENTRIES, held=None, since="2026-08-21", existing=existing)
         assert _dates(got) == ["2026-08-21", "2026-09-18"]
 
     def test_a_consumer_at_the_newest_mark_gets_nothing(self):
-        got = propagate_doctrine.entries_to_deliver(ENTRIES, mark="2026-09-18", since=None, existing="")
+        got = propagate_doctrine.entries_to_deliver(ENTRIES, held={h for h in ("## 2026-09-18: C", "## 2026-08-30: B", "## 2026-08-21: A")}, since=None, existing="")
         assert got == []
 
 
@@ -303,7 +305,7 @@ class TestPropagateBacklog:
 
         text = (consumer / ".claude" / "upstream-update.md").read_text()
         assert text.index("## 2026-03-24: First Update") < text.index("## 2026-03-26: Second Update")
-        assert (consumer / ".claude" / "doctrine-delivered").read_text().strip() == "2026-03-26"
+        assert _mark(consumer) == {"## 2026-03-26: Second Update", "## 2026-03-24: First Update"}
 
     def test_a_second_run_delivers_nothing_new(self, consumer, capsys):
         propagate_doctrine.propagate(dry_run=False, since="2026-03-24")
@@ -325,7 +327,7 @@ class TestPropagateBacklog:
         assert not (consumer / ".claude" / "upstream-update.md").exists()
 
     def test_a_marked_consumer_gets_only_newer_entries(self, consumer):
-        (consumer / ".claude" / "doctrine-delivered").write_text("2026-03-24\n")
+        (consumer / ".claude" / "doctrine-delivered").write_text("## 2026-03-24: First Update\n")
 
         propagate_doctrine.propagate(dry_run=False, since="2026-03-01")
 
@@ -361,3 +363,232 @@ class TestMain:
             propagate_doctrine.main(["--since", bad])
 
         assert exc.value.code == 2
+
+
+def _mark(repo):
+    mark = repo / ".claude" / "doctrine-delivered"
+    return {line for line in mark.read_text().splitlines() if line} if mark.exists() else None
+
+
+def _note(repo):
+    note = repo / ".claude" / "upstream-update.md"
+    return note.read_text() if note.exists() else ""
+
+
+def _doc(*entries):
+    """A doctrine file with (date, subject) entries, newest first as given."""
+    body = "\n\n---\n\n".join(f"## {d}: {subject}\n\n{subject} body." for d, subject in entries)
+    return f"# Doctrine Updates\n\nHeader.\n\n---\n\n{body}\n"
+
+
+class TestHeadingMark:
+    """The mark is the set of entry headings a repo has been offered; it never shrinks."""
+
+    @pytest.fixture
+    def world(self, projects_dir, monkeypatch):
+        hub = _make_repo(projects_dir, "github/hub")
+        repo = _make_repo(projects_dir, "github/consumer")
+        doctrine = hub / "docs" / "doctrine-updates.md"
+        doctrine.parent.mkdir(parents=True)
+        monkeypatch.setattr(propagate_doctrine, "PROJECTS_DIR", projects_dir)
+        monkeypatch.setattr(propagate_doctrine, "TACSOP_ROOT", hub)
+        monkeypatch.setattr(propagate_doctrine, "DOCTRINE_FILE", doctrine)
+        return doctrine, repo
+
+    def test_a_second_entry_written_the_same_day_still_ships(self, world):
+        doctrine, repo = world
+        doctrine.write_text(_doc(("2026-10-01", "X")))
+        propagate_doctrine.propagate()
+        (repo / ".claude" / "upstream-update.md").unlink()  # reviewed
+        doctrine.write_text(_doc(("2026-10-01", "Y"), ("2026-10-01", "X")))
+
+        propagate_doctrine.propagate()
+
+        assert "## 2026-10-01: Y" in _note(repo)
+        assert "## 2026-10-01: X" not in _note(repo)
+
+    def test_an_entry_inserted_below_the_top_still_ships(self, world):
+        doctrine, repo = world
+        doctrine.write_text(_doc(("2026-09-18", "C"), ("2026-08-21", "A")))
+        propagate_doctrine.propagate(since="2026-08-21")
+        (repo / ".claude" / "upstream-update.md").unlink()
+        doctrine.write_text(_doc(("2026-09-18", "C"), ("2026-09-10", "Late"), ("2026-08-21", "A")))
+
+        propagate_doctrine.propagate()
+
+        assert _note(repo).count("## 20") == 1
+        assert "## 2026-09-10: Late" in _note(repo)
+
+    def test_a_run_from_an_older_checkout_never_shrinks_the_mark(self, world):
+        doctrine, repo = world
+        doctrine.write_text(_doc(("2026-09-18", "C"), ("2026-08-30", "B")))
+        propagate_doctrine.propagate(since="2026-08-30")
+        (repo / ".claude" / "upstream-update.md").unlink()
+        doctrine.write_text(_doc(("2026-08-30", "B")))  # an older hub checkout
+        propagate_doctrine.propagate()
+        doctrine.write_text(_doc(("2026-09-18", "C"), ("2026-08-30", "B")))  # back on main
+
+        propagate_doctrine.propagate()
+
+        assert _note(repo) == ""
+        assert _mark(repo) == {"## 2026-09-18: C", "## 2026-08-30: B"}
+
+    def test_the_newest_entry_skipped_as_unread_is_not_resent_after_review(self, world):
+        doctrine, repo = world
+        doctrine.write_text(_doc(("2026-03-26", "Second"), ("2026-03-24", "First")))
+        (repo / ".claude" / "upstream-update.md").write_text("# U\n\n---\n\n## 2026-03-26: Second\n\nSecond body.\n")
+        propagate_doctrine.propagate(since="2026-03-24")
+        (repo / ".claude" / "upstream-update.md").unlink()
+
+        propagate_doctrine.propagate()
+
+        assert _note(repo) == ""
+
+    @pytest.mark.parametrize("bad", ["garbage\n", "2026-08-21\n", "\ufeff## 2026-08-21: A\n", "<<<<<<< HEAD\n## 2026-08-21: A\n", "\n"])
+    def test_a_malformed_mark_is_refused_and_left_untouched(self, world, bad, capsys):
+        doctrine, repo = world
+        doctrine.write_text(_doc(("2026-09-18", "C"), ("2026-08-21", "A")))
+        mark = repo / ".claude" / "doctrine-delivered"
+        mark.write_text(bad)
+
+        failures = propagate_doctrine.propagate()
+
+        assert failures == 1
+        assert mark.read_text() == bad
+        assert _note(repo) == ""
+        assert "FAILED github/consumer" in capsys.readouterr().out
+
+
+FENCED_EXAMPLE = """\
+# Doctrine Updates
+
+Header.
+
+---
+
+## 2026-10-01: X about reverts
+
+Mark a reverted entry like this:
+
+```markdown
+## 2026-10-05: REVERT, Old subject
+```
+
+End of X.
+
+---
+
+## 2026-09-18: C
+
+c body.
+"""
+
+
+class TestParsing:
+    def test_a_dated_heading_inside_a_code_fence_does_not_split_the_entry(self, tmp_path):
+        doctrine = tmp_path / "doctrine-updates.md"
+        doctrine.write_text(FENCED_EXAMPLE)
+
+        entries = propagate_doctrine.extract_entries(doctrine)
+
+        assert [date for date, _ in entries] == ["2026-10-01", "2026-09-18"]
+        assert entries[0][1].endswith("End of X.")
+
+    @pytest.mark.parametrize("typo", ["## 2026-10-01 - Dash not colon", "## 2026-10-1: Short day", "## Untitled"])
+    def test_an_undated_top_level_heading_stops_the_run_and_names_the_line(self, tmp_path, typo):
+        doctrine = tmp_path / "doctrine-updates.md"
+        doctrine.write_text(FENCED_EXAMPLE.replace("## 2026-10-01: X about reverts", typo))
+
+        with pytest.raises(ValueError, match=re.escape(typo)):
+            propagate_doctrine.extract_entries(doctrine)
+
+    def test_a_fenced_heading_in_an_unread_notification_is_not_unread(self):
+        existing = "# U\n\n---\n\n## 2026-08-21: A\n\n```\n## 2026-09-18: C\n```\n"
+
+        got = propagate_doctrine.entries_to_deliver(ENTRIES, held=None, since="2026-08-21", existing=existing)
+
+        assert _dates(got) == ["2026-08-30", "2026-09-18"]
+
+    def test_the_hubs_own_doctrine_file_parses(self):
+        # Read-only: a malformed heading in the real file fails here, before any run.
+        entries = propagate_doctrine.extract_entries(propagate_doctrine.DOCTRINE_FILE)
+
+        assert entries
+        assert [d for d, _ in entries] == sorted((d for d, _ in entries), reverse=True)
+
+    def test_main_reports_a_refused_doctrine_file_and_exits_1(self, tmp_path, monkeypatch, capsys):
+        doctrine = tmp_path / "doctrine-updates.md"
+        doctrine.write_text(FENCED_EXAMPLE.replace("## 2026-09-18: C", "## Untitled"))
+        monkeypatch.setattr(propagate_doctrine, "DOCTRINE_FILE", doctrine)
+
+        assert propagate_doctrine.main(["--dry-run"]) == 1
+        assert "## Untitled" in capsys.readouterr().out
+
+
+def test_a_fenced_copy_of_a_real_heading_does_not_split_the_entry(tmp_path):
+    # An entry quoting another entry's exact heading inside a fence.
+    doctrine = tmp_path / "doctrine-updates.md"
+    doctrine.write_text(FENCED_EXAMPLE.replace("## 2026-10-05: REVERT, Old subject", "## 2026-09-18: C"))
+
+    entries = propagate_doctrine.extract_entries(doctrine)
+
+    assert [date for date, _ in entries] == ["2026-10-01", "2026-09-18"]
+    assert entries[0][1].endswith("End of X.")
+
+
+@pytest.fixture
+def fleet(projects_dir, monkeypatch):
+    """A hub with two entries and three consumer repos."""
+    hub = _make_repo(projects_dir, "github/hub")
+    repos = [_make_repo(projects_dir, f"github/c{i}") for i in (1, 2, 3)]
+    doctrine = hub / "docs" / "doctrine-updates.md"
+    doctrine.parent.mkdir(parents=True)
+    doctrine.write_text(_doc(("2026-09-18", "C"), ("2026-08-21", "A")))
+    monkeypatch.setattr(propagate_doctrine, "PROJECTS_DIR", projects_dir)
+    monkeypatch.setattr(propagate_doctrine, "TACSOP_ROOT", hub)
+    monkeypatch.setattr(propagate_doctrine, "DOCTRINE_FILE", doctrine)
+    return repos
+
+
+needs_unix_permissions = pytest.mark.skipif(
+    os.name == "nt" or (hasattr(os, "geteuid") and os.geteuid() == 0),
+    reason="needs file permissions a non-root POSIX user cannot bypass",
+)
+
+
+def test_a_since_after_the_newest_entry_refuses_the_whole_run(fleet, capsys):
+    # A typo (10-18 for 08-18) would otherwise mark every repo delivered and send nothing.
+    assert propagate_doctrine.main(["--since", "2026-10-18"]) == 1
+
+    assert "after the newest entry" in capsys.readouterr().out
+    assert all(_mark(repo) is None and _note(repo) == "" for repo in fleet)
+
+
+@needs_unix_permissions
+def test_a_failed_notification_write_leaves_no_mark(fleet):
+    note = fleet[0] / ".claude" / "upstream-update.md"
+    note.write_text("# U\n\n---\n\n## 2026-03-01: Old\n\nold\n")
+    note.chmod(0o444)
+    try:
+        propagate_doctrine.propagate()
+    finally:
+        note.chmod(0o644)
+
+    assert _mark(fleet[0]) is None
+
+
+@needs_unix_permissions
+def test_one_failing_repo_does_not_stop_the_rest(fleet, capsys):
+    note = fleet[1] / ".claude" / "upstream-update.md"
+    note.write_text("# U\n\n---\n\n## 2026-03-01: Old\n\nold\n")
+    note.chmod(0o444)
+    try:
+        code = propagate_doctrine.main(["--since", "2026-08-21"])
+    finally:
+        note.chmod(0o644)
+
+    assert code == 1
+    assert "FAILED github/c2" in capsys.readouterr().out
+    for repo in (fleet[0], fleet[2]):
+        assert "## 2026-08-21: A" in _note(repo)
+        assert _mark(repo) == {"## 2026-09-18: C", "## 2026-08-21: A"}

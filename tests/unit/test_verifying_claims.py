@@ -9,6 +9,8 @@ reviewer's call and stays out of this file.
 import re
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[2]
 SKILL_DIR = ROOT / ".claude" / "skills" / "verifying-claims"
 SKILL = SKILL_DIR / "SKILL.md"
@@ -56,6 +58,7 @@ def test_kernel_carries_the_decided_terms():
         "`UNVERIFIED: <blocker>`",
         "`git status --porcelain`",
         "never write",
+        "an absence is a claim",
     ):
         assert term in kernel, f"kernel lost {term!r}"
 
@@ -83,8 +86,8 @@ EXAMPLES = SKILL_DIR / "EXAMPLES.md"
 
 
 def _pairs() -> list[str]:
-    """The numbered `## N. title` sections of EXAMPLES.md."""
-    return re.split(r"^## \d+\. .*$", EXAMPLES.read_text(), flags=re.M)[1:]
+    """The bodies of the numbered `## N. title` sections of EXAMPLES.md."""
+    return re.findall(r"^## \d+\. [^\n]*\n(.*?)(?=^## |\Z)", EXAMPLES.read_text(), re.S | re.M)
 
 
 def test_examples_hold_seven_pairs():
@@ -99,3 +102,11 @@ def test_each_example_shows_a_before_and_an_evidenced_after():
         assert after, f"pair {number} has no After"
         assert "Evidence:" in after or "UNVERIFIED:" in after, f"pair {number}'s After shows no evidence"
         assert "Evidence:" not in before and "UNVERIFIED:" not in before
+
+
+def test_examples_show_a_clean_report():
+    """The counterweight: a report that needs no added line, so the pairs do not teach over-flagging."""
+    clean = _section(EXAMPLES.read_text(), "A clean report")
+    assert "**Before**" not in clean
+    assert "Evidence:" not in clean.split("\n\n")[0] and "UNVERIFIED:" not in clean.split("\n\n")[0]
+

@@ -77,3 +77,25 @@ def test_probe_table_has_one_probe_per_claim_type():
     assert len(rows) == len(CLAIM_TYPES)
     for row in rows:
         assert "`" in row[2], f"row {row[0]!r} names no command"
+
+
+EXAMPLES = SKILL_DIR / "EXAMPLES.md"
+
+
+def _pairs() -> list[str]:
+    """The numbered `## N. title` sections of EXAMPLES.md."""
+    return re.split(r"^## \d+\. .*$", EXAMPLES.read_text(), flags=re.M)[1:]
+
+
+def test_examples_hold_seven_pairs():
+    """Six incident shapes plus the plan's own line-count slip."""
+    assert len(_pairs()) == 7
+
+
+def test_each_example_shows_a_before_and_an_evidenced_after():
+    for number, pair in enumerate(_pairs(), start=1):
+        before, _, after = pair.partition("**After**")
+        assert "**Before**" in before, f"pair {number} has no Before"
+        assert after, f"pair {number} has no After"
+        assert "Evidence:" in after or "UNVERIFIED:" in after, f"pair {number}'s After shows no evidence"
+        assert "Evidence:" not in before and "UNVERIFIED:" not in before

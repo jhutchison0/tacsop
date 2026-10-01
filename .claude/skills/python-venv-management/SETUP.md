@@ -39,7 +39,7 @@ uv venv .venv-ml --managed-python
 uv pip install --python .venv-ml -r requirements-ml.txt
 ```
 
-Naming convention: `.venv-{suffix}/` (matches the `.gitignore` glob `.venv-*/`). Every `uv pip` command names its target with `--python`. Never route one through `VIRTUAL_ENV` or an activated shell: the variable outlives the command, and the next bare `uv pip` in that shell, in any repo, installs into `.venv-ml`.
+Naming convention: `.venv-{suffix}/` (matches the `.gitignore` glob `.venv-*/`). Every `uv pip` command names its target with `--python`. Never route one through `VIRTUAL_ENV`: activating a venv or exporting the variable outlives the command, and the next bare `uv pip` in that shell, in any repo, installs into `.venv-ml`. One form, `--python`, covers every case.
 
 ## Setup Patterns
 
@@ -93,10 +93,10 @@ venv:
 	uv venv --managed-python
 
 install: venv
-	uv pip install --python .venv -r requirements.txt
+	uv pip install --python $(VENV) -r requirements.txt
 
 dev-install: install
-	uv pip install --python .venv -r requirements-dev.txt
+	uv pip install --python $(VENV) -r requirements-dev.txt
 
 clean:
 	rm -rf $(VENV)
@@ -234,7 +234,7 @@ This captures **all** transitive dependencies at exact versions. Use it alongsid
 Better still: compile pins from loose specs (uv's built-in replacement for pip-tools):
 
 ```bash
-uv pip compile requirements.in -o requirements.txt   # Pin all transitives
+uv pip compile --python .venv requirements.in -o requirements.txt   # Pin all transitives
 uv pip sync --python .venv requirements.txt                         # Install exactly what's listed (no more, no less)
 ```
 

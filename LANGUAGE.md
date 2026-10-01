@@ -58,7 +58,7 @@ When a term is missing or contested, invoke the `maintaining-ubiquitous-language
 
 **Task**: One person, one session, one clear action. The smallest unit in `docs/tasks.md`. Promote upward when the work exceeds one session or requires multi-step coordination.
 
-**TCS** (Task, Condition, Standard): a structured task spec with pass/fail criteria. The universal task-detail unit inside all plan types (CONOP, OPORD). _Avoid:_ ticket, story.
+**TCS** (Task, Condition, Standard): a structured task spec with pass/fail criteria. Its table also carries a Purpose column: who gets the output and what decision it informs. The universal task-detail unit inside all plan types (CONOP, OPORD). _Avoid:_ ticket, story.
 
 **CONOP**: Concept of Operations, a multi-wave plan covering design decisions and parallel tracks. Lives in `docs/plans/`. _Avoid:_ design doc (already taken).
 

@@ -151,6 +151,8 @@ Each wave gets:
   |------|---------|-----------|----------|
   |      |         |           |          |
 
+  Purpose: who gets the output and what decision it informs (`.claude/commands/task.md`, Level 2).
+
 - **Exit criterion**: the single shared condition that closes the wave
 
 ---

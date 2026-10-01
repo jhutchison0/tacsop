@@ -84,7 +84,7 @@ TCS is also the **universal task specification unit**: every task within a CONOP
 | Handle errors | Same lead, deciding whether to rerun or discard | Given invalid input | Raises appropriate exception, logs warning |
 ```
 
-**Purpose** names who gets the output and what decision it informs. Fill it before planning the work; if you cannot, ask. A task with no named consumer is the cheapest place to catch work aimed at the wrong question: a walkthrough built when the need was a calibration costs a session, and the Condition and Standard columns never ask what the output is for.
+**Purpose** names who gets the output and what decision it informs. Fill it before planning the work; if you cannot, ask. The task spec is where wrong-question work costs least to catch: a walkthrough built when the need was a calibration cost a session, and Condition and Standard never ask what the output is for.
 
 ### Level 3: CONOP — Concept of Operations
 **When**: Multi-wave plan with design decisions or multiple agent teams.

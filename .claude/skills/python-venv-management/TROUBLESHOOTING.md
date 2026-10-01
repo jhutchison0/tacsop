@@ -207,12 +207,12 @@ python --version               # Verify
 
 **Symptom**: an install errors because uv can't find an environment to target.
 
-**Cause**: running outside the project root without `--python`.
+**Cause**: running outside the project tree, where a bare `uv pip` finds no `.venv`; or passing `--python .venv` from a subdirectory, where the relative path resolves against the current directory.
 
-**Fix**: name the environment, and the command works from anywhere:
+**Fix**: run from the project root, or name the environment by an absolute path, which works from anywhere:
 ```bash
 uv pip install --python <project-root>/.venv -e "<project-root>[dev]"
-uv pip install --python .venv-ml -r requirements-ml.txt   # an alternate env
+uv pip install --python <project-root>/.venv-ml -r <project-root>/requirements-ml.txt   # an alternate env
 ```
 Do not fix it by activating a venv or exporting `VIRTUAL_ENV`. The variable outlives the command, which is Issue 7's first cause.
 
@@ -236,11 +236,11 @@ For a self-signed corporate proxy, `export SSL_CERT_FILE=/path/to/corp-ca.pem` (
 
 1. **An inherited `VIRTUAL_ENV`**: a variable left from another repo's shell outranks the project's `.venv`. A `uv pip install` without `--python` then succeeds into the other environment, and a `uv pip list` without it checks that environment too, so it confirms the wrong thing. uv names the target when it is not the `.venv` in the current directory: `Using Python <version> environment at: <path>`.
    ```bash
-   echo "${VIRTUAL_ENV:-unset}"   # anything but this project's .venv is the cause
+   echo "${VIRTUAL_ENV:-unset}"   # a path other than this project's .venv is the cause
    which python                   # the interpreter you are running
    uv pip list --python .venv     # the project's environment, whatever is inherited
    ```
-   Fix: name the target on every command, or `unset VIRTUAL_ENV`.
+   Fix: name the target on every command. `unset VIRTUAL_ENV` clears it for one shell only, and in Claude Code each Bash call is a new shell, so relaunch from a shell without the variable. A named conda env (`CONDA_PREFIX`) redirects a bare install the same way, and `--python .venv` overrides it too.
 
 2. **Package name differs from import name**:
    ```bash

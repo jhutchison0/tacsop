@@ -86,6 +86,8 @@ all land at once.
   |------|---------|-----------|----------|
   |      |         |           |          |
 
+  Purpose: who gets the output and what decision it informs (`.claude/commands/task.md`, Level 2).
+
 - **Exit criterion**: the shared condition that closes the wave
 - **Checkpoint**: a **commit-gate with a named owner**; the wave is
   not closed until its verifying commit exists and the owner has

@@ -100,11 +100,11 @@ Loaded on demand when this SKILL.md cites them.
 - [uv documentation](https://docs.astral.sh/uv/) — environments, `uv pip`, `uv python`, caching
 - [Python venv documentation](https://docs.python.org/3/library/venv.html)
 - [pyproject.toml specification](https://packaging.python.org/en/latest/specifications/pyproject-toml/)
-- Replaced by uv: pyenv (`uv python`), pipx (`uvx`), pip-tools (uv's `pip compile` and `pip sync`)
+- Replaced by uv: pyenv (`uv python`), pipx (`uvx`), pip-tools (`uv pip compile`, `uv pip sync --python .venv`)
 
 ---
 
 **Maintained by**: Python Venv Management Skill
-**Version**: 3.1.0: every `uv pip` command names its target (`--python .venv`). A `VIRTUAL_ENV` inherited from another repo's shell outranks the project's `.venv`, and a bare install lands there; the alternate-env route through `VIRTUAL_ENV=` and activation is removed (2026-10-01, CONOP OVERWATCH task 1b).
+**Version**: 3.1.0: every `uv pip` command names its target (`--python .venv`). A `VIRTUAL_ENV` inherited from another repo's shell outranks the project's `.venv`, and a bare install lands there; the alternate-env route through the `VIRTUAL_ENV` variable and activation is removed (2026-10-01, CONOP OVERWATCH task 1b).
 **Prior**: 3.0.0 rebuilt on uv as the environment engine; pyenv/pip command surfaces replaced (2026-08-03)
 **Previous versions**: 2.0.0 restructured to directory form with sidecar progressive disclosure (2026-05-19); 1.0.0 single-file at `.claude/skills/python-venv-management.md`.

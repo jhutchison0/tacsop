@@ -69,21 +69,25 @@ something is wrong and nothing when it is fine, so a gap surfaces in the first
 minute instead of at session end:
 
 ```bash
-{ git config user.name && git config user.email; } >/dev/null \
-  || echo "NO GIT IDENTITY: commits fail (/session-end Step 3)"
-if [ -n "${VIRTUAL_ENV:-}" ] && [ "$(realpath "$VIRTUAL_ENV")" != "$(realpath .venv 2>/dev/null)" ]; then
-  echo "STRAY VIRTUAL_ENV=$VIRTUAL_ENV: a bare uv pip installs there, not into .venv"
+if ! { git config user.name && git config user.email; } >/dev/null; then
+  echo "NO GIT IDENTITY: commits fail (/session-end Step 3)"
+fi
+if [ -d "${VIRTUAL_ENV:-}" ] && [ "$(cd "$VIRTUAL_ENV" && pwd -P)" != "$(cd .venv 2>/dev/null && pwd -P)" ]; then
+  echo "STRAY VIRTUAL_ENV=$VIRTUAL_ENV: an install without --python lands there, not in .venv (every uv pip command)"
 fi
 for cli in gh glab; do
-  command -v "$cli" >/dev/null && ! "$cli" auth status >/dev/null 2>&1 \
-    && echo "$cli NOT AUTHENTICATED: PR/MR filing and CI status checks fail"
+  if command -v "$cli" >/dev/null && ! "$cli" auth status >/dev/null 2>&1; then
+    echo "$cli AUTH CHECK FAILED (not logged in, or offline): merge and CI results are UNVERIFIED (/session-end Step 6)"
+  fi
 done
 ```
 
-A stray `VIRTUAL_ENV` usually means a shell activated another repo's venv; run
-`deactivate` or `unset VIRTUAL_ENV` before any `uv pip` command. An
-unauthenticated `gh` or `glab` means a merge or CI result cannot be verified
-from here: report it as UNVERIFIED rather than as passing.
+A stray `VIRTUAL_ENV` came from the shell that launched this session. Pin
+`--python .venv` on every `uv pip` command. `unset VIRTUAL_ENV` lasts one shell,
+and in Claude Code each Bash call is a new shell; to clear it, exit, run
+`deactivate` in the launching shell, and relaunch. A failed `gh` or `glab` auth
+check means a merge or CI result cannot be verified from here: report it as
+`UNVERIFIED: <blocker>`, never as passing.
 
 ## Step 5: Summarize and Ready
 

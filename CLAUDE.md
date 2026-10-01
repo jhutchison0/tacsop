@@ -78,7 +78,7 @@ source .venv/bin/activate           # Activate before working
 .venv/bin/pytest                    # Run tests without activating
 ```
 
-uv venvs do not bundle pip. Run every package operation as `uv pip <command> --python .venv ...`; never `sudo pip`, never system pip. Name the target every time: a `VIRTUAL_ENV` inherited from another repo's shell outranks the project's `.venv`, and a bare `uv pip install` lands there.
+uv venvs do not bundle pip. Run every package operation from the project root as `uv pip <command> --python .venv ...`; never `sudo pip`, never system pip. Name the target every time: a `VIRTUAL_ENV` inherited from another repo's shell outranks the project's `.venv`, and a bare `uv pip install` lands there.
 
 ## Quick Commands
 
@@ -160,7 +160,7 @@ tacsop/
 Work scales through four levels. Use `/task promote` or `/task plan` to evaluate:
 
 1. **Task** — One person, one session, clear action (`docs/tasks.md`)
-2. **TCS** — Multi-step with pass/fail criteria (Task, Condition, Standard); also the universal task detail unit within all plan types
+2. **TCS** — Multi-step with pass/fail criteria (Task, Condition, Standard, plus a Purpose column); also the universal task detail unit within all plan types
 3. **CONOP** — Multi-wave with design decisions and parallel tracks (`docs/plans/`)
 4. **OPORD** — Sequential execution of a decided strategy in waves (`docs/plans/`)
 

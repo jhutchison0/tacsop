@@ -447,3 +447,43 @@ The added lines contain 0 cruft words and 1 em dash. The em dash is the bold lab
 - My consumer reads were read-only (fence-parity `grep` of notification files).
 - `find ~/projects -maxdepth 4 -name doctrine-delivered` prints nothing.
 - Outside the scratchpad, I wrote only this section and one agent-memory update.
+
+---
+
+## Round 3 (`f268c51`, narrow recheck)
+
+**Verdict: GO.** All three round-2 Warnings are closed. Two Suggestions remain, and neither blocks the merge or the seeded backlog run.
+
+I ran only the requested probes against a scratch export of `f268c51`. The suite (`CI=1`) gives `392 passed`, and the module gives `55 passed`.
+
+| Check | Result |
+|---|---|
+| W1 duplicate heading | `REFUSED: doctrine heading appears twice: '## 2026-10-01: Errata'`. The run refuses before sending. |
+| W2 seeding recipe, verbatim from `docs/propagation-protocol.md:111` to `:114` | I extracted the recipe by awk and changed only `<repo>`, to a scratch repo. Exit 0, 14 headings written, 0 lines for 09-18. The dry run against the real doctrine file's copy gives `github/stx: would send 1 entry (2026-09-18) (new); mark 14 -> 15 headings`, and an unseeded repo beside it gives `5 entries`. |
+| W3 grep | `grep -n -i 'right for a repo bootstrapped\|holds everything older\|it already holds everything' docs/propagation-protocol.md scripts/propagate_doctrine.py` gives exit 1, no match. |
+| S2 tilde line inside a backtick fence | 2 entries, no split |
+| S2 4-backtick fence around a 3-backtick example with a dated line | 2 entries, no split |
+| S2 indented (list-item) fence holding a dated line | 2 entries, no split |
+| S3 unclosed fence, scratch file | `REFUSED: unclosed code fence opened at line 6` |
+| S3 unclosed fence in a new top entry of the real file | `REFUSED: doctrine heading is not dated ...: '## Step 1.5: Identify the Machine'` |
+| S4 mark line with trailing spaces | `Notified 1 entry (2026-09-18)`. A is no longer re-sent. |
+| S4 hub heading with trailing space vs unread without | B is deduped (`Appended 2 entries (2026-08-21, 2026-09-18)`), and the mark holds the stripped heading. |
+| Real dry run (`--dry-run --since 2026-08-21`) | exit 0, 19 lines, 19 with `mark none -> 15 headings`, 0 `FAILED`. No fleet notification trips the new unclosed-fence check. |
+
+| Mutant | Result | Caught by |
+|---|---|---|
+| N7 mark written only when something was sent | killed | `TestRound2::test_the_mark_is_written_even_when_everything_due_is_already_unread` |
+| N9 indented fence markers ignored | **survived** | none |
+| N10 duplicate-heading check removed | killed | `TestRound2::test_a_repeated_heading_stops_the_run_and_names_it` |
+| N11 fence closes on any marker char | killed | `TestRound2::test_a_tilde_line_inside_a_backtick_fence_does_not_close_it` |
+
+### Suggestion (non-blocking)
+
+- **N9 survives.** The S2 indented-fence probe passes at HEAD, but no test pins it. Add that probe as a test: a list-item fence (`   ```markdown`) holding a column-0 dated line must not split the entry.
+- **The unclosed-fence error names the wrong line in both cases.** "line 6" counts from the start of `parts[1]`, after the header, and the file line is 11. On the real file, the closer accepts an info string (`` ```bash ``), so the stray fence resyncs, and the run is refused at the fenced `docs/doctrine-updates.md:260` instead of at the new entry. Both runs are refused, so nothing ships. Report file line numbers, and add "check for an unclosed code fence above this line" to the undated-heading error.
+
+### Scope Confirmation (round 3)
+
+- I ran the script against the real `~/projects` tree only as `--dry-run --since 2026-08-21`, with `PYTHONDONTWRITEBYTECODE=1`. Output went to the scratchpad.
+- Every probe, the recipe run and all mutants used `scratchpad/r3/hub` and scratch worlds. For the recipe, I temporarily symlinked `.venv` inside that scratch copy and removed it after.
+- `find ~/projects -maxdepth 4 -name doctrine-delivered` prints nothing.

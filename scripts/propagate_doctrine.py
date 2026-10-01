@@ -57,7 +57,7 @@ def find_downstream_repos() -> list[Path]:
 ENTRY_HEADING = re.compile(r"^## (\d{4}-\d{2}-\d{2}):", re.MULTILINE)
 
 
-def _with_fences(text: str):
+def _with_fences(text: str, first_line: int = 1):
     """Yield (line, inside_a_code_fence) for each line; fence markers count as inside.
 
     A fence closes only on the character that opened it, at least as long
@@ -65,7 +65,7 @@ def _with_fences(text: str):
     open at the end raises ValueError: it would swallow everything after it.
     """
     opener = ""
-    for number, line in enumerate(text.splitlines(), 1):
+    for number, line in enumerate(text.splitlines(), first_line):
         run = re.match(r"\s*(`{3,}|~{3,})", line)
         if run and not opener:
             opener, opened_at = run.group(1), number
@@ -94,7 +94,8 @@ def extract_entries(doctrine_path: Path) -> list[tuple[str, str]]:
         return []
     entries: list[list] = []
     seen: set[str] = set()
-    for line, fenced in _with_fences(parts[1]):
+    # The entries begin after the header's lines and its `---` separator.
+    for line, fenced in _with_fences(parts[1], first_line=parts[0].count("\n") + 3):
         if line.startswith("## ") and not fenced:
             line = line.rstrip()
             heading = ENTRY_HEADING.match(line)

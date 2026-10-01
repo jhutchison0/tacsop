@@ -637,3 +637,21 @@ class TestRound2:
         propagate_doctrine.propagate()
 
         assert _note(fleet[0]) == ""
+
+
+def test_an_unclosed_fence_error_names_the_file_line(tmp_path):
+    doctrine = tmp_path / "doctrine-updates.md"
+    text = FENCED_EXAMPLE.replace("## 2026-10-05: REVERT, Old subject\n```\n", "no close\n")
+    doctrine.write_text(text)
+    fence_line = text.splitlines().index("```markdown") + 1
+
+    with pytest.raises(ValueError, match=f"line {fence_line}$"):
+        propagate_doctrine.extract_entries(doctrine)
+
+
+def test_an_indented_fence_still_hides_its_headings(tmp_path):
+    # Pins the gate's surviving mutant N9 (indented fence markers ignored).
+    doctrine = tmp_path / "doctrine-updates.md"
+    doctrine.write_text(FENCED_EXAMPLE.replace("```markdown\n## 2026-10-05: REVERT, Old subject\n```", "  ```markdown\n## 2026-10-05: REVERT, Old subject\n  ```"))
+
+    assert [d for d, _ in propagate_doctrine.extract_entries(doctrine)] == ["2026-10-01", "2026-09-18"]

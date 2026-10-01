@@ -27,7 +27,10 @@ SESSION_FORMAT = ROOT / "docs" / "session-doc-format.md"
 
 STATES = ("written", "tested", "deployed", "observed")
 BOUND = "claim a reader will act on"
-LEDGER_LINE = "Overclaims the user caught this session: N"
+LEDGER_LINES = (
+    "Overclaims the user caught this session: N",
+    "Overclaims a reviewer caught this session: M",
+)
 
 
 def _frontmatter(text: str) -> dict[str, str]:
@@ -236,6 +239,7 @@ def test_session_doc_format_defines_the_claims_table():
 
 
 @pytest.mark.parametrize("path", [SKILL, SESSION_END, SESSION_FORMAT], ids=lambda path: path.name)
-def test_ledger_line_is_one_string_everywhere(path):
-    """The count a repo's overclaim rate is read from; reworded in one file, it stops being one instrument."""
-    assert LEDGER_LINE in path.read_text()
+def test_ledger_lines_are_the_same_strings_everywhere(path):
+    """N is the count a repo's overclaim rate is read from; reworded in one file, it stops being one instrument."""
+    for line in LEDGER_LINES:
+        assert line in path.read_text()

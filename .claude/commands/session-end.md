@@ -72,8 +72,8 @@ The session doc carries a `## Claims` table: one row for each claim a reader wil
 - Each row gives the claim, its state (written, tested, deployed, or observed), and what an `Evidence:` line would carry: the command and its output. A claim that could not be checked reads `UNVERIFIED: <blocker>`.
 - Re-run the probe now for every claim about the session's end state (tests pass, pushed, merged), and name the commit each row checked. A claim about an earlier moment keeps its original output and says when it was taken.
 - The commit that carries this doc cannot be in its own table. Report that push in your final message, with its own `Evidence:` line.
-- Under the table, write `Overclaims the user caught this session: N`. Count each claim made to the user that proved false after the user corrected it or asked about it. Zero is a count; write it.
-- On the next line, write `Overclaims a reviewer caught this session: M`: claims a reviewer's re-run refuted before the user relied on them. They are not in N.
+- Under the table, write `Overclaims the user caught this session: N`. Count each claim made to the user that proved false and that the user corrected, asked about, or had already relied on. Zero is a count; write it.
+- On the next line, write `Overclaims a reviewer caught this session: M`: every other claim a reviewer's re-run refuted. A claim is in N or in M, never both.
 - A session that claimed no outcome writes the two count lines alone.
 
 ## Step 6: Evaluate Merge Readiness

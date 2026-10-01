@@ -11,6 +11,6 @@ settings.register_profile("dev", max_examples=50)
 settings.register_profile("ci", max_examples=300, deadline=None)
 settings.load_profile("ci" if os.getenv("CI") else "dev")
 
-# The isolation tripwire: while a test runs, it may not delete outside the
-# sandbox (see .claude/skills/shift-left-testing/ISOLATION.md).
-pytest_plugins = ["tests.isolation"]
+# The isolation tripwire (no deletes outside the sandbox, no network, no real
+# .env) registers in pyproject.toml addopts, not here: pytest runs this whole
+# file before it reads pytest_plugins. See shift-left-testing/ISOLATION.md.

@@ -4,7 +4,7 @@ Sidecar to `SKILL.md`. A test that deletes real files, opens a network connectio
 
 ## The Design: Pass the Root In
 
-The fix is structural. Code that deletes, sweeps, or evicts takes its root as a parameter, and every test points that parameter at `tmp_path`:
+Code that deletes, sweeps, or evicts takes its root as a parameter, and every test points that parameter at `tmp_path`:
 
 ```python
 # BAD: the root is a module constant; a test reaches it only by monkeypatching
@@ -29,25 +29,31 @@ A config-driven repo reads the root from YAML in production and passes it in. Te
 
 ## The Backstop: The Tripwire Plugin
 
-`tests/isolation.py` is a pytest plugin that raises `IsolationError` when a running test reaches outside its sandbox. One line in `tests/conftest.py` registers it:
+`tests/isolation.py` is a pytest plugin that raises `IsolationError` when a running test reaches outside its sandbox. Register it in `pyproject.toml`, not in `conftest.py`:
 
-```python
-pytest_plugins = ["tests.isolation"]
+```toml
+[tool.pytest.ini_options]
+pythonpath = ["."]
+addopts = ["-p", "tests.isolation"]
 ```
+
+pytest runs a whole `conftest.py` before it reads that file's `pytest_plugins`. A production import anywhere in the conftest therefore runs before the plugin exists, and binds the real `load_dotenv`. A later `pytest_plugins = [...]` in the same file replaces the line and drops the tripwire with no error. A `-p` option in `addopts` loads before any conftest.
 
 | Tripwire | Fires on | Allowed |
 |---|---|---|
-| Deletion | `os.remove`, `os.unlink`, `Path.unlink`, `os.rmdir`, `Path.rmdir`, `shutil.rmtree`; a subprocess whose program is `rm`, `rmdir`, `unlink`, or `shred` | the system temp dir (which holds `tmp_path`), Hypothesis's example database, and `isolation_allow` entries |
-| Network | `socket.connect`, `socket.getaddrinfo` | loopback, `localhost`, Unix sockets |
-| dotenv | `load_dotenv()` with no path, or with a path outside the allowlist: loads nothing, returns `False` | a stream, or a path inside the allowlist |
+| Deletion | `os.remove`, `os.unlink`, `Path.unlink`, `os.rmdir`, `Path.rmdir`, `shutil.rmtree`; a launch (`subprocess`, `os.posix_spawn`, `os.spawn*`, `os.exec*`) whose program or `argv[0]` is `rm`, `rmdir`, `unlink`, or `shred` | the system temp dir (which holds `tmp_path`), `--basetemp` when set, Hypothesis's example directory, and `isolation_allow` entries |
+| Network | `socket.connect`, `sendto`, `sendmsg`; the lookups `getaddrinfo`, `gethostbyname`, `gethostbyaddr`, `getnameinfo` | loopback, `0.0.0.0` and `::`, `localhost` in any case, Unix sockets |
+| dotenv | `load_dotenv()` with no path, or with a path outside the allowlist: loads nothing, returns `False` | a path inside the allowlist, or a stream with no path |
 
-The first two are one Python audit hook (`sys.addaudithook`), armed only while a test runs. Arming covers setup, call, and teardown, so an autouse fixture is inside it. An audit hook sees `shutil.rmtree` even when the code under test ran `from shutil import rmtree` before any patch existed. A monkeypatched guard does not, and that hole is the incident's shape. The dotenv guard is applied when pytest imports the plugin, before test modules import the code they test.
+The first two are one Python audit hook (`sys.addaudithook`), armed only while a test runs. Arming covers setup, call, and teardown, so a fixture is inside it at both ends. An audit hook sees `shutil.rmtree` even when the code under test ran `from shutil import rmtree` before any patch existed. A monkeypatched guard does not, and that hole is the incident's shape. Paths resolve the way the kernel resolves them: symlinks before `..`, and the last component followed when a trailing slash makes the kernel follow it. An `rmtree` name relative to a directory descriptor cannot be resolved, so it is refused.
 
-Each catch appends one line to `.claude/audits/isolation-tripwire.log`:
+Each catch appends one line to `.claude/audits/isolation-tripwire.log`. A catch raises `IsolationError` even when that log cannot be written:
 
 ```
 [2026-09-30T22:08:34-05:00] TRIPWIRE event=shutil.rmtree target=/data/cache test=tests/unit/test_evict.py::test_sweep
 ```
+
+A session-scoped fixture's teardown is caught, but its line names the last test that ran.
 
 ### Extending the Allowlist
 
@@ -62,31 +68,33 @@ Never allowlist a production data root. A test that needs one is testing code th
 
 ## What the Tripwire Cannot See
 
-- **Overwrites.** `open(path, "w")` and a rename onto an existing file (`os.replace`, `shutil.move`) destroy data with no deletion event.
-- **Shell strings.** `subprocess.run("rm -rf x", shell=True)` and `["sh", "-c", "rm ..."]` show the tripwire only the shell.
-- **Child processes.** A program the test launches deletes in its own process, which has no audit hook.
-- **C extensions** that call `unlink(2)` directly.
-- **Deletion relative to a directory descriptor** (`os.remove(name, dir_fd=fd)`) outside `shutil.rmtree`, which is checked at its top directory instead.
-- **UDP `sendto`** without `connect`.
-- **Code that runs before the plugin loads.** A `conftest.py` that imports production code above its `pytest_plugins` line binds the real `load_dotenv`. `dotenv_values()` is not guarded.
+- **Overwrites and moves.** `open(path, "w")` and a rename onto an existing file destroy data with no deletion event. A rename out of a real directory into the sandbox, followed by a delete there, passes both checks.
+- **Shell strings and wrappers.** `shell=True`, `["sh", "-c", ...]`, and `os.system` show the tripwire only the shell. It reads the program and `argv[0]`, so `env rm`, `sudo rm`, `xargs rm`, `find -delete`, `git clean`, and `rsync --delete` pass.
+- **Child processes.** A program the test launches deletes and connects in its own process, which has no audit hook. Python 3.14 makes forkserver the Linux default for `multiprocessing`, so pool workers fall in this class.
+- **C extensions** that call `unlink(2)` or open sockets themselves. `psycopg` connecting to a host given as an IP raises no event; libcurl and gRPC clients are the same.
+- **A hostname passed to `connect`.** CPython resolves it in C before the `socket.connect` event, so the DNS query leaves. The connection itself is still refused.
+- **Loopback that forwards.** An SSH tunnel, a local proxy, a published Docker port, and `/var/run/docker.sock` are all local addresses that reach past the box.
+- **Code outside a test.** Collection (module-level code in a test file), `pytest_configure`, `pytest_sessionstart`, `pytest_sessionfinish`, `atexit` handlers, and threads that outlive their test all run disarmed. Collection stays disarmed on purpose: it imports libraries that build caches at import time (matplotlib's font cache is one), and arming it would trade a rare miss for routine false catches.
+- **The temp dir itself.** A test may delete the temp dir root and other processes' files in it. A repo checked out under the temp dir allowlists its own `.env` and data.
+- **`dotenv_values()`**, which reads a `.env` without setting variables, and any plugin that loads before this one and imports production code.
 - **Commands typed into a shell.** Those belong to the permission layer, not to pytest.
 
 That list is why the root parameter is the design and the tripwire is the backstop.
 
 ## Testing the Tripwire
 
-The hub's tests are `tests/unit/test_isolation.py`. Each one narrows the allowlist to a directory inside `tmp_path`, targets a sentinel outside it, asserts `IsolationError` rather than any exception, and asserts the sentinel still exists. Known-good controls prove that deletion inside the allowlist and connections to loopback still work, so a tripwire that refused everything would fail.
+The hub's tests are `tests/unit/test_isolation.py`. Each catch test narrows the allowlist to a directory inside `tmp_path`, targets a sentinel outside it, asserts `IsolationError` rather than any exception, and asserts the sentinel still exists. Known-good controls prove that deletion inside the allowlist, deleting a symlink, connections to loopback and to `0.0.0.0`, and a dotenv stream all still work, so a tripwire that refused everything would fail. Four tests run a fresh project in its own pytest process: fixture setup and teardown are armed, registration survives a conftest that imports production code, a fresh checkout's `.pytest_cache` builds, and `--basetemp` outside the temp dir works.
 
 Do not write `with pytest.raises(OSError): shutil.rmtree("/data/x")`. On a box with no `/data`, that test passes with no tripwire installed. On a box with `/data`, a regressed tripwire makes the test delete real data.
 
 ## Adopting Downstream
 
-1. Copy `tests/isolation.py`. It needs `tests` importable as a package (`tests/__init__.py`; the hub also sets `pythonpath = ["."]`).
-2. Add `pytest_plugins = ["tests.isolation"]` to `tests/conftest.py`, above any import of production code.
-3. Run the suite, then read `.claude/audits/isolation-tripwire.log`. Each line is a test reaching the real world (fix the test: pass the root in) or a directory that belongs in `isolation_allow`.
+1. Copy `tests/isolation.py` and `tests/unit/test_isolation.py`. The plugin needs `tests` importable as a package (`tests/__init__.py`). The test file is the registration canary: with the plugin unregistered, its catch tests fail.
+2. Add `"-p", "tests.isolation"` to `addopts` in `[tool.pytest.ini_options]`, beside `pythonpath = ["."]`. Add `"-p", "pytester"` too; the canary's fresh-project tests need it. Remove any `pytest_plugins` line for it from `conftest.py`.
+3. Run the suite with and without `CI=true`, then read `.claude/audits/isolation-tripwire.log`. Each line is a test reaching the real world (fix the test: pass the root in) or a directory that belongs in `isolation_allow`.
 4. Check that `.claude/audits/` is gitignored. The shift-left audit hook already needs it.
 
-Measured at the hub on adoption, 2026-09-30: 308 existing tests ran armed with 0 catches, including a forced matplotlib font-cache rebuild outside the temp dir. The 17 tripwire tests pass on Python 3.11.15 and 3.12.13.
+Measured at the hub, 2026-09-30, after the merge-gate review: 308 existing tests ran armed with 0 catches, with and without `CI=true`, including a forced matplotlib font-cache rebuild outside the temp dir. The 37 tripwire tests pass on Python 3.11.15 and 3.12.13.
 
 ## See Also
 

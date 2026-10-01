@@ -1,6 +1,6 @@
 ---
 name: shift-left-testing
-description: Multi-tier testing strategy with vertical-slicing (tracer-bullet) TDD, mocks, fixtures, simulation, property-based invariants, numeric tolerances, legacy characterization, script/CLI testing, CI integration, and explicit anti-patterns. Use when setting up test infrastructure, designing test strategy, implementing mocks, or driving feature work via test-first one-cycle-at-a-time TDD.
+description: Multi-tier testing strategy with vertical-slicing (tracer-bullet) TDD, mocks, fixtures, simulation, property-based invariants, numeric tolerances, legacy characterization, script/CLI testing, test isolation (deletion, network, and load_dotenv tripwires), CI integration, and explicit anti-patterns. Use when setting up test infrastructure, designing test strategy, implementing mocks, or driving feature work via test-first one-cycle-at-a-time TDD.
 version: "2.2.0"
 ---
 
@@ -91,7 +91,7 @@ Loaded on demand when this SKILL.md cites them. Read only the ones relevant to t
 - [NUMERIC.md](NUMERIC.md) — float comparison and tolerance selection, numpy and pandas assertions, injectable randomness, testing stochastic code. Read whenever a test touches computed numbers.
 - [REGRESSION.md](REGRESSION.md) — characterization tests for legacy code and the golden-file workflow (normalization, bless discipline, churn control). Read when the audit hook fires on untested code.
 - [SCRIPTS.md](SCRIPTS.md) — testing CLIs and filesystem scripts: thin main, tmp_path repo factories, dry-run contracts, the subprocess tier, and widening the enforcement perimeter to scripts/.
-- [ISOLATION.md](ISOLATION.md) — tests never touch the real world: pass data roots in as parameters, and the `tests/isolation.py` tripwire plugin (deletion, network, dotenv) as the backstop, with what it cannot see.
+- [ISOLATION.md](ISOLATION.md) — tests never touch the real world: pass data roots in as parameters, and the `tests/isolation.py` tripwire plugin (deletion, network, dotenv), registered through `addopts`, as the backstop, with what it cannot see.
 - [ENFORCEMENT.md](ENFORCEMENT.md) — enforcement gradient (probabilistic → deterministic), the PostToolUse audit hook, why we don't hard-block, when to escalate.
 - [CI.md](CI.md) — GitHub Actions example, coverage thresholds, marker-based test selection.
 - [ANTIPATTERNS.md](ANTIPATTERNS.md) — four anti-patterns to avoid, examples by domain (web API, data pipeline, ML), and the pre-commit testing checklist.

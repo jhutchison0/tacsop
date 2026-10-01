@@ -366,6 +366,7 @@ This is why `session-end`, `pcc`, `pci`, `sitrep`, `session-start`, and `task` r
 │   ├── NUMERIC.md
 │   ├── REGRESSION.md
 │   ├── SCRIPTS.md
+│   ├── ISOLATION.md
 │   ├── ENFORCEMENT.md
 │   ├── CI.md
 │   └── ANTIPATTERNS.md

@@ -11,8 +11,9 @@ Usage:
     python scripts/propagate_doctrine.py [--dry-run] [--since YYYY-MM-DD]
 
 --since applies to repos with no mark yet: it sends every entry from that date.
-Without it, an unmarked repo gets the newest entry only, which is right for a
-repo bootstrapped from the template (it already holds everything older).
+Without it, an unmarked repo gets the newest entry only. A repo that already
+holds entries the run would send needs its mark seeded first; see "Seeding a
+mark by hand" in docs/propagation-protocol.md.
 Exit 1 if any repo failed or the run was refused; 0 otherwise.
 """
 
@@ -57,13 +58,25 @@ ENTRY_HEADING = re.compile(r"^## (\d{4}-\d{2}-\d{2}):", re.MULTILINE)
 
 
 def _with_fences(text: str):
-    """Yield (line, inside_a_code_fence) for each line; fence markers count as inside."""
-    fenced = False
-    for line in text.splitlines():
-        marker = line.lstrip().startswith(("```", "~~~"))
-        if marker:
-            fenced = not fenced
-        yield line, fenced or marker
+    """Yield (line, inside_a_code_fence) for each line; fence markers count as inside.
+
+    A fence closes only on the character that opened it, at least as long
+    (CommonMark), so a ~~~ line inside a ``` block stays inside. A fence still
+    open at the end raises ValueError: it would swallow everything after it.
+    """
+    opener = ""
+    for number, line in enumerate(text.splitlines(), 1):
+        run = re.match(r"\s*(`{3,}|~{3,})", line)
+        if run and not opener:
+            opener, opened_at = run.group(1), number
+            yield line, True
+        elif run and run.group(1)[0] == opener[0] and len(run.group(1)) >= len(opener):
+            opener = ""
+            yield line, True
+        else:
+            yield line, bool(opener)
+    if opener:
+        raise ValueError(f"unclosed code fence opened at line {opened_at}")
 
 
 def extract_entries(doctrine_path: Path) -> list[tuple[str, str]]:
@@ -80,15 +93,21 @@ def extract_entries(doctrine_path: Path) -> list[tuple[str, str]]:
     if len(parts) < 2:
         return []
     entries: list[list] = []
+    seen: set[str] = set()
     for line, fenced in _with_fences(parts[1]):
         if line.startswith("## ") and not fenced:
+            line = line.rstrip()
             heading = ENTRY_HEADING.match(line)
             if not heading:
                 raise ValueError(f"doctrine heading is not dated (## YYYY-MM-DD: Subject): {line!r}")
+            if line in seen:
+                # A heading is an entry's identity; a repeat would never ship.
+                raise ValueError(f"doctrine heading appears twice: {line!r}")
+            seen.add(line)
             entries.append([heading.group(1), [line]])
         elif entries:
             entries[-1][1].append(line)
-    return [(date, re.sub(r"\n+---\s*$", "", "\n".join(lines).strip())) for date, lines in entries]
+    return [(day, re.sub(r"\n+---\s*$", "", "\n".join(lines).strip())) for day, lines in entries]
 
 
 def _heading(entry: tuple[str, str]) -> str:
@@ -97,7 +116,7 @@ def _heading(entry: tuple[str, str]) -> str:
 
 def _headings(text: str) -> set[str]:
     """The dated entry headings in a notification, outside code fences."""
-    return {line for line, fenced in _with_fences(text) if not fenced and ENTRY_HEADING.match(line)}
+    return {line.rstrip() for line, fenced in _with_fences(text) if not fenced and ENTRY_HEADING.match(line)}
 
 
 def read_mark(mark_file: Path) -> set[str] | None:
@@ -108,7 +127,7 @@ def read_mark(mark_file: Path) -> set[str] | None:
     """
     if not mark_file.exists():
         return None
-    lines = [line for line in mark_file.read_text(encoding="utf-8").splitlines() if line.strip()]
+    lines = [line.rstrip() for line in mark_file.read_text(encoding="utf-8").splitlines() if line.strip()]
     bad = [line for line in lines if not ENTRY_HEADING.match(line)]
     if bad or not lines:
         raise ValueError(f"malformed delivery mark: {bad[0] if bad else 'empty'!r}")
@@ -162,7 +181,7 @@ def propagate(dry_run: bool = False, since: str | None = None) -> int:
     if not entries:
         print("No doctrine updates found.")
         return 0
-    newest = max(date for date, _ in entries)
+    newest = max(day for day, _ in entries)
     if since and since > newest:
         # A typo here would otherwise mark every repo delivered and send nothing.
         raise ValueError(f"--since {since} is after the newest entry ({newest}); it would send nothing")
@@ -183,7 +202,7 @@ def propagate(dry_run: bool = False, since: str | None = None) -> int:
             existing = target.read_text(encoding="utf-8") if target.exists() else ""
             due = entries_to_deliver(entries, held, since, existing)
             new_mark = (held or set()) | offered
-            dates = ", ".join(date for date, _ in due)
+            dates = ", ".join(day for day, _ in due)
             noun = "entry" if len(due) == 1 else "entries"
             if dry_run:
                 mode = "append" if existing else "new"

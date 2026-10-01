@@ -104,9 +104,18 @@ Adopted 2026-10-01 (CONOP OVERWATCH, transport fix).
 
 **Behavior**: `.claude/doctrine-delivered` lists, one per line, the heading of every entry the hub has offered that repo. A run sends each entry whose heading the mark does not hold, oldest first, and skips any entry already sitting in the repo's unread notification. After writing the notification, the script adds every current hub heading to the mark and never removes one. So an entry skipped because it was already unread is not sent again after the maintainer reviews it, and a run from an older hub checkout cannot shrink the mark. Dates play no part once a mark exists: an entry written the same day as a delivered one, or merged below the top later, still ships.
 
-**No mark yet**: the repo gets the newest entry only, which is right for a repo bootstrapped from the template: it already holds everything older. For an older repo that missed cycles, run once with `--since YYYY-MM-DD`, naming the oldest entry it may lack. A mark, once written, wins over `--since`, and a `--since` after the newest entry refuses the run: it would mark every repo delivered and send nothing.
+**No mark yet**: the repo gets the newest entry only, and its mark then holds every current heading. A repo bootstrapped from the template after the newest entry already holds that entry too, and receives it again unless its mark is seeded first. For an older repo that missed cycles, run once with `--since YYYY-MM-DD`, naming the oldest entry it may lack. A mark, once written, wins over `--since`, and a `--since` after the newest entry refuses the run: it would mark every repo delivered and send nothing.
 
-**Seeding a mark by hand**: one `--since` covers every unmarked repo, and some repos already hold entries it would send: a repo bootstrapped after those entries, or one that adopted them by hand. Before that repo's first run, write the headings of the entries it holds into its mark, copied exactly from `docs/doctrine-updates.md`. Check the result with `--dry-run`, which prints each repo's sends and mark change.
+**Seeding a mark by hand**: one `--since` covers every unmarked repo, and some repos already hold entries it would send: a repo bootstrapped after those entries, or one that adopted them by hand. Before that repo's first run, write every hub heading into its mark except the headings of the entries it lacks. A heading missing from a mark is sent, whatever its date, so a mark listing only the recent entries a repo holds sends it the whole older history. For a repo that lacks only the 2026-09-18 entry:
+
+```bash
+.venv/bin/python -c 'import sys; sys.path.insert(0, "scripts"); import propagate_doctrine as p; print("\n".join(t.splitlines()[0] for _, t in p.extract_entries(p.DOCTRINE_FILE)))' \
+  | grep -v '^## 2026-09-18:' > <repo>/.claude/doctrine-delivered
+```
+
+Then run `--dry-run` and confirm that repo is sent exactly the entries it lacks.
+
+**Recovery**: deleting one line from a repo's mark re-sends that one entry on the next run. Deleting the mark lets the next `--since` run backfill the repo, and dedupe still skips anything unread.
 
 **What it records**: delivery, not review. The unread notification file still holds whatever the maintainer has not reviewed; append mode keeps it. Consumers should commit the mark, so a clone on another machine knows what this repo has been sent.
 
@@ -130,7 +139,7 @@ If a propagated change turns out to be wrong:
 
 1. **Author a corrective doctrine entry.** Title it `## YYYY-MM-DD: REVERT — <original subject>`. Spell out what to undo and how. Include before/after snippets in the reverse direction.
 2. **Propagate the correction.** Use the same script. Append mode means it lands cleanly even if downstream has not consumed the original yet.
-3. **Update `docs/doctrine-updates.md`** to mark the original entry with `(REVERTED YYYY-MM-DD)` at the end of its heading: `## 2026-08-30: Subject (REVERTED 2026-10-05)`. Placed between the date and the colon, it breaks the dated-heading pattern and refuses the run. The changed heading sends the entry again, which tells downstream it was reverted. Do not delete the original; keep the history visible.
+3. **Update `docs/doctrine-updates.md`** to mark the original entry with `(REVERTED YYYY-MM-DD)` at the end of its heading: `## 2026-08-30: Subject (REVERTED 2026-10-05)`. Placed between the date and the colon, it breaks the dated-heading pattern and refuses the run. The changed heading sends the entry again, which tells downstream it was reverted. Retitle only after the REVERT entry has propagated; in the same cycle, the full original arrives first and the REVERT after it. Do not delete the original; keep the history visible.
 
 **Do not**: rewrite history by editing or removing past entries in `docs/doctrine-updates.md`. Future readers need to see what we asked downstream to do, even when we changed our minds.
 

@@ -319,3 +319,131 @@ A maintainer should expect the shape: the 10 append repos' newest unread entry i
   - One `git merge-tree --write-tree main HEAD` added unreferenced objects to the hub's `.git/objects`. No ref changed.
   - I added one agent-memory file (`.claude/agent-memory/code-reviewer/project_doctrine_transport_review_patterns.md`) and one index line in that directory's `MEMORY.md`.
   - Nothing was written to any consumer repo, no cache was cleaned, and no global config changed.
+
+---
+
+## Round 2 (`9f0af02`)
+
+**Verdict: GO-WITH-FIXES (0 Critical, 3 Warning, 7 Suggestion).** Both Criticals are closed. Every round-1 probe that lost or re-sent an entry now behaves correctly. Three small items remain. Two are doc text, and the seeding text must be fixed before anyone seeds marks for the backlog run. The third is a one-line guard. They do not need another gate if the lead re-runs the probes named below.
+
+### The heading-set mark, judged on its merits
+
+The heading set is the better design, and I withdraw my date-plus-same-day sketch. It closes P2b (an entry inserted below the top after a later one shipped), which my sketch could not. The union is commutative, so an older hub checkout, a second machine, or a git conflict resolved as "keep both sides" can only add lines, never lose them. Most of its failure modes are loud: they cause a re-send, which the dry run shows.
+
+The costs come from one choice: the heading text is the entry's identity.
+- A retitle re-sends the entry. That is documented.
+- Two entries with the same heading collide (W1 below).
+- Trailing whitespace on a mark line re-sends its entry (S4).
+- A mark that omits old headings sends the whole history, because a mark wins over dates (W2 below).
+
+Only the collision is silent.
+
+### Round-1 probes re-run (scratch trees, module from `scratchpad/r2/hub`)
+
+| Probe | Round 1 | Round 2 |
+|---|---|---|
+| P1 same-day entry after a run | Y lost | `Appended 1 entry (2026-10-01)`; Y ships |
+| P2a backdated entry on top | missed, mark regressed, 09-18 re-sent | `Notified 1 entry (2026-09-10)`; run 3 `Up to date` |
+| P2b entry inserted mid-file | missed | `Appended 1 entry (2026-08-30)` |
+| P3 older hub checkout | mark regressed, re-send | `Up to date` both runs; mark keeps all 3 headings |
+| P4 malformed mark | 0 sent, mark overwritten | `FAILED github/c1: malformed delivery mark: ...`, mark byte-identical, in dry and real runs, for empty, whitespace, garbage, a legacy bare date, BOM, and conflict markers. CRLF marks parse. |
+| P5 retitled entry | re-sent under the new title | same, now documented (`docs/propagation-protocol.md:113`) |
+| P5b trailing space on a hub heading | duplicate | same; the real file has 0 such headings (S4) |
+| P6 dated heading inside a fence | split, re-sent every run | 2 entries parsed, X whole; runs 2 and 3 `Up to date` |
+| P6b real heading equal to a fenced line in the unread file | (split hid it) | `Appended 1 entry (2026-10-05)`; the fenced line does not count as unread |
+| P7 CRLF hub and CRLF unread file | correct | correct |
+| P8 mark lost (fresh clone) | newest re-sent | same, by design; commit the mark |
+| P9 `--since 2026-10-18` | 0 sent, mark written | `ValueError ... it would send nothing`, mark `None`; on the real tree `Refused, nothing written`, exit 1 |
+| P10 plain run before the backlog run | backlog lost | same, by design; recovery undocumented (S6) |
+| F1 notification denied in repo 2 of 3 | run aborted | `FAILED github/b2: [Errno 13]`; b2 has no mark; c3 delivered and marked |
+| F2 mark write denied after notification | one re-send after review | same: `FAILED github/a1`, then `Notified 1 entry (2026-09-18)` after review; the safe direction |
+| F3 non-UTF-8 notification | both runs died | `FAILED github/a1: 'utf-8' codec can't decode ...`; b2 processed, in dry and real runs |
+| Dry vs real, 6 states | agreed | agree in all 6 (unmarked, partial mark, unread, garbage mark, full mark, empty notification) |
+
+The suite at `9f0af02` (scratch export, `CI=1`): `387 passed, 1 warning`. The module: `50 passed`. Both match the commit message.
+
+### Mutation table (one mutant per run, scratch copy, 50 tests)
+
+| Mutant | Result | Caught by |
+|---|---|---|
+| N1 mark not unioned (new mark = hub headings only) | killed | `test_a_run_from_an_older_checkout_never_shrinks_the_mark` |
+| N2a fence state ignored in the doctrine parse | killed | 3, incl. `test_a_dated_heading_inside_a_code_fence_does_not_split_the_entry` |
+| N2b fence state ignored in unread headings | killed | `test_a_fenced_heading_in_an_unread_notification_is_not_unread` |
+| N3 undated heading silently skipped | killed | 4 (`..._stops_the_run_and_names_the_line` ×3, `test_main_reports_a_refused_doctrine_file_and_exits_1`) |
+| N4 late `--since` not refused | killed | `test_a_since_after_the_newest_entry_refuses_the_whole_run` |
+| N5 mark not validated | killed | 5 (`test_a_malformed_mark_is_refused_and_left_untouched` ×5) |
+| N6 no per-repo error handling | killed | 7 |
+| N7 mark written only when something was sent | **survived** | none (S1) |
+| N8 refusal exits 0 | killed | 2 |
+| N9 indented fence markers ignored | **survived** | none (S2) |
+| M1' mark = held plus headings sent | killed | `test_the_newest_entry_skipped_as_unread_is_not_resent_after_review` |
+| M3' dedupe removed | killed | 2 |
+| M4' `since` `>=` to `>` | killed | 5 |
+| M5' newest first | killed | 5 |
+| M6' mark written before the notification | killed | `test_a_failed_notification_write_leaves_no_mark` |
+| M8' dry run writes the mark | killed | `test_dry_run_names_what_each_consumer_would_get_and_writes_nothing` |
+| M10' no mark, no since sends all | killed | `test_with_no_mark_and_no_since_delivers_the_newest_only` |
+| M11' `--since` wins over the mark | killed | 3 |
+| M12' trailing `---` kept | killed | 3 |
+
+(My first M6' run reported "survived" because I inserted the line after the dry-run `continue`, where it was dead code. Placed correctly, the mutant dies.)
+
+### Real dry run
+
+`--dry-run --since 2026-08-21`, exit 0: 19 lines of the form `[dry-run] github/fist: would send 5 entries (2026-08-21, 2026-08-27, 2026-08-29, 2026-08-30, 2026-09-18) (new); mark none -> 15 headings`. The 15 entries parse. The plain `--dry-run` sends `1 entry (2026-09-18)` to all 19, fist and schelling-point included. `--dry-run --since 2026-10-18` prints `Refused, nothing written: --since 2026-10-18 is after the newest entry (2026-09-18); it would send nothing` and exits 1. The output now shows each repo's mark change, which round 1's S1 asked for. Round 1's W1 table still holds: without seeding, at least 20 of the 95 deliveries carry a skill the repo already has.
+
+### Warning
+
+**W1 (new). Two entries with the same heading collide, and the later one never ships.** `scripts/propagate_doctrine.py:83` to `:91` accept duplicate headings. `:129` and `:175` treat a heading as the entry's identity. Scratch probe: a repo has received `## 2026-10-01: Errata`, and a second entry with the identical heading is added on top.
+
+```
+parsed: [('2026-10-01', '## 2026-10-01: Errata', 'second errata'), ('2026-10-01', '## 2026-10-01: Errata', 'first errata'), ...]
+Up to date: github/c1 | note has 'second errata': False
+```
+
+This is the only silent loss left. The real file's 15 headings are unique today. **Fix**: in `extract_entries`, raise `ValueError` naming the heading when it repeats, the same way an undated heading refuses the run.
+
+**W2 (new). Followed as its framing suggests, the seeding recipe sends a repo the whole history.** `docs/propagation-protocol.md:109` says to "write the headings of the entries it holds into its mark". The paragraph opens with entries that "it would send", so a reader seeds the in-window headings. Because a mark wins over dates, every heading it omits then ships. Scratch probe on a copy of the real doctrine file, for a repo shaped like stx-server:
+
+```
+seeded 4 of 15 headings  -> would send 11 entries (2026-03-24, 2026-03-26, ..., 2026-08-03, 2026-09-18) (new); mark 4 -> 15 headings
+seeded 14 of 15 headings -> would send 1 entry (2026-09-18) (new); mark 14 -> 15 headings
+```
+
+That is 1,198 lines of entries the repo already holds, per mis-seeded repo. The dry run shows it, but only to a reader who counts. **Fix**: "Write every hub heading into its mark except those of the entries it lacks. A heading missing from a mark is sent, whatever its date." Give a command that uses the script's own fence-aware parser (verified in scratch: 14 lines, exit 0):
+
+```bash
+.venv/bin/python -c 'import sys; sys.path.insert(0, "scripts"); import propagate_doctrine as p; print("\n".join(t.splitlines()[0] for _, t in p.extract_entries(p.DOCTRINE_FILE)))' \
+  | grep -v '^## 2026-09-18:' > ~/projects/github/stx-server/.claude/doctrine-delivered
+```
+
+Seeds for this fleet:
+- fist and schelling-point: all 15 headings.
+- stx-server and propter: all but 09-18.
+- beesly-equilibrium: all but 08-29, 08-30 and 09-18.
+
+Expect 75 deliveries on the `--since 2026-08-21` run.
+
+**W3 (carried from round-1 W1(d)). The false claim about bootstrapped repos is still in two places.** `docs/propagation-protocol.md:107` and `scripts/propagate_doctrine.py:13` to `:15` still say the newest-only default "is right for a repo bootstrapped from the template (it already holds everything older)". The plain real dry run sends `1 entry (2026-09-18)` to fist and schelling-point, both of which already hold it. **Fix**: "With no mark, a repo gets the newest entry only. That is right for a repo bootstrapped after the second-newest entry and before the newest. Seed any other new repo's mark by hand."
+
+### Suggestion
+
+- **S1. Pin N7.** HEAD writes the mark even when everything due is already unread. The surviving mutant shows why that matters. Scratch probe, unread notification already holding the newest entry: HEAD gives `mark after run1: 2 ... after review: Up to date`, and N7 gives `mark after run1: None ... after review: Notified 1 entry (2026-09-18)`. A test: an unmarked repo whose notification already holds the newest entry is run once, the notification is deleted, and the next run sends nothing.
+- **S2. Fence matching is a toggle, not CommonMark.** `scripts/propagate_doctrine.py:63` to `:65` flip on any line starting with three backticks or tildes. A tilde line inside a backtick fence flips the state, and a fenced dated example then splits the entry: `parsed: [('2026-10-01', '## 2026-10-01: X tilde'), ('2026-10-05', '## 2026-10-05: Fenced example')]`. A 4-backtick fence around a 3-backtick example mis-scopes the inner lines the same way. N9 survives. The real file has 0 tilde fences and 0 fences of four or more backticks, so this is latent. **Fix**: remember the opening fence's character and length, and close only on a bare run of the same character at least that long.
+- **S3. An unclosed fence goes undetected until something downstream trips.** In a scratch file with no fenced undated heading, an entry with an unclosed fence swallows every older entry: `parsed: [('2026-10-01', '## 2026-10-01: X unclosed')]`, and the dry run shows a normal-looking `1 entry`. On the real file, the flip exposes the fenced `## Step 1.5: Identify the Machine` (`docs/doctrine-updates.md:260`), and the run is refused with a message naming that unrelated line. **Fix**: if a fence is still open at end of file, refuse the run and name the entry where the fence opened.
+- **S4. Normalize trailing whitespace.** A mark line `## 2026-08-21: A title  ` passes validation and re-sends A (`sent=['2026-08-21', ...]`). Hand-seeding and pre-commit `trailing-whitespace` hooks both produce such lines. `rstrip()` headings in `extract_entries`, `_headings` and `read_mark`.
+- **S5. A REVERTED retitle re-sends the full original ahead of the REVERT entry.** Scratch probe: `note headings in order: ['## 2026-08-30: B title (REVERTED 2026-10-05)', '## 2026-10-05: REVERT — B title']`. A maintainer reading top to bottom meets the original Action Required first. The protocol (`:133`) calls the re-send intentional. If it stays, say there that the original arrives first. Otherwise add the retitled heading to the mark without sending it.
+- **S6. Document two recovery paths the heading set makes easy.** Deleting one line from a repo's mark re-sends that one entry. Deleting the mark lets `--since` backfill the repo, while dedupe protects unread entries. Neither is in the protocol, and P10 needs the second.
+- **S7. Carried:** `date` is still reused as a loop name (`:91`, `:165`, `:186`). No doctrine entry yet tells consumers to commit the mark (`grep -c doctrine-delivered docs/doctrine-updates.md` gives `0`). Round-1 prose finding "Since the delivery mark" (`:46`) is still open.
+
+### Prose (lines added in `9f0af02`)
+
+The added lines contain 0 cruft words and 1 em dash. The em dash is the bold label separator in "**Rule 1 — Related changes ...**", which the other three rules share; RULES.md 8 exempts it. Round-1 W6 is closed: `:44` now names the dates, Rule 1's title matches its body, Append Mode says "every entry due", and the Behavior and Limits paragraphs are true as measured above. One small residue: `:44` says 2026-08-21 through 2026-09-18 "stacked up behind the newest", but 2026-09-18 is the newest.
+
+### Scope Confirmation (round 2)
+
+- I ran the script against the real `~/projects` tree only with `--dry-run`, three times: with `--since 2026-08-21`, with no `--since`, and with `--since 2026-10-18`. All three set `PYTHONDONTWRITEBYTECODE=1`.
+- Every write probe, mutant and pytest run used a scratch export of `9f0af02` (`scratchpad/r2/hub`, `scratchpad/mut2/`). Pytest ran with `--basetemp` inside the scratchpad and `-p no:cacheprovider`. Round 2 ran no pytest in the hub and no `git merge-tree`.
+- My consumer reads were read-only (fence-parity `grep` of notification files).
+- `find ~/projects -maxdepth 4 -name doctrine-delivered` prints nothing.
+- Outside the scratchpad, I wrote only this section and one agent-memory update.

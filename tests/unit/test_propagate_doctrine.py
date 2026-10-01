@@ -592,3 +592,48 @@ def test_one_failing_repo_does_not_stop_the_rest(fleet, capsys):
     for repo in (fleet[0], fleet[2]):
         assert "## 2026-08-21: A" in _note(repo)
         assert _mark(repo) == {"## 2026-09-18: C", "## 2026-08-21: A"}
+
+
+class TestRound2:
+    def test_a_repeated_heading_stops_the_run_and_names_it(self, tmp_path):
+        # A heading is an entry's identity; a second "Errata" would never ship.
+        doctrine = tmp_path / "doctrine-updates.md"
+        doctrine.write_text(_doc(("2026-10-01", "Errata"), ("2026-10-01", "Errata")))
+
+        with pytest.raises(ValueError, match="## 2026-10-01: Errata"):
+            propagate_doctrine.extract_entries(doctrine)
+
+    def test_an_unclosed_fence_stops_the_run(self, tmp_path):
+        # Unclosed, it would swallow every older entry into this one.
+        doctrine = tmp_path / "doctrine-updates.md"
+        doctrine.write_text(FENCED_EXAMPLE.replace("## 2026-10-05: REVERT, Old subject\n```\n", "no close\n"))
+
+        with pytest.raises(ValueError, match="unclosed code fence"):
+            propagate_doctrine.extract_entries(doctrine)
+
+    def test_a_tilde_line_inside_a_backtick_fence_does_not_close_it(self, tmp_path):
+        doctrine = tmp_path / "doctrine-updates.md"
+        doctrine.write_text(FENCED_EXAMPLE.replace("```markdown\n", "```markdown\n~~~\n"))
+
+        entries = propagate_doctrine.extract_entries(doctrine)
+
+        assert [d for d, _ in entries] == ["2026-10-01", "2026-09-18"]
+
+    def test_trailing_whitespace_on_a_heading_does_not_resend_it(self, fleet):
+        mark = fleet[0] / ".claude" / "doctrine-delivered"
+        mark.write_text("## 2026-09-18: C  \n## 2026-08-21: A\t\n")
+
+        propagate_doctrine.propagate()
+
+        assert _note(fleet[0]) == ""
+
+    def test_the_mark_is_written_even_when_everything_due_is_already_unread(self, fleet):
+        # Pins the gate's surviving mutant N7: no mark here re-sends C after review.
+        note = fleet[0] / ".claude" / "upstream-update.md"
+        note.write_text("# U\n\n---\n\n## 2026-09-18: C\n\nC body.\n")
+        propagate_doctrine.propagate()
+        note.unlink()
+
+        propagate_doctrine.propagate()
+
+        assert _note(fleet[0]) == ""

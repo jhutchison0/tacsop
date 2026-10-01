@@ -1,7 +1,7 @@
 ---
 name: shift-left-testing
-description: Multi-tier testing strategy with vertical-slicing (tracer-bullet) TDD, mocks, fixtures, simulation, property-based invariants, numeric tolerances, legacy characterization, script/CLI testing, CI integration, and explicit anti-patterns. Use when setting up test infrastructure, designing test strategy, implementing mocks, or driving feature work via test-first one-cycle-at-a-time TDD.
-version: "2.1.1"
+description: Multi-tier testing strategy with vertical-slicing (tracer-bullet) TDD, mocks, fixtures, simulation, property-based invariants, numeric tolerances, legacy characterization, script/CLI testing, test isolation (deletion, network, and load_dotenv tripwires), CI integration, and explicit anti-patterns. Use when setting up test infrastructure, designing test strategy, implementing mocks, or driving feature work via test-first one-cycle-at-a-time TDD.
+version: "2.2.0"
 ---
 
 # Shift-Left Testing
@@ -91,6 +91,7 @@ Loaded on demand when this SKILL.md cites them. Read only the ones relevant to t
 - [NUMERIC.md](NUMERIC.md) — float comparison and tolerance selection, numpy and pandas assertions, injectable randomness, testing stochastic code. Read whenever a test touches computed numbers.
 - [REGRESSION.md](REGRESSION.md) — characterization tests for legacy code and the golden-file workflow (normalization, bless discipline, churn control). Read when the audit hook fires on untested code.
 - [SCRIPTS.md](SCRIPTS.md) — testing CLIs and filesystem scripts: thin main, tmp_path repo factories, dry-run contracts, the subprocess tier, and widening the enforcement perimeter to scripts/.
+- [ISOLATION.md](ISOLATION.md) — tests never touch the real world: pass data roots in as parameters, and the `tests/isolation.py` tripwire plugin (deletion, network, dotenv), registered through `addopts`, as the backstop, with what it cannot see.
 - [ENFORCEMENT.md](ENFORCEMENT.md) — enforcement gradient (probabilistic → deterministic), the PostToolUse audit hook, why we don't hard-block, when to escalate.
 - [CI.md](CI.md) — GitHub Actions example, coverage thresholds, marker-based test selection.
 - [ANTIPATTERNS.md](ANTIPATTERNS.md) — four anti-patterns to avoid, examples by domain (web API, data pipeline, ML), and the pre-commit testing checklist.
@@ -110,7 +111,8 @@ Loaded on demand when this SKILL.md cites them. Read only the ones relevant to t
 ---
 
 **Maintained by**: Shift-Left Testing Skill
-**Version**: 2.1.1 fixes the CI sidecar's workflow example: `uv venv --clear`, because `setup-uv@v5` has already created `.venv` and uv refuses a second bare `uv venv` (exit 2); adds the self-hosted cache inputs (2026-09-18, found in `fist`).
+**Version**: 2.2.0 adds the ISOLATION sidecar and the `tests/isolation.py` tripwire plugin: one audit hook that stops a running test from deleting outside its sandbox or opening a network connection, and a `load_dotenv` guard (2026-09-30, CONOP OVERWATCH task 1a).
+**Prior**: 2.1.1 fixes the CI sidecar's workflow example: `uv venv --clear`, because `setup-uv@v5` has already created `.venv` and uv refuses a second bare `uv venv` (exit 2); adds the self-hosted cache inputs (2026-09-18, found in `fist`).
 **Prior**: 2.1.0 adds four sidecars: PROPERTY-BASED (Hypothesis invariants), NUMERIC (tolerances and determinism), REGRESSION (characterization and golden files), SCRIPTS (CLI testing and perimeter widening). New sidecars follow writing-simple-and-direct (2026-07-17).
 **Prior**: 2.0.0, restructured to directory form with sidecar progressive disclosure, vertical-slicing discipline added, ENFORCEMENT sidecar describes deterministic hooks (2026-05-19)
 **Replaces**: prior single-file at `.claude/skills/shift-left-testing.md` (deleted in the same commit).

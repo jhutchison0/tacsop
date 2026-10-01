@@ -38,7 +38,7 @@ This directory contains agent definitions, team templates, slash commands, and s
     │
     └── # All Level 0 skills now use directory form (Anthropic Dec 18 open standard)
         ├── configuration-management/SKILL.md + 5 sidecars
-        ├── shift-left-testing/SKILL.md + 7 sidecars
+        ├── shift-left-testing/SKILL.md + 13 sidecars
         ├── python-venv-management/SKILL.md + 2 sidecars
         ├── maintaining-ubiquitous-language/SKILL.md
         ├── maintaining-project-context/SKILL.md

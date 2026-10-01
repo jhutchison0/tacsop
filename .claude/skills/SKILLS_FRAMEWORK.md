@@ -112,7 +112,7 @@ These skills are portable to any software project. They contain no project names
 
 ### shift-left-testing (directory form)
 
-**Path**: `.claude/skills/shift-left-testing/SKILL.md` + 7 sidecars (`TIERS.md`, `PATTERNS.md`, `MOCKS.md`, `FIXTURES.md`, `VERTICAL-SLICING.md`, `CI.md`, `ANTIPATTERNS.md`).
+**Path**: `.claude/skills/shift-left-testing/SKILL.md` + 13 sidecars (`TIERS.md`, `PATTERNS.md`, `MOCKS.md`, `FIXTURES.md`, `VERTICAL-SLICING.md`, `PROPERTY-BASED.md`, `NUMERIC.md`, `REGRESSION.md`, `SCRIPTS.md`, `ISOLATION.md`, `ENFORCEMENT.md`, `CI.md`, `ANTIPATTERNS.md`).
 
 **Focus**: Multi-tier testing strategy with vertical-slicing (tracer-bullet) TDD, mocks, fixtures, simulation, CI integration, and explicit anti-patterns.
 
@@ -366,6 +366,7 @@ This is why `session-end`, `pcc`, `pci`, `sitrep`, `session-start`, and `task` r
 │   ├── NUMERIC.md
 │   ├── REGRESSION.md
 │   ├── SCRIPTS.md
+│   ├── ISOLATION.md
 │   ├── ENFORCEMENT.md
 │   ├── CI.md
 │   └── ANTIPATTERNS.md

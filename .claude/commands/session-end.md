@@ -59,9 +59,18 @@ Create a session doc in `docs/sessions/` with format `YYYYMMDD_descriptive_name.
 Quick reminders:
 - Date-first filename so sessions sort chronologically.
 - Knowledge-graph header: only include relationship fields that actually apply.
-- Body must include Summary and Next Steps. Other sections (Work Completed, Key Decisions, Pillar Compliance, Commits) are added as the session warrants.
+- Body must include Summary, Claims, and Next Steps. Other sections (Work Completed, Key Decisions, Pillar Compliance, Commits) are added as the session warrants.
 - Prefer Mermaid over ASCII art for any non-trivial diagram (renders natively in GitHub).
 - If a traversal informed the session's work, record it in Work Completed as a `KB-graph: <traversal run> → <what it changed or confirmed>` line, in the sub-topic it informed. That line is uptake metric M1 in `.claude/skills/traversing-the-knowledge-base/SKILL.md`; a walk with no line cannot be counted. The skill says when to write it.
+
+### The Claims table
+
+The session doc carries a `## Claims` table: one row for each claim of success the doc makes, per the verifying-claims skill (`.claude/skills/verifying-claims/SKILL.md`).
+
+- Each row gives the claim, its state (written, tested, deployed, or observed), and what an `Evidence:` line would carry: the command and its output. A claim that could not be checked reads `UNVERIFIED: <blocker>`.
+- Re-run the probe now for every claim about the session's end state (tests pass, pushed, merged), after the Step 3 commit and push. Output from earlier in the session is stale.
+- Under the table, write `Overclaims the user caught this session: N`: the number of claims the user had to correct. Zero is a count; write it.
+- A session that claimed no outcome writes the count line alone.
 
 Search related sessions with `grep -r "#domain" docs/sessions/` or `grep -r "References.*config" docs/sessions/`.
 

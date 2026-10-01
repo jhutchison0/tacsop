@@ -131,3 +131,24 @@ def test_claude_md_carries_the_kernel_verbatim():
 )
 def test_skill_is_registered(path, needle):
     assert needle in (ROOT / path).read_text()
+
+
+SESSION_END = ROOT / ".claude" / "commands" / "session-end.md"
+SESSION_FORMAT = ROOT / "docs" / "session-doc-format.md"
+
+
+def test_session_end_requires_the_claims_table():
+    step5 = _section(SESSION_END.read_text(), "Step 5: Session Documentation")
+    assert "Summary, Claims, and Next Steps" in step5
+    assert "`## Claims`" in step5
+    assert "`Evidence:`" in step5
+    assert "`UNVERIFIED: <blocker>`" in step5
+    assert "`Overclaims the user caught this session: N`" in step5
+
+
+def test_session_doc_format_defines_the_claims_table():
+    fmt = SESSION_FORMAT.read_text()
+    assert "\n## Claims\n" in fmt
+    assert "| Claim | State | Evidence |" in fmt
+    assert "\nOverclaims the user caught this session: N\n" in fmt
+    assert "Summary, Claims, and Next Steps" in fmt

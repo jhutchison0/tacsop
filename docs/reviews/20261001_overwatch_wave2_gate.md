@@ -396,3 +396,211 @@ Reviewed per `REVIEWING.md`, four passes.
 - I read the held source file. This report quotes none of it.
 
 **Verdict: GO-WITH-FIXES** for tasks 2a to 2c. Apply C1 and the Warnings, then re-run sections 2 and 3 against the fixed branch. Wave 2 stays open until 2d passes.
+
+---
+
+## Round 2
+
+**Date**: 2026-10-01
+**Subject**: the same branch at `c97c79e`. New commits: `1b50924` ([gate]), `6bde122`, `c97c79e`. The merge `2e33662` is out of scope except for its one conflict resolution.
+
+### Verdict
+
+**GO** for tasks 2a to 2c.
+
+C1 is closed. Of the 16 Warnings, 14 are closed and 2 are partial (W13, W15). Both partials are record items, not shipped text. The round 1 mutation set now scores 41 of 46, up from 25. I checked 45 new claims by the lead: 41 hold, 2 are refuted in part, 2 cannot be verified. One new Warning (R2-W1) and seven Suggestions follow. None needs another review round: append R2-W1's lines and the W15 surface to the Status Log, and take R2-S1 to R2-S4 with the next edit to the skill.
+
+Wave 2 stays open until 2d passes.
+
+### What I ran
+
+| Check | Command | Result |
+|---|---|---|
+| Suite at `c97c79e`, 3.12 | `.venv/bin/pytest -q`; then with `CI=true` | `431 passed, 1 warning`, exit 0, both ways; `Python 3.12.13` |
+| The two doc-pin files | same, per file | `25 passed`; `3 passed` |
+| Suite on 3.11 | `<scratch venv311>/bin/python -m pytest -q -p no:cacheprovider`; then with `CI=true` | `393 passed, 5 skipped, 1 warning`, exit 0, both ways; `Python 3.11.15` |
+| `1b50924` with the old test file | `git archive 1b50924` export, `pytest -q -p no:cacheprovider` | `421 passed, 1 warning`, exit 0 |
+| New tests on the unfixed tree | `6bde122`'s test file on `2e33662`'s tree; on `1b50924`'s tree | 7 failed, 18 passed; 5 failed, 20 passed |
+| Mutation | 70 mutants on a `git archive c97c79e` export | 46 killed, 24 survived (1 equivalent) |
+| PCC check 5 | both blocks, verbatim | 0 MISSING, 0 MISSING-DIR |
+| D6 | 39 search strings over the changed files, 206 added lines, 4 messages | 0 names |
+| Kernel identity | `diff` of `SKILL.md:27-32` and `CLAUDE.md:65-70` | identical |
+
+### 1. Round 1 findings
+
+| # | Status | Evidence at `c97c79e` |
+|---|---|---|
+| C1 | CLOSED | `SKILL.md:65`: "so rule 6 does not hold for them"; reverting it fails `test_tests_are_not_called_read_only` (N01) |
+| W1 | CLOSED | `CLAUDE.md:72`: "The belief a plan rests on is one: check it before you act."; `SKILL.md:9`; `EXAMPLES.md:50` |
+| W2 | CLOSED | `SKILL.md:52` reads `git status --porcelain`; `refs/heads/` at `:52`, `:53`, `:56`, `:57`. In scratch the fixed row fails both round 1 cases: status prints ` M f.txt`; `git ls-remote origin refs/heads/main` prints nothing where only `feature/main` exists |
+| W3 | CLOSED | `SKILL.md:55`: `find . -maxdepth 3 -name pyvenv.cfg`; none found is "none under this directory", which the row calls less than absent. In scratch it prints `./venv/pyvenv.cfg` and `./envs/gpu/pyvenv.cfg` |
+| W4 | CLOSED | Python at `SKILL.md:75` and `EXAMPLES.md:61`; pair 1 claims "scheduled", not deployed (`:15`); states at `:32`, `:104` |
+| W5 | CLOSED | `EXAMPLES.md:105`: "at the commit under review on 2026-09-30"; `:108` says why |
+| W6 | CLOSED | `SKILL.md:67`: "So is a check the user or the harness declined: do not retry it another way."; `EXAMPLES.md:79` |
+| W7 | CLOSED | `SKILL.md:86`: "as one that shows evidence for none" |
+| W8 | CLOSED | `SKILLS_FRAMEWORK.md:217` restates the six shipped rules |
+| W9 | CLOSED | `grep -n -e 'claim of success' -e 'closes a task'` over the eight files prints nothing; the bound is on all six surfaces; the non-claim lists match (`SKILL.md:9`, `CLAUDE.md:72-73`) |
+| W10 | CLOSED | `session-end.md:75-76` defines N and M. M awaits the user; the Status Log says so. A small gap: R2-S2 |
+| W11 | CLOSED | `session-end.md:73-74`; `session-doc-format.md:103` ("at `<commit>`") |
+| W12 | CLOSED | `code-reviewer.md:43` carries the three severities and UNVERIFIABLE |
+| W13 | PARTIAL | The scope decision is recorded. `1b50924` carries 1 `Evidence:` line, `6bde122` carries 3 and 1 `UNVERIFIED:`, the Status Log 2. Four claims still carry none: R2-W1 |
+| W14 | CLOSED | M08 to M12, M04c, M05g, M17, M19, and M03c all die now |
+| W15 | PARTIAL | The README needle is the skill's name and the sidecar count comes from the directory (`test_verifying_claims.py:202-209`). The Status Log lists five surfaces for the release entry; line 209 reads a sixth, `.claude/README.md`. Two of 15 sibling repos have no such file |
+| W16 | CLOSED | `1b50924` is tagged `[gate]`; the Status Log records `d1614fc` as a D4 change reviewed here |
+
+| # | Status | Evidence |
+|---|---|---|
+| S1 | ADOPTED | `SKILL.md:51` names where the launch time comes from; `:63` is the silent-default trap; pair 1 no longer uses `systemctl show` |
+| S2 | PARTLY | Skips and deselection at `SKILL.md:54`; the Windows form is declined, and the log says so |
+| S3 | PARTLY | `git rev-parse main` is in the Probe cell (`SKILL.md:56`); `main` is still literal, and the stale-local-`main` case is unsaid |
+| S4 | ADOPTED | `SKILL.md:57`: "the third prints one line with the second's SHA"; `--exit-code` at `:61` |
+| S5 | ADOPTED | `SKILL.md:64`: `git reflog -1 --date=iso` |
+| S6 | PARTLY | Rule 2 and rule 5 reworded (`SKILL.md:28`, `:31`); the re-run at every report stays, as D2 |
+| S7 | ADOPTED | `SKILL.md:57`: "Deployed: running from a checkout" |
+| S8 | ADOPTED | The Status Log lists three changes for the user; M23 to M25 now die |
+| S9 | ADOPTED | `SKILL.md:43`, `:27`; `CLAUDE.md:63`, `:73` |
+| S10 | ADOPTED | `session-end.md:66` sits above `:68`; the no-claims case is at `session-doc-format.md:110` |
+| S11 | ADOPTED | `session-doc-format.md:110` says to escape a pipe inside a command |
+| S12 | NOT ADOPTED | Declined as a record; the log says so |
+| S13 | ADOPTED | `EXAMPLES.md:108`: "A plan's first draft"; the test docstrings name no plan |
+| S14 | NOT ADOPTED | Nothing to change; a note about session start |
+| S15 | PARTLY | M01c, M26, and M27 die; the Level 0 block still passes anywhere in the file (M05f) |
+
+### 2. Mutation, re-run
+
+The export is `git archive c97c79e`. The anchors are updated in a scratch copy of the runner.
+
+Round 1 set, 47 mutants: 41 killed, 6 survived, 1 of them equivalent. Score: 41 of 46, from 25 of 46.
+
+- Round 1 survivors that now die, 16: M01c, M03c, M04c, M05g, M08, M09, M10, M11, M12, M17, M19, M23, M24, M25, M26, M27.
+- Still alive, 5: M04b (one of two Evidence lines cut from pair 1), M05f (block moved), M06c (the "(Required.)" note), M13 (a `git push` among the probes), M14 (the "re-run now" bullet). M13 is the read-only gap the docstring names.
+
+Round 2 set, 23 mutants, each reverting one round 1 fix: 5 killed, 18 survived.
+
+- Killed: N01 (C1), N02 (W1 in `CLAUDE.md`), N12 (W9 in `/session-end`), N20 (a state renamed), N21 (the framework's sidecar count).
+- Survived: the reverts of W1 in `SKILL.md:9`, W2, W3, W4, W5, W6, W7, W8, W10 (three forms), W11, W12, S1, one of three bound mentions in the format doc, the README count, and a drift in `SKILL.md:82`. See R2-S5.
+
+Both sets: 46 of 69.
+
+### 3. The new text, read for regressions
+
+Probes, run here:
+
+| Probe | Output |
+|---|---|
+| `git ls-remote origin refs/heads/main` | `b1c3e360...	refs/heads/main`; equal to `git rev-parse main` |
+| `git ls-remote --exit-code origin refs/heads/no-such-branch-xyz; echo "exit=$?"` | no line, `exit=2` |
+| `find . -maxdepth 3 -name pyvenv.cfg` | `./.venv/pyvenv.cfg` |
+| `git reflog -1 --date=iso` | `c97c79e HEAD@{2026-10-01 13:23:47 -0500}: commit: ...` |
+| `systemctl list-timers no-such-xyz.timer` | `0 timers listed.` |
+| `systemctl show no-such-unit-xyz.service -p ExecMainStatus` | `ExecMainStatus=0`, as trap 3 says |
+
+| New text | Reading |
+|---|---|
+| Trap 5, `SKILL.md:65` | Sound. It is my wording, and it is pinned |
+| Pushed, third probe, `SKILL.md:52` | Checkable when the status output is pasted, as pair 2 does. "No file the claim covers" asks the reader to compare paths; that is a judgment, and a visible one |
+| Venv, "less than absent", `SKILL.md:55` | Sound. The probe reaches three levels and the wording says "under this directory": R2-S4 |
+| Declined check, `SKILL.md:67` | Consistent with rule 4: declined is not skipped. "The harness declined" could be stretched to cover a timeout; the pasted error shows which it was |
+| Rule 5, `SKILL.md:31` | Consistent with the state table (`:40`). The Deployed row (`:57`) asks a clean tree of any checkout that runs, which is stricter than the rule and errs the safe way |
+| The M line | `session-end.md:76` and `session-doc-format.md:108` agree on the string. Plan line 158 names N only, and the Status Log says the MOE reads N only. `SKILL.md:82` still says "one count": R2-S2 |
+| Reviewer line, `code-reviewer.md:43` | Sound. I applied it in section 4 |
+| `CLAUDE.md:72`, the belief under a plan | Closes W1. Every plan rests on several beliefs, so this may raise the flag rate on 2d's clean turns. 2d measures it |
+
+The merge `2e33662`: the resolution kept both sides. Against `d91441f` the format doc differs only by this branch's Claims lines; against `f100c2b`, only by the capture point's two rewordings. No conflict marker remains, and the 3 capture pins pass.
+
+### 4. The lead's new claims
+
+45 claims in `1b50924`, `6bde122`, `c97c79e`, and the new Status Log entry: 41 HOLDS, 2 REFUTED in part, 2 UNVERIFIABLE.
+
+| # | Where | Claim | Verdict | Evidence or reason |
+|---|---|---|---|---|
+| 1 | `1b50924` | Tagged `[gate]`; holds the three gate surfaces | HOLDS | `git show --name-only`: 3 files |
+| 2 | `1b50924` | W9 on the ledger | HOLDS | `session-end.md:70` |
+| 3 | `1b50924` | W10: N defined; M added; M not in N | HOLDS | `session-end.md:75-76` |
+| 4 | `1b50924` | W11: rows name a commit; the doc's commit goes in the final message | HOLDS | `session-end.md:73-74` |
+| 5 | `1b50924` | S10 and S11 | HOLDS | `session-end.md:66`; `session-doc-format.md:110` |
+| 6 | `1b50924` | W12: the reviewer line's severities | HOLDS | `code-reviewer.md:43` |
+| 7 | `1b50924` | Tests pass on this tree with the old test file: 421 | HOLDS | export of `1b50924` → `421 passed, 1 warning`, exit 0 |
+| 8 | `1b50924` | The run was made before the amend | UNVERIFIABLE | order of events. The reflog shows 17 seconds between `4893bd7` and the amend |
+| 9 | `6bde122`, log | C1, W2, W3, W5, S1 all reproduce | HOLDS | `ISOLATION.md:71`; ` M f.txt` with equal SHAs; `find` against `ls`; `wc -l tests/conftest.py` → 16; `ExecMainStatus=0`. "Before fixing" is history |
+| 10 | `6bde122` | C1 fixed | HOLDS | `SKILL.md:65` |
+| 11 | `6bde122` | W1 fixed in both files | HOLDS | `SKILL.md:9`; `CLAUDE.md:72` |
+| 12 | `6bde122` | One bound and one non-claim list on every surface | HOLDS | grep for the old forms prints nothing |
+| 13 | `6bde122` | S6: rules 2 and 5 | HOLDS | `SKILL.md:28`, `:31` |
+| 14 | `6bde122` | W7 fixed | HOLDS | `SKILL.md:86` |
+| 15 | `6bde122` | Probe table: every `git ls-remote` names `refs/heads/` | HOLDS | 5 of 5 in the table. One specimen outside it does not: R2-S1 |
+| 16 | `6bde122` | The Pushed row reads `git status --porcelain` | HOLDS | `SKILL.md:52` |
+| 17 | `6bde122` | W3 fixed | HOLDS | `SKILL.md:55` |
+| 18 | `6bde122` | Two more traps | HOLDS | 5 bullets, `SKILL.md:61-65` |
+| 19 | `6bde122` | W6 fixed | HOLDS | `SKILL.md:67` |
+| 20 | `6bde122` | Every tests-pass line names its Python; pairs 2 and 7 name a state | HOLDS | `SKILL.md:75`; `EXAMPLES.md:61`, `:32`, `:104` |
+| 21 | `6bde122` | Pair 1 reads the completion line and claims "scheduled" | HOLDS | `EXAMPLES.md:14-15` |
+| 22 | `6bde122` | Pair 7 names its date; the file is 16 lines today | HOLDS | `EXAMPLES.md:105`; `wc -l` → 16 |
+| 23 | `6bde122` | W8 fixed | HOLDS | `SKILLS_FRAMEWORK.md:217` |
+| 24 | `6bde122` | The five new kinds of pin | HOLDS | M08 to M12, M04c, M17, M18, M19 die. The bound's pin is a presence check: R2-S5 |
+| 25 | `6bde122` | Seven of the new pins were red against the unfixed text | HOLDS | 7 failed on `2e33662`'s tree. Against its own parent, 5: `1b50924` had fixed two surfaces |
+| 26 | `6bde122` | Two requirements stay unpinned, and the docstring says why | HOLDS | `test_verifying_claims.py:8-10` |
+| 27 | `6bde122`, log | 431 both ways: 403, 25, 3; Python 3.12.13; no CI config | HOLDS | 431, 431; 25; 3; `ls .github` fails |
+| 28 | `6bde122` | On 3.11.15, the two new files: 28 passed | HOLDS | `28 passed` |
+| 29 | `6bde122` | `SKILL.md` is 105 lines | HOLDS | `wc -l` → 105 |
+| 30 | `c97c79e` | The entry and the reviewer's report ride here | HOLDS | 2 files: plan +5, report +398 |
+| 31 | log | Round 1's counts; all three Standards held | HOLDS | round 1 above |
+| 32 | log | `test-runner` matched the lead's suite numbers | UNVERIFIABLE | no artifact in the repo records that run |
+| 33 | log | The five lead errors, as described | HOLDS | C1, W1, W2, S1, W5 above |
+| 34 | log | 41 claims: 30, 10, 1; six mutants left 15 tests green | HOLDS | round 1, sections 11 and 3 |
+| 35 | log | `1b50924` was amended with the tree unchanged | HOLDS | reflog: `4893bd7`, then `commit (amend)` to `1b50924`; both have tree `9076e88f` and parent `2e33662` |
+| 36 | log | Three changes wait on the user; the MOE reads N only | HOLDS | plan line 158 names N only |
+| 37 | log | The seven commits keep their SHAs, which two reports cite | HOLDS | `git log` unchanged; `grep -l ef5b488 docs/reviews/*.md` → 2 files |
+| 38 | log | From `1b50924` on, the messages carry `Evidence:` lines | REFUTED in part | the lines exist; two claims in `6bde122` have none (R2-W1) |
+| 39 | log | `d1614fc` is a D4 change, reviewed at this gate | HOLDS | W16 |
+| 40 | log | The new tests expect five surfaces | REFUTED in part | a sixth: `grep -n README tests/unit/test_verifying_claims.py` → line 209 |
+| 41 | log | Not adopted: the Windows form; S12 | HOLDS | `SKILL.md:54`; `d2cdaf8` unchanged |
+| 42 | log | 3.11, dev extras: 393 passed, 5 skipped, both ways; the skips are matplotlib and pandas | HOLDS | same counts here; neither library imports in that venv. R2-S6 |
+| 43 | log | The 3.11 run was a skipped check, then run | HOLDS | `6bde122` (13:22:12) says UNVERIFIED; the egg-info is stamped 13:22:24; the log (13:23:47) cites the run |
+| 44 | log | The editable install rewrote the gitignored egg-info; no tracked file changed | HOLDS | `.gitignore:6`; `git status --porcelain` → 5 untracked lines |
+| 45 | log | The Wave 2 exit is still open | HOLDS | 2d has not run |
+
+The coordinator said I could not see the pre-amend commit. The reflog still holds it, so claim 35 is checked, not taken on trust.
+
+### 5. `1b50924` with the old test file
+
+It passes: the export gives `421 passed, 1 warning`, exit 0, on Python 3.12.13. `git diff --quiet f100c2b 1b50924 -- tests/unit/test_verifying_claims.py` exits 0, so the test file is the old one.
+
+### 6. PCC check 5 and D6
+
+- Check 5: 0 MISSING, 0 MISSING-DIR. All 5 paths on lines added since `f100c2b` resolve.
+- Check 6's logic prints no WARN for the three new commits.
+- D6: 0 system, product, dataset, or organization names in the changed files, the 206 added lines, and the 4 messages. Three hits, none a name: `EXAMPLES.md:17` (the generic component description from round 1, unchanged), `CLAUDE.md:17` (a substring of a common word, on an old line), and plan line 277 (the plan's own phrase for the work machine).
+- Prose on the added lines and the three messages: 0 em dashes, 0 banned words.
+
+### New findings
+
+**R2-W1. Four claims in the new record carry no `Evidence:` line.** This is the reviewer line applied as written: one Warning that lists them.
+- `6bde122`: "Seven of the new pins were red against the unfixed text."
+- `6bde122` and the log: "The lead re-ran C1, W2, W3, W5, and S1 before fixing; all five reproduce."
+- The log: "`test-runner` matched the lead's suite numbers."
+The first two hold by my re-run (claims 25 and 9). The third cannot be checked.
+Fix: append to the Status Log. For the first: the test file of `6bde122` on `2e33662`'s tree → `7 failed, 18 passed`. For the third: paste the `test-runner` summary line, or cut the sentence.
+
+**R2-S1. `SKILL.md:77` writes the bare branch name that trap 1 forbids.** The specimen reads `git ls-remote mirror main`; `:61` says "so write `refs/heads/<branch>`". Change it to `refs/heads/main`.
+
+**R2-S2. The second count is not on every surface.** `SKILL.md:82` says "with one count below it"; `session-end.md:75-76` and `session-doc-format.md:106-108` write two. `session-end.md:76` says "on the next line" and the template puts a blank line between; without it markdown renders one paragraph. The format doc defines neither N nor M. And M counts a claim refuted "before the user relied" on it, so a claim a reviewer refutes after the user relied on it is in neither count. Settle these when the user rules on M.
+
+**R2-S3. The table's lead-in still calls every probe read-only.** `SKILL.md:47`, the description at `:3`, and `SKILLS_FRAMEWORK.md:215` say "one read-only probe per claim type"; `SKILL.md:65` says one of them is not. Rewrite `:47`: "One probe per claim type, read-only except the test run (see the traps)."
+
+**R2-S4. "None under this directory" says more than `-maxdepth 3` reaches (`SKILL.md:55`).** In scratch, a venv at `./a/b/.venv` is not found. Write "none within three levels of this directory".
+
+**R2-S5. Most round 1 fixes can be reverted with 25 tests green.** 18 of 23 revert mutants survive. Four cheap pins: `git status --porcelain` in the Pushed elements; `refs/heads/` in the Merged and Deployed elements; the `find` in the venv elements; the M line in both files, if the user keeps it. The bound's pin checks presence, so a second, rival bound on the same surface passes (N13).
+
+**R2-S6. "5 skipped" on 3.11 is 38 tests that did not run.** Two of the five skips are whole modules: `pytest --collect-only` counts 35 tests in them on 3.12, and 431 minus 393 is 38. The log explains the skips, as the Tests row asks. It should give the count of tests too. All 28 doc-pin tests did run on 3.11.
+
+**R2-S7. `1b50924` holds two gate surfaces in one commit.** The reviewer line and the ledger changed together; 2c's Condition says one commit per gate surface. D4 is met: the commit is dedicated, tagged, and reviewed here. No action; a record.
+
+### Reviewer's notes, round 2
+
+- I appended this section and wrote scratch files only. Round 1 is as committed. I did not update agent memory, for the same reason as before.
+- Every pytest run on an export passed `-p no:cacheprovider` and a `--basetemp` under my scratch directory. The runs in the repo root wrote the gitignored `.pytest_cache` and `.hypothesis` there; `git status --porcelain` printed the same five untracked lines before and after, and HEAD is `c97c79e`.
+- Network: three `git ls-remote` calls against origin.
+- I rebuilt the private term list in scratch for the D6 check and deleted it afterward. This section quotes none of it.
+
+**Verdict, round 2: GO** for tasks 2a to 2c. Append R2-W1's evidence and the sixth surface for W15 to the Status Log before merge.

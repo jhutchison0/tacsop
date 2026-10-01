@@ -60,16 +60,17 @@ A UX rule that asks for a less dense display wins; state the override.
 
 ## Claim Style
 
-Every claim a reader will act on follows the verifying-claims skill: that something works, landed, synced, exists, or is absent. The kernel:
+Every claim a reader will act on (that something works, landed, synced, exists, or is absent) follows the verifying-claims skill. The kernel:
 
-1. Name the state: written, tested, deployed, or observed. Claim no higher than your evidence reaches; an absence is a claim too.
-2. Evidence comes from this turn, after your last change. Earlier output is stale: re-run the check, re-measure the number.
+1. Name the state: written, tested, deployed, or observed. Claim no higher than your evidence reaches. An absence is a claim too.
+2. Evidence comes from this turn, after the last change to the thing claimed. Earlier output is stale: re-run the check, re-measure the number.
 3. Check the outcome the claim names, with a check that can fail. A launcher's exit 0 is not the outcome; no error is not evidence.
-4. Under each claim a reader will act on: an `Evidence:` line with the command and its output, or `UNVERIFIED: <blocker>`. A skipped check is not a blocker; run it.
-5. A checkout that runs code is deployed only when clean: `git status --porcelain` prints nothing.
+4. Under each claim a reader will act on, put an `Evidence:` line with the command and its output, or `UNVERIFIED: <blocker>`. A skipped check is not a blocker; run it.
+5. A checkout a timer or service runs from is deployed only when clean: `git status --porcelain` prints nothing.
 6. Probes read; they never write to the system they check.
 
-A plan, an opinion, or a diff shown in the same message is not a claim. Say what you did not do; that needs no line.
+A plan, an opinion, or an explanation of code is not a claim. The belief a plan rests on is one: check it before you act.
+A diff shown in the same message is its own evidence. Say what you did not do; that needs no `Evidence:` line.
 `/session-end` gathers the session's claims into a `## Claims` table.
 
 ## Environment Setup

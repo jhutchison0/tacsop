@@ -11,13 +11,13 @@ Sidecar to `SKILL.md`. Seven pairs, one per failure shape, then one clean report
 
 **After**:
 > Tonight's run failed (observed), so the pipeline is not live.
-> Evidence: `systemctl show nightly.service -p ExecMainStatus` → `ExecMainStatus=1`; `tail -1 logs/run.log` → `OperationalError: no such column: run_id`
-> The timer is installed, from a clean checkout (deployed).
-> Evidence: `systemctl list-timers nightly.timer` → `1 timers listed.`; `git status --porcelain` → no output
+> Evidence: `tail -2 logs/run.log` → `OperationalError: no such column: run_id`, `nightly run FAILED, exit 1`
+> The timer is scheduled (observed). I have not checked which commit its checkout holds.
+> Evidence: `systemctl list-timers nightly.timer` → `1 timers listed.`
 > The error points at the state database's schema. That is the next thing to check.
 
-**Rules applied**: 1 (name the state), 3 (the outcome the claim names), 5 (clean checkout).
-Installing a timer reaches deployed. "Landed" and "live" claim observed, and only the run's own exit status and output reach that. The launcher exiting 0 says the launch worked.
+**Rules applied**: 1 (name the state), 3 (the outcome the claim names).
+"Landed" and "live" claim observed, and only the run's own record of how it ended reaches that. The launcher exiting 0 says the launch worked. The After also stops short of "deployed": a listed timer is scheduled, and nothing here shows which code it runs.
 
 ---
 
@@ -28,9 +28,9 @@ Installing a timer reaches deployed. "Landed" and "live" claim observed, and onl
 
 **After**:
 > Pushed to origin (deployed).
-> Evidence: `git rev-parse HEAD` → `4f2a91c`; `git ls-remote origin main` → `4f2a91c refs/heads/main`
-> The mirror is not at origin's SHA.
-> Evidence: `git ls-remote mirror main` → `9be07d3 refs/heads/main`
+> Evidence: `git rev-parse HEAD` → `4f2a91c`; `git ls-remote origin refs/heads/main` → `4f2a91c refs/heads/main`; `git status --porcelain` → no output
+> The mirror is not at origin's SHA (observed).
+> Evidence: `git ls-remote mirror refs/heads/main` → `9be07d3 refs/heads/main`
 
 **Rules applied**: 3, 4 (show it).
 The push was checked and the mirror was assumed. Two claims need two probes.
@@ -44,10 +44,10 @@ The push was checked and the mirror was assumed. Two claims need two probes.
 
 **After**:
 > The venv exists and its Python runs (observed), so I'll use it as built.
-> Evidence: `ls -d .venv*` → `.venv  .venv-gpu`; `cat .venv-gpu/pyvenv.cfg` → `version_info = 3.12`; `.venv-gpu/bin/python -V` → `Python 3.12.13`
+> Evidence: `find . -maxdepth 3 -name pyvenv.cfg` → `./.venv/pyvenv.cfg`, `./.venv-gpu/pyvenv.cfg`; `.venv-gpu/bin/python -V` → `Python 3.12.13`
 
 **Rules applied**: 1 (an absence is a claim), 3.
-The Before is not a report; it is a plan resting on a belief nobody checked. One `ls` could have disproved it, and acting on it would have rebuilt what was already there.
+The Before is not a report. It is a plan, and the belief under it is a claim nobody checked. One `find` could have disproved it, and acting on it would have rebuilt what was already there.
 
 ---
 
@@ -58,7 +58,7 @@ The Before is not a report; it is a plan resting on a belief nobody checked. One
 
 **After**:
 > The scan fix is tested: two new tests for empty partitions pass.
-> Evidence: `.venv/bin/pytest -k empty_partition; echo "exit=$?"` → `2 passed, 61 deselected in 0.41s`, `exit=0`
+> Evidence: `.venv/bin/pytest -k empty_partition; echo "exit=$?"` → `2 passed, 61 deselected in 0.41s`, `exit=0`; `.venv/bin/python -V` → `Python 3.12.13`
 
 **Rules applied**: 1, 3.
 "Fixed" claims tested. Until a run exercised the change, the true sentence was "the fix is written". Whether those tests fail without the fix is a separate claim; test-first work shows it by running them red before the change.
@@ -76,7 +76,7 @@ The Before is not a report; it is a plan resting on a belief nobody checked. One
 > UNVERIFIED: the production validation. `./validate --against prod --read-only; echo "exit=$?"` → `AccessDenied: this role cannot read the production store`, `exit=1`. Someone with read access can run the same command.
 
 **Rules applied**: 4, 6 (probes read).
-A weaker check that ran does not carry the stronger claim. The blocker is shown, not asserted: the command was tried and its refusal is pasted. "I have no access", with no attempt, is a skipped check.
+A weaker check that ran does not carry the stronger claim. The blocker is shown, not asserted: a read-only attempt was refused, and the refusal is pasted. "I have no access", with no error and no named credential, is a skipped check.
 
 ---
 
@@ -101,11 +101,11 @@ The number was true once. A figure carried forward from earlier in a session is 
 > The template `conftest.py` is 11 lines.
 
 **After**:
-> The template `conftest.py` is 12 lines.
-> Evidence: `wc -l tests/conftest.py` → `12 tests/conftest.py`
+> The template `conftest.py` is 12 lines (observed).
+> Evidence: `wc -l tests/conftest.py` → `12 tests/conftest.py`, at the commit under review on 2026-09-30
 
 **Rules applied**: 2, 3.
-The plan that commissioned this skill made this claim in its first draft, and a reviewer's `wc -l` caught it. A count typed from memory is stale on arrival. A number you will cite or act on gets the probe; a number nobody will use does not need one.
+A plan's first draft made this claim, and a reviewer's `wc -l` caught it. A count typed from memory is stale on arrival. The file has grown since, which is why the line names its date: evidence is true of the moment it was taken. A number you will cite or act on gets the probe; a number nobody will use does not need one.
 
 ---
 
@@ -113,4 +113,4 @@ The plan that commissioned this skill made this claim in its first draft, and a 
 
 > Renamed `load_cfg` to `load_config` in `utils.py` and its two callers; the diff is above. I have not run the tests.
 
-This report needs nothing added. It claims written, and the diff in the same message shows it. "I have not run the tests" is a true statement of what was not done, not an unverified claim, so it takes no `UNVERIFIED` line. The same holds for a plan, an opinion, or an explanation of how code works. An `Evidence:` line under each of those would be noise, and a reader trained on noise stops reading the lines that matter.
+This report needs nothing added. It claims written, and the diff in the same message is its evidence. "I have not run the tests" is a true statement of what was not done, not an unverified claim, so it takes no `UNVERIFIED` line. The same holds for a plan, an opinion, or an explanation of how code works. An `Evidence:` line under each of those would be noise, and a reader trained on noise stops reading the lines that matter.

@@ -59,10 +59,31 @@ Check if `.claude/upstream-update.md` exists. If it does:
 Run these commands:
 ```bash
 git fetch && git pull # Sync with remote before anything else
-pytest                # Verify all tests pass
+.venv/bin/pytest      # All tests, on this project's venv (Windows: .venv\Scripts\pytest)
 git status            # Check for uncommitted changes
 git branch -v         # Current branch state
 ```
+
+Then check the tools the session will need. Each check prints one line when
+something is wrong and nothing when it is fine, so a gap surfaces in the first
+minute instead of at session end:
+
+```bash
+{ git config user.name && git config user.email; } >/dev/null \
+  || echo "NO GIT IDENTITY: commits fail (/session-end Step 3)"
+if [ -n "${VIRTUAL_ENV:-}" ] && [ "$(realpath "$VIRTUAL_ENV")" != "$(realpath .venv 2>/dev/null)" ]; then
+  echo "STRAY VIRTUAL_ENV=$VIRTUAL_ENV: a bare uv pip installs there, not into .venv"
+fi
+for cli in gh glab; do
+  command -v "$cli" >/dev/null && ! "$cli" auth status >/dev/null 2>&1 \
+    && echo "$cli NOT AUTHENTICATED: PR/MR filing and CI status checks fail"
+done
+```
+
+A stray `VIRTUAL_ENV` usually means a shell activated another repo's venv; run
+`deactivate` or `unset VIRTUAL_ENV` before any `uv pip` command. An
+unauthenticated `gh` or `glab` means a merge or CI result cannot be verified
+from here: report it as UNVERIFIED rather than as passing.
 
 ## Step 5: Summarize and Ready
 
@@ -76,6 +97,7 @@ Provide a brief summary:
 6. **Pending**: Key items remaining in current phase
 7. **Test Status**: All passing or failures?
 8. **Git State**: Branch, uncommitted changes?
+9. **Tools**: each line Step 4's tool checks printed, or "all present" if they printed nothing
 
 Then ask: **"What would you like to work on today?"**
 

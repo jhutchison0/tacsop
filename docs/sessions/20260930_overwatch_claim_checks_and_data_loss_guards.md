@@ -1,7 +1,7 @@
 # Session: OVERWATCH, Claim Checks and Data-Loss Guards
 
 **Date**: 2026-09-30 to 2026-10-01
-**Branch**: main; topic branches `topic/overwatch-sealed-tests`, `topic/overwatch-template-docs` (both merged and deleted), `topic/doctrine-transport-backlog` (in re-gate)
+**Branch**: main; topic branches `topic/overwatch-sealed-tests`, `topic/overwatch-template-docs`, `topic/doctrine-transport-backlog` (all merged and deleted)
 **Tags**: #session #doctrine #overwatch #testing #propagation #review #infra
 **Documents**: [conop_overwatch_claim_verification_and_irreversible_guards.md](../plans/conop_overwatch_claim_verification_and_irreversible_guards.md), [ISOLATION.md](../../.claude/skills/shift-left-testing/ISOLATION.md), [propagation-protocol.md](../propagation-protocol.md), [session-start.md](../../.claude/commands/session-start.md), [task.md](../../.claude/commands/task.md), [docs/tasks.md](../tasks.md)
 **Implements**: [conop_overwatch_claim_verification_and_irreversible_guards.md](../plans/conop_overwatch_claim_verification_and_irreversible_guards.md) (Wave 1 tasks 1a to 1d; the transport fix that gates its release)
@@ -14,19 +14,18 @@
 
 A Claude Code Insights report from the work terminal (22 sessions, 2026-08-04 to 09-28) named two failure classes hub doctrine did not cover: success claimed without proof (at least 6 sessions), and operations that reach past their scope (a test fixture that deleted about 138 GB of real cache, a directory-wide `git add`, an install into another repo's venv). The session turned the report and a second agent's recommendation into CONOP OVERWATCH, approved it after a blind two-reviewer debate, and shipped Wave 1's first four tasks into the template: a test tripwire, pinned install targets, session-start tool checks, and a Purpose column on task specs.
 
-Releasing that work exposed an older defect. The propagation script shipped only the newest doctrine entry, so three entries sat unsent. The lead chose a consumer-side delivery mark; its first design (a date) failed its gate on two Criticals, and the rebuilt design (a set of entry headings) is in re-gate. Nothing has propagated downstream.
+Releasing that work exposed an older defect. The propagation script shipped only the newest doctrine entry, so three entries sat unsent. The lead chose a consumer-side delivery mark; its first design (a date) failed its gate on two Criticals, and the rebuilt design (a set of entry headings) passed on the third round and merged. Nothing has propagated downstream.
 
 The plan's thesis was tested on its own author. Every review round caught at least one claim of the lead's that its own runs had not, starting with five overstatements in the plan that is meant to stop overstatement.
 
 | Metric | Value |
 |---|---|
 | Tests on `main`, start of session | 308 |
-| Tests on `main`, end of session | 360 |
-| Tests on the transport branch | 387 (396 once merged with `main`) |
-| Commits | 16 on `main`, 2 on the transport branch |
-| Review agent runs | 11 (proposer 1; code-reviewer 8, counting resumed rounds and the re-gate still running; test-runner 2) |
-| Subagent tokens, summed as reported per run | about 1.7M (resumed runs may count earlier context again) |
-| Lead claims refuted by a reviewer's re-run | 18 (5 in the CONOP draft, 13 later; listed in Appendix A) |
+| Tests on `main`, end of session | 403 |
+| Commits | 24 on `main` (including 3 merges) |
+| Review agent runs | 13 (proposer 1; code-reviewer 10, counting resumed rounds; test-runner 2) |
+| Subagent tokens, summed as reported per run | about 2.3M (resumed runs may count earlier context again) |
+| Lead claims refuted by a reviewer's re-run | 19 (5 in the CONOP draft, 14 later; listed in Appendix A) |
 | Lead errors caught by the lead's own re-run before commit | 9 (Appendix A) |
 | PCC check 5, last run | 0 MISSING over 30 paths; 0 MISSING-DIR |
 | Downstream repos written to | 0 |
@@ -53,9 +52,9 @@ One Python audit hook, armed during each test's setup, call, and teardown, raise
 
 One review pass (0 Critical, 7 Warning, two of them the lead's overclaims), fixes, then a probe re-run: GO.
 
-### 4. The transport fix (`topic/doctrine-transport-backlog`, in re-gate)
+### 4. The transport fix (merged `d602c8e`)
 
-`propagate_doctrine.py` now sends each repo every entry its delivery mark (`.claude/doctrine-delivered`) does not hold. The first design stored a date; the gate showed a same-day entry never ships (C1) and the mark could move backward or close the backlog on a `--since` typo (C2). The rebuild stores the set of entry headings offered, unioned on every run and never shrunk; malformed marks and undated headings refuse rather than guess; one failing repo no longer stops the run. 50 propagation tests. The real dry run with `--since 2026-08-21` would send 5 entries to each of 19 repos and write 0 marks; the gate measured 20 of those 95 deliveries as redundant for five repos, which the protocol now handles with hand-seeded marks.
+`propagate_doctrine.py` now sends each repo every entry its delivery mark (`.claude/doctrine-delivered`) does not hold. The first design stored a date; the gate showed a same-day entry never ships (C1) and the mark could move backward or close the backlog on a `--since` typo (C2). The rebuild stores the set of entry headings offered, unioned on every run and never shrunk; malformed marks, undated or repeated headings, and unclosed fences refuse rather than guess; one failing repo no longer stops the run. Three gate rounds: 2 Critical and 7 Warning, then 0 and 3, then GO. 57 propagation tests. The real dry run with `--since 2026-08-21` would send 5 entries to each of 19 repos and write 0 marks; the gate measured 20 of those 95 deliveries as redundant for five repos, which the protocol now handles with hand-seeded marks.
 
 ## Key Decisions
 
@@ -85,12 +84,11 @@ One review pass (0 Critical, 7 Warning, two of them the lead's overclaims), fixe
 
 ## Next Steps
 
-1. Transport re-gate result; fix, merge, and push.
-2. Seed marks for fist, schelling-point, stx-server, propter, and beesly-equilibrium (the lead's go), then draft four OVERWATCH entries (1a; 1b; 1c alone as breaking; 1d), pre-flight, dry run, and propagate the backlog in one cycle on the lead's go. The cycle also carries the 08-27 Figure Style entry, which has awaited the lead's go since August.
-3. On the work terminal: Wave 0 (A3 `ask` rules in that terminal's mode, with its `glab` version; A1 claim-detector spike; A4 command replay), then task 1e.
-4. Wave 2: the `verifying-claims` kernel and its controlled replay.
-5. Filed this session: in-code install hints (P2, test-first), bare `pytest` outside Step 4 (P3), the audit hook's `src/`-only watch (folded into the P1 hook task).
-6. WHETSTONE: this session is another candidate for the Wave 1 window, whose count is still unresolved (P1).
+1. Seed marks for fist, schelling-point, stx-server, propter, and beesly-equilibrium (the lead's go), then draft four OVERWATCH entries (1a; 1b; 1c alone as breaking; 1d), pre-flight, dry run, and propagate the backlog in one cycle on the lead's go. The cycle also carries the 08-27 Figure Style entry, which has awaited the lead's go since August.
+2. On the work terminal: Wave 0 (A3 `ask` rules in that terminal's mode, with its `glab` version; A1 claim-detector spike; A4 command replay), then task 1e.
+3. Wave 2: the `verifying-claims` kernel and its controlled replay.
+4. Filed this session: in-code install hints (P2, test-first), bare `pytest` outside Step 4 (P3), the audit hook's `src/`-only watch (folded into the P1 hook task).
+5. WHETSTONE: this session is another candidate for the Wave 1 window, whose count is still unresolved (P1).
 
 ## Commits
 
@@ -104,13 +102,15 @@ One review pass (0 Critical, 7 Warning, two of them the lead's overclaims), fixe
 | `d98428a` | Merge tasks 1b to 1d |
 | `3e8b59d` | Release shape reopened (Rules 2 and 4) |
 | `2a2e725` | Tests pinning the session-start tool checks |
-| `c2eb3f2`, `9f0af02` | Transport fix and its gate fixes (branch, unmerged) |
+| `539ba3a` | This session doc, task list, and project state |
+| `c2eb3f2`, `9f0af02`, `f268c51`, `3da00c9` | Transport fix and its three gate rounds |
+| `d602c8e` | Merge the transport fix |
 
 ## Appendix A: The Lead's Claims and Errors, by Who Caught Them
 
-Recounted from the review reports at session end; a first draft of this doc said 14 refuted claims, which undercounted the later ones.
+Recounted from the review reports at session end. A first draft of this doc said 14 refuted claims; the first recount said 18 and missed number 14 below.
 
-**Refuted by a reviewer's re-run after the CONOP draft (13)**
+**Refuted by a reviewer's re-run after the CONOP draft (14)**
 
 | # | Claim | Where | Caught by |
 |---|---|---|---|
@@ -127,6 +127,7 @@ Recounted from the review reports at session end; a first draft of this doc said
 | 11 | The script "sends each repo every entry it has not been sent" | propagation-protocol.md | transport W6 |
 | 12 | The mark is "the hub's newest date" (the script wrote the top entry's) | protocol and docstring | transport W6, S2 |
 | 13 | Same-day entries "both go or both wait" | propagation-protocol.md | transport C1 |
+| 14 | The newest-only default "is right for a repo bootstrapped from the template" | protocol and docstring | transport W1, round 2 W3 |
 
 The 5 in the CONOP draft are in its Status Log. Separately, `test-runner` found the `CI=true` failure that the lead's runs had missed.
 
@@ -139,6 +140,6 @@ The 5 in the CONOP draft are in its Status Log. Separately, `test-runner` found 
 5. "The hub's CI" sets `CI=true` (the hub has no workflow).
 6. "One entry for 1a to 1d, 1c marked breaking" (breaks propagation Rules 2 and 4).
 7. The first fence-aware parser treated a fenced copy of a real heading as a heading.
-8. This doc's first draft said 14 refuted claims; the recount above is 18.
+8. This doc's first draft said 14 refuted claims; the recount above is 19.
 9. This doc's first draft said the tripwire grew "from about 100 to about 240 lines"; `git show` says 164 to 224.
 

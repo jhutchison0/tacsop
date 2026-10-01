@@ -1,8 +1,8 @@
-"""Tests pinning the two capture points /session-end must keep.
+"""Tests pinning the capture point /session-end must keep.
 
-Two WHETSTONE instruments depend on /session-end asking for them: the
-`KB-graph:` line (uptake metric M1) and Step 5.5, the upward lesson channel.
-An edit that drops either ask would silence a metric and fail nothing else.
+WHETSTONE's uptake metric M1 counts `KB-graph:` lines in session docs, and
+/session-end is where an author is asked for one. An edit that drops the ask
+would silence the metric and fail nothing else.
 """
 
 import re
@@ -27,10 +27,8 @@ def test_session_doc_format_shows_the_kb_graph_line():
     assert f"`{_kb_graph_format()}`" in FORMAT.read_text()
 
 
-def test_session_end_carries_the_upward_lesson_step():
-    text = SESSION_END.read_text()
-    assert "LESSON (OBSERVED): " in text
-    assert "scope: fleet" in text
-    assert "`.claude/upstream-lesson.md`" in text
-    steps = [text.index(f"## Step {n}: ") for n in ("5", "5.5", "6")]
-    assert steps == sorted(steps), "Step 5.5 sits between Step 5 and Step 6"
+def test_format_puts_the_kb_graph_line_inside_a_sub_topic():
+    """Above the edit it led to: the M3 check reads the record's order."""
+    text = FORMAT.read_text()
+    line = text.index(f"`{_kb_graph_format()}`")
+    assert text.index("### 1. <Sub-topic>") < line < text.index("[What was done, why, what files changed.]")

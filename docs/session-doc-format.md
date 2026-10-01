@@ -84,13 +84,13 @@ grep -r "Follows.*20260421" docs/sessions/          # Sessions continuing 2026-0
 
 [Organized by sub-topic or wave. Each sub-topic gets a heading.]
 
-`KB-graph: <traversal run> → <what it changed or confirmed>`
-
-(One line per knowledge-base walk, written when the walk happens. Omit when the session ran none.)
-
 ### 1. <Sub-topic>
 
+`KB-graph: <traversal run> → <what it changed or confirmed>`
+
 [What was done, why, what files changed.]
+
+(One `KB-graph:` line per knowledge-base walk, in the sub-topic it informed, above the edit it led to. Omit when the session ran none.)
 
 ### 2. <Sub-topic>
 
@@ -194,8 +194,7 @@ Per the project's CLAUDE.md documentation style: **prefer Mermaid over ASCII art
 - **Only include relationship fields that apply**; do not pad with placeholder links.
 - **Use the right diagram type** for the complexity at hand.
 - **Always include Summary and Next Steps**; the rest is optional.
-- **Record each knowledge-base walk as a `KB-graph:` line** under Work Completed. It is uptake metric M1 in `.claude/skills/traversing-the-knowledge-base/SKILL.md`, and the count is taken by grep.
-- **Route fleet-scope lessons upward** per `/session-end` Step 5.5. The session doc stays the record; the channel file is the routing copy.
+- **Record each knowledge-base walk as a `KB-graph:` line** in the sub-topic it informed, above the edit it led to. It is uptake metric M1 in `.claude/skills/traversing-the-knowledge-base/SKILL.md`, and the count is taken by grep.
 - **Tag with activity and status** so sessions can be filtered by type.
 
 ---

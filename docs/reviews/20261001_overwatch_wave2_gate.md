@@ -604,3 +604,102 @@ Fix: append to the Status Log. For the first: the test file of `6bde122` on `2e3
 - I rebuilt the private term list in scratch for the D6 check and deleted it afterward. This section quotes none of it.
 
 **Verdict, round 2: GO** for tasks 2a to 2c. Append R2-W1's evidence and the sixth surface for W15 to the Status Log before merge.
+
+---
+
+## Round 3
+
+**Date**: 2026-10-01
+**Subject**: the same branch at `fcf63c3`, read through `git archive fcf63c3` exports. New commits: `278a426`, `cea55fe`, `447a459` ([gate]), `fcf63c3`. I am the non-author reviewer of `447a459` under WHETSTONE D4.
+
+### Verdict
+
+**GO** for merge.
+
+The ledger's two counts never overlap, the three files and the plan's MOE agree, and the pin fails when either line is reworded in any one file. R2-W1, W15, and R2-S1 to R2-S6 are closed. The suite is 431 on Python 3.12.13, with and without `CI=true`, on exports of all three code-bearing commits. Two claims in the new record are refuted in part (R3-W1); both are wording in the record, and nothing that ships rests on either. Three Suggestions follow.
+
+### 1. `447a459`, the ledger's two counts
+
+**Do N and M partition the refuted claims?** They are disjoint. They are not exhaustive.
+
+- No claim is in both. M is "every other claim a reviewer's re-run refuted", and `session-end.md:76` adds "never both".
+- A claim refuted after the user relied on it now lands in N ("or had already relied on", `session-end.md:75`). That closes the gap from round 2.
+- Some refuted claims land in neither:
+  - A claim the author retracted alone, before the user relied on it and with no reviewer. This branch has one: the round 1 log entry records that `1b50924`'s message "said the tests pass before they had been run", an error "the lead caught itself".
+  - A claim refuted by something other than the user or a reviewer's re-run: a CI job, a hook, or the author's own next command.
+- That is a fair design. The line names say who caught the claim, and a self-caught claim is the kernel working. But the text does not say so, and an author who retracts a claim will not know where to count it: R3-S1.
+
+**Do the four places agree?** Yes.
+
+| Place | Text |
+|---|---|
+| `session-end.md:75-76` | defines N and M; both line strings |
+| `session-doc-format.md:106`, `:108`, `:110`, `:210` | both line strings in the template; "the two count lines"; "both overclaim counts" |
+| `SKILL.md:82` | "with two counts below it", both line strings |
+| Plan line 158, the MOE | the N line only; the log at line 284 says the MOE reads N |
+
+Evidence: `grep -c` for each line string → 1 in each of the three files; plan line 158 holds the N string.
+Two loose ends, both small: R3-S3.
+
+**Does the pin fail when either line is reworded in any one file?** Yes, 6 of 6. On the export, I reworded the N line and then the M line in `SKILL.md`, `session-end.md`, and the format doc, one file per run. Each run fails `test_ledger_lines_are_the_same_strings_everywhere`.
+
+The pin holds the two strings. It does not hold the two definitions: R3-S2.
+
+**D4.** The commit is tagged `[gate]` and holds `session-end.md`, the one sentence in `SKILL.md` that names the same instrument, and its pin. That matches `1edf0d4`, which I accepted in round 1. Check 6's logic prints no WARN for any of the four commits. The pin was red first: `447a459`'s test file on `cea55fe`'s tree gives `1 failed, 24 passed`, the `SKILL.md` case, as the message says.
+
+### 2. Round 2 findings
+
+| # | Status | Evidence at `fcf63c3` |
+|---|---|---|
+| R2-W1 | CLOSED | Plan lines 279 to 281 carry an evidence line for each of the three claims; the third says its source was a message and no file holds it |
+| W15 | CLOSED | Plan line 278 names the sixth surface, `.claude/README.md`. Its last clause is R3-W1 |
+| R2-S1 | CLOSED | `SKILL.md:77`: `git ls-remote mirror refs/heads/main` |
+| R2-S2 | CLOSED | `SKILL.md:82` names two counts; `session-end.md:75` covers reliance. Residue: R3-S3 |
+| R2-S3 | CLOSED | `SKILL.md:3`, `:47` and `SKILLS_FRAMEWORK.md:215`; a grep for "one read-only probe" prints nothing |
+| R2-S4 | CLOSED | `SKILL.md:55`: "none within three levels of this directory" |
+| R2-S5 | CLOSED | Four pins in `PROBE_ELEMENTS`; each revert fails the suite (4 of 4). The round 2 revert set now scores 10 of 23, from 5 |
+| R2-S6 | CLOSED | Plan line 278: "5 skipped" is 38 tests that did not run |
+
+Mutation at `fcf63c3`, 82 mutants: 61 killed, 21 survived, 1 of them equivalent. The round 1 set stays at 41 of 46.
+
+### 3. The lead's claims in the four messages and two log entries
+
+Every count I could re-run holds.
+
+| Claim | Verdict | Evidence |
+|---|---|---|
+| 431 passed with and without `CI=true`, Python 3.12.13 (`278a426`, `447a459`, the log) | HOLDS | exports of `278a426`, `447a459`, and `fcf63c3`: `431 passed, 1 warning`, exit 0, six runs of six |
+| Each of the four pins fails when its probe is reverted (`278a426`) | HOLDS | four revert mutants, each killed |
+| Three places said "one read-only probe" (`278a426`) | HOLDS | the diff changes three lines |
+| The ledger pin was red for `SKILL.md` before the edit: `1 failed, 24 passed` (`447a459`) | HOLDS | same output on `cea55fe`'s tree |
+| Mutation and claim counts quoted from round 2 (the log) | HOLDS | round 2 above |
+| The five reproductions and the seven red pins (the log's evidence lines) | HOLDS | `sed -n 71p` of `ISOLATION.md` prints the overwrites bullet; the rest as in round 2 |
+| "Every refuted claim lands in one" (`447a459`, subject) | REFUTED in part | section 1: a self-retracted claim lands in neither |
+| "The release entry's Action Required lists all six" (the log, line 278) | REFUTED in part | no release entry exists: `grep -n -i -e 'verifying-claims' -e 'OVERWATCH' docs/doctrine-updates.md` prints nothing. The six are in the log; the entry is unwritten |
+| The user's four decisions, and the two earlier ones (the log, line 284) | UNVERIFIABLE | no artifact holds the user's answers; the coordinator's brief says the same |
+| `test-runner`'s numbers (line 281) | UNVERIFIABLE | the log says so itself |
+
+### 4. PCC check 5
+
+Run on the `fcf63c3` export: 0 MISSING, 0 MISSING-DIR. All six surfaces exist. The kernel is identical in `SKILL.md:27-32` and `CLAUDE.md:65-70`. A name check over the lines and messages added since `c97c79e` counts 0 hits.
+
+### New findings
+
+**R3-W1. Two claims in the new record say more than a re-run supports.** One Warning, per the reviewer line.
+- `447a459`'s subject: "every refuted claim lands in one". Disjoint, yes; exhaustive, no.
+- Plan line 278: the release entry "lists all six". It will have to; today there is no entry.
+Fix: one Status Log line. "Every claim the user or a reviewer caught lands in exactly one count; a claim the author retracted alone is in neither. The release entry, when written, must list all six surfaces." A task line in `docs/tasks.md` would keep the second from being lost.
+
+**R3-S1. Say where a self-retracted claim goes (`session-end.md:76`).** Add: "A claim you retracted yourself before anyone relied on it is in neither count; its row shows the correction."
+
+**R3-S2. The definitions are not pinned.** Two mutants survive: N without "or had already relied on", and M reverted to "before the user relied on them". Both undo the user's ruling with 25 tests green. Pin "had already relied on" and "every other claim" in Step 5.
+
+**R3-S3. Two loose ends from R2-S2.** `SKILL.md:82` says what each count holds lives in the format doc and `/session-end`; only `/session-end` defines them. And `session-end.md:76` says "on the next line" where the template leaves a blank line between the two; without it markdown renders one paragraph.
+
+### Reviewer's notes, round 3
+
+- I appended this section and wrote scratch files only. Rounds 1 and 2 are as committed.
+- Every pytest run was on an export, with `-p no:cacheprovider` and a `--basetemp` under my scratch directory. No network call this round.
+- I did not update agent memory, for the same reason as before.
+
+**Verdict, round 3: GO** for merge. Append R3-W1's line to the Status Log; it can land on `main` after the merge.

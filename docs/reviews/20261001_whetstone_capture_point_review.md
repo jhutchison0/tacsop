@@ -240,3 +240,128 @@ EXISTS  docs/tasks.md
 3. Suggestions at the lead's discretion. S4 and S5 are their own gate changes.
 
 **Verdict: GO-WITH-FIXES**
+
+---
+
+## Round 2
+
+**Date**: 2026-10-01
+**Reviewed**: `topic/whetstone-capture-point` at `3820b95` (`8c31948`, `1ed229c`, `3820b95` on top of `d565df9`)
+
+**Verdict: GO-WITH-FIXES.** W1 to W4 are all CLOSED. 0 Critical, 1 new Warning, 6 new Suggestion. The Warning is one sentence in the Status Log entry and one in `docs/tasks.md`, both on an unmerged branch.
+
+### Method
+
+I read the branch only through `git show 3820b95:<path>`, `git diff`, and `git archive` into the scratchpad. `main` and `origin/main` are at `b1c3e36`. The branch has no remote ref and is merged only into `topic/overwatch-verifying-claims` (`2783d6e`). Full suite on the `3820b95` export: `406 passed, 1 warning in 4.29s`.
+
+### Status of the round 1 warnings
+
+| # | Status | Probe against `3820b95` | Output |
+|---|---|---|---|
+| W1 | CLOSED | Template block, `docs/session-doc-format.md` lines 87 to 93 | `### 1. <Sub-topic>` at 87, the `KB-graph:` line at 89, `[What was done, why, what files changed.]` at 91, the placement note at 93 |
+| W2 | CLOSED (option B) | `grep -c 'not at session close'` on `session-end.md`; `grep -c 'when the walk happens'` on both files | 0; 0 and 0. Line 64 now ends "The skill says when to write it." |
+| W3 | CLOSED, see N1 | Last Status Log heading; the task lines | CONOP line 237: "2026-10-01 — The `KB-graph:` capture point shipped; the capture regime changes here." The P1 capture task is gone from Active; the Completed line is `docs/tasks.md` line 58; the window-count P1 stays open at line 7 |
+| W4 | CLOSED | `grep -c 'Step 5\.5\|upstream-lesson\|LESSON (OBSERVED)'` on `session-end.md`, the format doc, the test file | 0, 0, 0. Step headings run 1, 2, 3, 4, 4.5, 5, 6. `docs/tasks.md` line 30 carries the HELD note |
+
+Other round 1 probes, re-run:
+
+- Format string: byte-identical to skill line 56 in both files (1 match each with `grep -F`).
+- No count already taken changes: `git diff --stat b1c3e36 3820b95 -- docs/sessions/ .claude/skills/traversing-the-knowledge-base/` is empty.
+- Dashes: one em dash in the added text outside this report, the date separator in the Status Log heading, which matches every other entry and is exempt as a list separator.
+
+W2's known residue stands: a line added at close leaves no trace. The Status Log entry says so and sends it to the window-close amendment.
+
+A limit on W1 that I should have stated in round 1. The template now tells the author to put the line above the edit, so a line placed by the template precedes its edit whether or not the traversal did. Placement gives the verifier the edit to read for the traversal's content. It does not show when the line was written. See N4.
+
+### New Warning
+
+**N1. The regime boundary is stated two ways, and neither is the real boundary.**
+
+- CONOP line 237: "Every session doc dated before 2026-10-01 is unprompted; every later one is prompted." A doc dated 2026-10-01 falls in neither class.
+- `docs/tasks.md` line 58: "Sessions from 2026-10-01 on are prompted." That includes the day the Status Log leaves out.
+- The prompt exists where the commit exists. `main` and `origin/main` are at `b1c3e36`. The 2026-08-28 Status Log entry records two machines working this same window. A session after 2026-10-01 on a checkout without `1ed229c` is "later" and unprompted.
+- The session that ships the prompt is in the position the CONOP ruled on for session 0 (line 206): counting it "would be the self-serving inclusion".
+
+The date wording traces to my round 1 W3 fix text. The error is mine first.
+
+Fix, in the Status Log entry and the Completed line, before merge:
+
+```
+A session is prompted when its checkout contains `1ed229c`
+(`git merge-base --is-ancestor 1ed229c <the session doc's commit>`); the date is a guide, not the test.
+The 2026-10-01 session shipped the prompt and is reported apart from both regimes.
+```
+
+The second sentence is a ruling for the lead and the user. Any explicit class for that session closes the gap.
+
+### New Suggestions
+
+**N2. Two claims were written before their evidence.** The Completed line says "shipped" and "all applied"; the Status Log says "all four applied". Both were committed before this round ran and before any merge. Round 2 now supports "all four applied". "Shipped" becomes true at merge. The neighbouring Completed lines cite merge commits (`d602c8e`, `d03e66a`, `d98428a`, each with two parents). After the merge, cite its SHA on line 58. Merge this branch before `topic/overwatch-verifying-claims`, which already contains it, so the `[gate]` commits reach `main` through their own gate merge.
+
+**N3. Two counts are off.**
+
+- `1ed229c` says "three lines in the format doc". `git diff --numstat b1c3e36 3820b95` gives `5 0 docs/session-doc-format.md`: five added lines, three of them non-blank. The session-end count is right: `1 0`.
+- `docs/tasks.md` line 58 says "three pin tests, `8c31948`". The tip has three tests. Two come from `8c31948`; the third comes from `1ed229c`, which also deleted `8c31948`'s third. Rewrite: "three pin tests, `8c31948` and `1ed229c`".
+
+**N4. The Status Log's reason for the placement claims more than placement gives.**
+
+```
+[Minor] Rule 2: "because the only M3 verification on record reads the record's order; the first version
+        put it above every sub-topic, where any line passes that check"
+        (docs/plans/conop_whetstone_recursive_doctrine_loop.md line 237)
+Rewrite: "so the verifier knows which edit to read for the traversal's content. Placement cannot show
+        when a line was written; that question goes to the window-close amendment."
+```
+
+A line placed above its edit by instruction also passes the order check. The sentence inherits my round 1 framing.
+
+**N5. The pins hold presence, not the ask.** Ten mutants, seven killed, three survive (table below). The survivors keep the string and change what it says or where it sits. `tests/unit/test_session_start_checks.py` line 28 slices one step with `^## Step 4.*?(?=^## Step 5)`; the same slice for Step 5 would kill the move.
+
+**N6. S2 landed in one of three places.** `session-end.md` line 64 now reads as the skill does. `docs/session-doc-format.md` lines 93 and 197 still say "per knowledge-base walk" and "each knowledge-base walk", the wider trigger.
+
+**N7. Two smaller items.**
+
+- The user's decision to hold Step 5.5 is recorded in the lead's words. The 2026-08-14 entry quotes the user (CONOP line 205). I cannot verify the decision from the repo. Quote it or cite where it was given.
+- `scripts/adopt_doctrine.py` copies `session-end.md` to a repo that lacks it and does not list the traversal skill (`grep -c traversing-the-knowledge-base` returns 0). Such a repo receives line 64's pointer to a skill file it does not have. Present since `d565df9`; I missed it in round 1. Low odds; note it for Wave 4.
+
+The Step 5.5 half of the task moved from a P1 line to a P3 line (`docs/tasks.md` line 30). That follows from the hold, and the line says so.
+
+### Net diff count
+
+`git diff b1c3e36 3820b95 -- .claude/commands/session-end.md docs/session-doc-format.md`:
+
+| File | Added | Non-blank | Deleted |
+|---|---|---|---|
+| `.claude/commands/session-end.md` | 1 | 1 | 0 |
+| `docs/session-doc-format.md` | 5 | 3 | 0 |
+
+The content is what `1ed229c` says: one reminder bullet, the template line, the placement note, one best-practice bullet. The line count is N3.
+
+### Pin tests
+
+`8c31948`'s claim holds. Its three tests pass on its own tree and all three fail against `b1c3e36`'s two docs.
+
+Mutants against the three tests at `3820b95`, each applied to a fresh scratch copy:
+
+| Mutant | Result |
+|---|---|
+| Both docs as on `main` | 3 failed |
+| Format doc as at `d565df9` (line above every sub-topic) | 1 failed: the placement test |
+| Reminder line deleted from `session-end.md` | 1 failed: the session-end test |
+| Arrow changed in the template line | 2 failed |
+| Template line moved below the work paragraph | 1 failed: the placement test |
+| Second copy of the line added above the sub-topics | 1 failed: the placement test |
+| Skill changes its format line | 3 failed |
+| Reminder reworded to "Do not record a ...", string kept | 3 passed (survivor) |
+| Best-practice bullet deleted from the format doc | 3 passed (survivor) |
+| Reminder moved from Step 5 to Step 1 | 3 passed (survivor) |
+
+The tests fail when the ask is dropped, when a copy drifts from the skill, and when the W1 placement regresses. They are what the file's docstring says: pins.
+
+### Fix order
+
+1. N1: one sentence in the Status Log entry and one in the Completed line, before merge.
+2. N3 and N4 can ride the same touch. N2's SHA citation follows the merge.
+3. N5, N6, N7 at the lead's discretion.
+
+**Round 2 verdict: GO-WITH-FIXES**

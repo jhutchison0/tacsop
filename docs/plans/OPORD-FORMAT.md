@@ -82,9 +82,9 @@ all land at once.
   already flagged as degenerate
 - **Tasks**: at TCS detail level
 
-  | Task | Condition | Standard |
-  |------|-----------|----------|
-  |      |           |          |
+  | Task | Purpose | Condition | Standard |
+  |------|---------|-----------|----------|
+  |      |         |           |          |
 
 - **Exit criterion**: the shared condition that closes the wave
 - **Checkpoint**: a **commit-gate with a named owner**; the wave is

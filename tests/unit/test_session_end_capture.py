@@ -25,7 +25,10 @@ def _step5() -> str:
 
 def test_session_end_asks_for_the_kb_graph_line():
     """In Step 5, where the session doc is written, and as an instruction to record."""
-    ask = f"- If a traversal informed the session's work, record it in Work Completed as a `{_kb_graph_format()}` line"
+    ask = (
+        "- If a traversal informed the session's work, record it in Work Completed as a "
+        f"`{_kb_graph_format()}` line, in the sub-topic it informed."
+    )
     assert ask in _step5()
 
 

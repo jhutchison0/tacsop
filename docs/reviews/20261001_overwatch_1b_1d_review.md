@@ -314,3 +314,58 @@ Identity probe: in a scratch repo with no identity, `git commit` printed `fatal:
 7. W7: file a test-first task for the two in-code hints.
 
 Per the 1a precedent (S10), the reviewer's probes in §1 B and C get re-run against the fixed branch before merge.
+
+---
+
+## Round 2 (against `f7d917b`)
+
+**Verdict: GO.** Every §1 probe passes against `f7d917b`, and all six fixes, W1 to W6, read correctly. W7 is filed test-first (`docs/tasks.md`, P2). None of the counts in `f7d917b`'s message or in the new Status Log entry fails a check.
+
+**Scope, as the coordinator asked.** I wrote only this section and files under `$S`: `toolcheck_r2.sh`, `repro/projA/requirements-ml.txt`, and a `cdp/` symlink. I did not run `uv cache clean` or any other cache command. I did not change git or gh config. Every uv command against tacsop's `.venv` used `--dry-run`. gh and glab got `GH_CONFIG_DIR` and `GLAB_CONFIG_DIR` under `$S`, except the all-fine case, which runs a read-only `gh auth status`. One caveat: every uv run, dry runs included, may refresh uv's interpreter metadata in `~/.cache/uv`. That is uv's normal bookkeeping, and I did not redirect `UV_CACHE_DIR`. I did not update reviewer memory this round.
+
+**Greps (1b Standard).** Run at HEAD = `f7d917b`. Grep 1, grep 2, and the wider grep each print nothing, so each pipeline exits 1. A per-occurrence scan, now with `compile`, finds only prose that names a command: `SKILL.md:103`, `TROUBLESHOOTING.md:237` and `:276`, and `CLAUDE.md:81`.
+
+**B. Repro** (uv 0.12.1, scratch projA, projB, projC). The results match round 1. The bare command under a stray env prints `environment at: .../projB/.venv`. `--python .venv` under the stray, with `-v`, prints `DEBUG Using Python 3.12.13 environment at: .venv`. With no `.venv`, the pinned command fails closed with `No virtual environment found for executable name '.venv'`.
+
+**C. Tool-check block**, extracted verbatim from `git show f7d917b:.claude/commands/session-start.md`:
+
+| Case | Output | Exit |
+|---|---|---|
+| 1. all fine (also run as a bare Bash call: "completed with no output", no error) | none | 0 |
+| 2. stray `VIRTUAL_ENV` | `STRAY VIRTUAL_ENV=...projB/.venv: an install without --python lands there, not in .venv (every uv pip command)` | 0 |
+| 3a-c. own `.venv`: absolute, relative, through a symlink | none | 0 |
+| 4. no git identity | `NO GIT IDENTITY: commits fail (/session-end Step 3)` | 0 |
+| 5. gh unauthenticated | `gh AUTH CHECK FAILED (not logged in, or offline): ... UNVERIFIED (/session-end Step 6)` | 0 |
+| 6. glab 1.120.0 unauthenticated | `glab AUTH CHECK FAILED ...` | 0 |
+| 7. all four gaps at once | four lines | 0 |
+| 8. stray, no `realpath` on PATH | STRAY line (round 1: silent) | 0 |
+| 9. `VIRTUAL_ENV=/nonexistent/venv` | none (round 1: false STRAY) | 0 |
+| 10. gh offline (`HTTPS_PROXY=http://127.0.0.1:9`) | gh AUTH CHECK FAILED line, which now names offline | 0 |
+
+**W4 subdirectory probe.** From `tacsop/src`, `uv pip install --python .venv ...` still fails: `No virtual environment found for executable name '.venv'`. The docs now explain why. Run from the root, the same command resolves. Both absolute forms in Issue 5 work from a directory outside any project: `--python <root>/.venv -e "<root>[dev]"` prints `environment at: .../tacsop/.venv`, and `--python <root>/.venv-ml -r <root>/requirements-ml.txt` prints `environment at: .../projA/.venv-ml`. The pinned `uv pip compile`, run under a stray 3.11 env, resolves with `.venv/bin/python3` (3.12.13).
+
+**Fix reading.**
+- W1 (`session-start.md:72-82`): `if` forms; exit 0 in every case above. Lines 67-69's "nothing when it is fine" is now true.
+- W2: `SKILL.md:108` now reads "through the `VIRTUAL_ENV` variable". `session-start.md:76` says "an install without --python". The Status Log records both overclaims.
+- W3 (`session-start.md:85-90`, `TROUBLESHOOTING.md:243`): the remedy now says to pin `--python .venv`, or to relaunch from a clean shell. The new CONDA_PREFIX sentence matches round 1's probe.
+- W4: `CLAUDE.md:81` says "from the project root" again. Issue 5's Cause names both routes, and its Fix scopes "works from anywhere" to absolute paths.
+- W5: the identity line names `/session-end Step 3`, and the CLI line names `/session-end Step 6`, which is Evaluate Merge Readiness. The stray line names an activity, and the Status Log records the "step or activity" reading.
+- W6 (`SETUP.md:42`): correct for activation and for `export` of an absolute path.
+
+**Non-blocking notes.**
+- (a) `SETUP.md:42` says "in any repo, installs into `.venv-ml`". An `export VIRTUAL_ENV=.venv-ml` with a relative path does not do that: in projB, uv logged `Failed to inspect ... .venv-ml/bin/python3` and fell back to projB's `.venv`. An absolute export does redirect. "exporting its absolute path" would be exact.
+- (b) `cd .venv` follows `CDPATH`. With `CDPATH` pointing at a directory that holds another `.venv`, the block falsely flags the project's own venv. I found no way for this to make the check miss a real stray. Writing `cd ./.venv` avoids the lookup.
+- (c) Run off-root (from `src/`), the block flags the project's own venv. `/session-start` runs from the root, so this is expected.
+
+**Numbers checked.**
+
+| Claim | Where | Result |
+|---|---|---|
+| "0 Critical, 7 Warning" | `f7d917b` | Holds |
+| "0 Critical, 7 Warning, 12 Suggestion" | Status Log | Holds |
+| "exit 0 in all 8 cases run" | `f7d917b` | Consistent: my 13 cases all exit 0. I cannot tell which 8 the lead ran. |
+| "Ten Suggestions were applied in whole or part" | Status Log | Holds: S1, S2, S4, S5, S6, S7, S8, S10, S11, S12. S9 filed; S3 declined. |
+| `d03e66a`, 1a "MERGED 2026-10-01" | `docs/tasks.md` | Holds: `d03e66a 2026-10-01 08:57:20 -0500` |
+| "both greps and the wider one now print nothing" | `f7d917b` | Holds |
+
+The added lines contain 1 em dash. It sits at `CLAUDE.md:163` as a list-index separator, which RULES.md 8 exempts. The cruft list has 0 matches.

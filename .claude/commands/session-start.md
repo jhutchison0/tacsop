@@ -72,7 +72,7 @@ minute instead of at session end:
 if ! { git config user.name && git config user.email; } >/dev/null; then
   echo "NO GIT IDENTITY: commits fail (/session-end Step 3)"
 fi
-if [ -d "${VIRTUAL_ENV:-}" ] && [ "$(cd "$VIRTUAL_ENV" && pwd -P)" != "$(cd .venv 2>/dev/null && pwd -P)" ]; then
+if [ -d "${VIRTUAL_ENV:-}" ] && [ "$(CDPATH= cd "$VIRTUAL_ENV" && pwd -P)" != "$(CDPATH= cd .venv 2>/dev/null && pwd -P)" ]; then
   echo "STRAY VIRTUAL_ENV=$VIRTUAL_ENV: an install without --python lands there, not in .venv (every uv pip command)"
 fi
 for cli in gh glab; do

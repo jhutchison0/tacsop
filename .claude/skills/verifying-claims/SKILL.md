@@ -1,6 +1,6 @@
 ---
 name: verifying-claims
-description: House rule for success claims. Six kernel rules, four claim states (written, tested, deployed, observed), one read-only probe per claim type, and before/after examples. Use before reporting that something passed, landed, synced, exists, or is absent, and when writing or reviewing a session's Claims table.
+description: House rule for success claims. Six kernel rules, four claim states (written, tested, deployed, observed), one probe per claim type, and before/after examples. Use before reporting that something passed, landed, synced, exists, or is absent, and when writing or reviewing a session's Claims table.
 version: "1.0.0"
 ---
 
@@ -44,7 +44,7 @@ No state implies the next. Tested code might not be pushed yet, and pushed code 
 
 ## Probes (rule 3)
 
-One read-only probe per claim type. Each can fail, which is the point: run it, then read the result against the last column.
+One probe per claim type, read-only except the test run. Each can fail, which is the point: run it, then read the result against the last column.
 
 | Claim | State | Probe | Holds when |
 |---|---|---|---|
@@ -52,7 +52,7 @@ One read-only probe per claim type. Each can fail, which is the point: run it, t
 | Pushed | deployed | `git rev-parse HEAD`; `git ls-remote origin refs/heads/<branch>`; `git status --porcelain` | The second prints one line with the first's SHA, and the third lists no file the claim covers |
 | Mirror synced | deployed | `git ls-remote <mirror> refs/heads/<branch>`; `git ls-remote origin refs/heads/<branch>` | Each prints one line, and the two SHAs match |
 | Tests pass | tested | `.venv/bin/pytest; echo "exit=$?"`; `.venv/bin/python -V` | The summary line shows no failures and no skip or deselection you cannot explain; `exit=0`; on the Python the CI config names (with no CI, say which Python ran) |
-| The venv exists, or does not | observed | `find . -maxdepth 3 -name pyvenv.cfg`; `cat <venv>/pyvenv.cfg`; `<venv>/bin/python -V` | The cfg prints and Python runs: usable. The cfg prints and Python fails: there, but broken. `find` prints nothing: none under this directory, which is less than "absent" |
+| The venv exists, or does not | observed | `find . -maxdepth 3 -name pyvenv.cfg`; `cat <venv>/pyvenv.cfg`; `<venv>/bin/python -V` | The cfg prints and Python runs: usable. The cfg prints and Python fails: there, but broken. `find` prints nothing: none within three levels of this directory, which is less than "absent" |
 | Merged | deployed | `git merge-base --is-ancestor <sha> main; echo "exit=$?"`; `git rev-parse main`; `git ls-remote origin refs/heads/main` | `exit=0`, and the last two print the same SHA |
 | Deployed: running from a checkout | deployed | In that checkout: `git status --porcelain`; `git rev-parse HEAD`; `git ls-remote origin refs/heads/<branch>` | The first prints nothing; the third prints one line with the second's SHA |
 
@@ -74,7 +74,7 @@ One line under each claim. Paste the command and the output lines that decide it
 Tests pass (tested).
 Evidence: `.venv/bin/pytest; echo "exit=$?"` → `403 passed, 1 warning in 4.56s`, `exit=0`; `.venv/bin/python -V` → `Python 3.12.13`
 
-UNVERIFIED: the mirror sync. `git ls-remote mirror main` → `fatal: unable to access: Could not resolve host`; this machine is off the VPN.
+UNVERIFIED: the mirror sync. `git ls-remote mirror refs/heads/main` → `fatal: unable to access: Could not resolve host`; this machine is off the VPN.
 ```
 
 Make the blocker checkable too: paste its error when there is one, and name the machine or the access when there is not. A line is true of the moment it was taken; name the commit or the time when a reader will re-run it later.

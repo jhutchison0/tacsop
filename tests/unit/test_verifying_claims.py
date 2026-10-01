@@ -101,12 +101,12 @@ def test_state_table_defines_the_four_states():
 # What each probe row must name, by claim type.
 PROBE_ELEMENTS = {
     "run landed": ("exit status", "`tail <log>`", "newer than the launch"),
-    "pushed": ("`git rev-parse HEAD`", "`git ls-remote origin refs/heads/<branch>`"),
+    "pushed": ("`git rev-parse HEAD`", "`git ls-remote origin refs/heads/<branch>`", "`git status --porcelain`"),
     "mirror synced": ("`git ls-remote <mirror> refs/heads/<branch>`",),
     "tests pass": ("summary line", "python -V", "CI"),
-    "venv exists": ("pyvenv.cfg", "python -V"),
-    "merged": ("`git merge-base --is-ancestor <sha> main",),
-    "deployed": ("`git status --porcelain`",),
+    "venv exists": ("`find . -maxdepth 3 -name pyvenv.cfg`", "python -V"),
+    "merged": ("`git merge-base --is-ancestor <sha> main", "`git ls-remote origin refs/heads/main`"),
+    "deployed": ("`git status --porcelain`", "`git ls-remote origin refs/heads/<branch>`"),
 }
 
 

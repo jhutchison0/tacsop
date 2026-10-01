@@ -208,6 +208,16 @@ These skills are portable to any software project. They contain no project names
 
 **Use when**: Adding or reviewing lake or home-storage writes, choosing a format for a stored artifact, planning a dev-to-production promotion, or preparing a machine to do storage work.
 
+### verifying-claims (directory form)
+
+**Path**: `.claude/skills/verifying-claims/SKILL.md` + 1 sidecar (`EXAMPLES.md`).
+
+**Focus**: House rule for success claims: six kernel rules, four claim states, one read-only probe per claim type, and seven before/after pairs. The testing skill governs how code gets tested; this one governs what a report may say about the result.
+
+**Key concepts**: claim only the state the evidence reaches (written, tested, deployed, observed), evidence from this turn, the check that could prove you wrong, the `Evidence:` line, `UNVERIFIED: <blocker>` as a named blocker and never a hedge, deployed means a clean tree, probes read and never write; the `## Claims` table at `/session-end`.
+
+**Use when**: Reporting that something passed, landed, synced, exists, or is absent; repeating a number measured earlier; writing or reviewing a session's Claims table.
+
 ### task management (command: `/task`)
 
 **Focus**: Military-inspired work tracking with structured escalation from tasks to operations orders.
@@ -410,6 +420,10 @@ This is why `session-end`, `pcc`, `pci`, `sitrep`, `session-start`, and `task` r
 │   ├── PREFLIGHT.md
 │   ├── ADOPTION.md
 │   └── HOME-STORAGE.md
+│
+├── verifying-claims/
+│   ├── SKILL.md
+│   └── EXAMPLES.md
 │
 └── # Level 1 — Project-Specific
     (none — this is a template; downstream repos add as needed)

@@ -110,3 +110,23 @@ def test_examples_show_a_clean_report():
     assert "**Before**" not in clean
     assert "Evidence:" not in clean.split("\n\n")[0] and "UNVERIFIED:" not in clean.split("\n\n")[0]
 
+
+CLAUDE_MD = ROOT / "CLAUDE.md"
+
+
+def test_claude_md_carries_the_kernel_verbatim():
+    """The ambient copy and the skill's kernel are one text in two places."""
+    ambient = _numbered_rules(_section(CLAUDE_MD.read_text(), "Claim Style"))
+    assert ambient == _numbered_rules(_section(SKILL.read_text(), "The Kernel"))
+
+
+@pytest.mark.parametrize(
+    ("path", "needle"),
+    [
+        (".claude/skills/SKILLS_FRAMEWORK.md", "### verifying-claims (directory form)"),
+        (".claude/skills/SKILLS_FRAMEWORK.md", "├── verifying-claims/"),
+        (".claude/README.md", "verifying-claims/SKILL.md + 1 sidecar"),
+    ],
+)
+def test_skill_is_registered(path, needle):
+    assert needle in (ROOT / path).read_text()

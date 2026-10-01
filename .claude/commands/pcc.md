@@ -66,10 +66,8 @@ git status --short
   sed -n '/^## Active/,/^## Completed/p' docs/tasks.md; } \
   | grep -oE '(docs|src|tests|config|scripts|\.claude|\.github)/[A-Za-z0-9_./-]+\.[A-Za-z0-9]{2,8}' \
   | grep -vE '^\.claude/(upstream-update\.md|upstream-lesson\.md|audits/)' \
-  | grep -vE '^docs/(decision_audit_20260326\.md|plans/decision_science_gaps\.md|review_decision_science_waves_2_3\.md)$' \
   | sort -u | while read -r p; do [ -e "$p" ] || echo "MISSING: $p"; done
 ```
-- Second allowlist line: the three known-missing March paths, dispositioned in `docs/tasks.md` P3; remove them from the allowlist when that task closes
 - Expected output: empty. WARN on any MISSING line, and record the run's count in the session doc (it is metric M2 in `.claude/skills/traversing-the-knowledge-base/SKILL.md`; an unrecorded run is indistinguishable from an unrun check)
 - Any MISSING line is caught drift and fires that skill's build trigger
 

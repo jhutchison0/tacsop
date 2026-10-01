@@ -147,9 +147,11 @@ Each wave gets:
 - **Team**: which template from `.claude/teams/`, with modifications
 - **Tasks**: every task at TCS detail level
 
-  | Task | Condition | Standard |
-  |------|-----------|----------|
-  |      |           |          |
+  | Task | Purpose | Condition | Standard |
+  |------|---------|-----------|----------|
+  |      |         |           |          |
+
+  Purpose: who gets the output and what decision it informs (`.claude/commands/task.md`, Level 2).
 
 - **Exit criterion**: the single shared condition that closes the wave
 

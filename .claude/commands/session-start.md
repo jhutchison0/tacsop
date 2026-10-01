@@ -59,10 +59,35 @@ Check if `.claude/upstream-update.md` exists. If it does:
 Run these commands:
 ```bash
 git fetch && git pull # Sync with remote before anything else
-pytest                # Verify all tests pass
+.venv/bin/pytest      # All tests, on this project's venv (Windows: .venv\Scripts\pytest)
 git status            # Check for uncommitted changes
 git branch -v         # Current branch state
 ```
+
+Then check the tools the session will need. Each check prints one line when
+something is wrong and nothing when it is fine, so a gap surfaces in the first
+minute instead of at session end:
+
+```bash
+if ! { git config user.name && git config user.email; } >/dev/null; then
+  echo "NO GIT IDENTITY: commits fail (/session-end Step 3)"
+fi
+if [ -d "${VIRTUAL_ENV:-}" ] && [ "$(CDPATH= cd "$VIRTUAL_ENV" && pwd -P)" != "$(CDPATH= cd .venv 2>/dev/null && pwd -P)" ]; then
+  echo "STRAY VIRTUAL_ENV=$VIRTUAL_ENV: an install without --python lands there, not in .venv (every uv pip command)"
+fi
+for cli in gh glab; do
+  if command -v "$cli" >/dev/null && ! "$cli" auth status >/dev/null 2>&1; then
+    echo "$cli AUTH CHECK FAILED (not logged in, or offline): merge and CI results are UNVERIFIED (/session-end Step 6)"
+  fi
+done
+```
+
+A stray `VIRTUAL_ENV` came from the shell that launched this session. Pin
+`--python .venv` on every `uv pip` command. `unset VIRTUAL_ENV` lasts one shell,
+and in Claude Code each Bash call is a new shell; to clear it, exit, run
+`deactivate` in the launching shell, and relaunch. A failed `gh` or `glab` auth
+check means a merge or CI result cannot be verified from here: report it as
+`UNVERIFIED: <blocker>`, never as passing.
 
 ## Step 5: Summarize and Ready
 
@@ -76,6 +101,7 @@ Provide a brief summary:
 6. **Pending**: Key items remaining in current phase
 7. **Test Status**: All passing or failures?
 8. **Git State**: Branch, uncommitted changes?
+9. **Tools**: each line Step 4's tool checks printed, or "all present" if they printed nothing
 
 Then ask: **"What would you like to work on today?"**
 

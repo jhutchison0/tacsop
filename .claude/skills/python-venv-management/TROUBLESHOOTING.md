@@ -6,17 +6,17 @@ Sidecar to `SKILL.md`. The most common venv failure modes with diagnoses and fix
 
 ### Diagnosing Conflicts
 
-**Symptom**: `uv pip install` fails with a version-conflict message. uv's resolver reports the full conflict chain in the error, which is usually diagnosis enough.
+**Symptom**: an install fails with a version-conflict message. uv's resolver reports the full conflict chain in the error, which is usually diagnosis enough.
 
 ```bash
 # What's currently installed
-uv pip list
+uv pip list --python .venv
 
 # Specific package
-uv pip show package-name
+uv pip show --python .venv package-name
 
 # Full dependency tree
-uv pip install pipdeptree
+uv pip install --python .venv pipdeptree
 .venv/bin/pipdeptree
 
 # Find conflicts in the tree
@@ -34,9 +34,9 @@ error: Because package-a==1.0 depends on lib>=2.0 and you require lib==1.5, ...
 **Fix**: upgrade or downgrade one package.
 
 ```bash
-uv pip install "lib>=2.0"
+uv pip install --python .venv "lib>=2.0"
 # OR
-uv pip install "package-a==0.9"   # Older package with lower lib requirement
+uv pip install --python .venv "package-a==0.9"   # Older package with lower lib requirement
 ```
 
 #### Pattern 2: Transitive Dependency Conflict
@@ -50,7 +50,7 @@ Two of your direct deps disagree about a shared transitive. Three fixes:
 
 1. **Find compatible versions** — usually possible if you go back far enough:
    ```bash
-   uv pip install "package-a==X.Y" "package-b==A.B"
+   uv pip install --python .venv "package-a==X.Y" "package-b==A.B"
    ```
 
 2. **Use separate environments** (see `SETUP.md` "Multiple Environments"):
@@ -72,12 +72,12 @@ rm -rf .venv
 uv venv --managed-python
 
 # 2. Install one package at a time to find the culprit
-uv pip install package-a
-uv pip install package-b
+uv pip install --python .venv package-a
+uv pip install --python .venv package-b
 # ... continue, observing which install introduces the conflict
 
 # 3. Try compatible versions (uv resolves the full set together)
-uv pip install "package-a>=1.0,<2.0" "package-b>=2.0"
+uv pip install --python .venv "package-a>=1.0,<2.0" "package-b>=2.0"
 ```
 
 ## Environment Variables and Secrets
@@ -169,7 +169,7 @@ export PATH="$HOME/.local/bin:$PATH"   # Current shell
 
 **Fix**:
 ```bash
-uv pip install <package>       # The normal path — no in-venv pip needed
+uv pip install --python .venv <package>       # The normal path — no in-venv pip needed
 
 # Only if a tool genuinely requires pip inside the venv:
 uv venv --seed --managed-python
@@ -185,7 +185,7 @@ uv venv --seed --managed-python
 ```bash
 rm -rf .venv
 uv venv --managed-python       # Managed interpreter survives incumbent removal
-uv pip install -e ".[dev]"
+uv pip install --python .venv -e ".[dev]"
 ```
 
 ### Issue 4: Wrong Python version in venv
@@ -205,46 +205,46 @@ python --version               # Verify
 
 ### Issue 5: "No virtual environment found"
 
-**Symptom**: `uv pip install` errors because it can't find an environment to target.
+**Symptom**: an install errors because uv can't find an environment to target.
 
-**Cause**: running outside the project root with no venv active.
+**Cause**: running outside the project tree, where a bare `uv pip` finds no `.venv`; or passing `--python .venv` from a subdirectory, where the relative path resolves against the current directory.
 
-**Fix**:
+**Fix**: run from the project root, or name the environment by an absolute path, which works from anywhere:
 ```bash
-cd <project-root>              # uv pip discovers ./.venv
-# OR
-source .venv/bin/activate      # Explicit activation works from anywhere
-# OR target an alternate env:
-VIRTUAL_ENV=.venv-ml uv pip install -r requirements-ml.txt
+uv pip install --python <project-root>/.venv -e "<project-root>[dev]"
+uv pip install --python <project-root>/.venv-ml -r <project-root>/requirements-ml.txt   # an alternate env
 ```
+Do not fix it by activating a venv or exporting `VIRTUAL_ENV`. The variable outlives the command, which is Issue 7's first cause.
 
 ### Issue 6: SSL / corporate index errors
 
-**Symptom**: `uv pip install` fails with TLS errors or can't reach PyPI.
+**Symptom**: an install fails with TLS errors or can't reach PyPI.
 
 **Fix**: point uv at the internal index:
 ```bash
 export UV_INDEX_URL=https://your-internal-pypi.corp/simple/
 # Or per-invocation:
-uv pip install --index-url https://your-internal-pypi.corp/simple/ package-name
+uv pip install --python .venv --index-url https://your-internal-pypi.corp/simple/ package-name
 ```
 For a self-signed corporate proxy, `export SSL_CERT_FILE=/path/to/corp-ca.pem` (uv honors the standard TLS env vars).
 
 ### Issue 7: Packages installed but not importable
 
-**Symptom**: `ModuleNotFoundError` despite `uv pip list` showing the package.
+**Symptom**: `ModuleNotFoundError` even though the install reported success and a package listing shows the package.
 
 **Causes and fixes**:
 
-1. **Wrong environment active**:
+1. **An inherited `VIRTUAL_ENV`**: a variable left from another repo's shell outranks the project's `.venv`. A `uv pip install` without `--python` then succeeds into the other environment, and a `uv pip list` without it checks that environment too, so it confirms the wrong thing. uv names the target when it is not the `.venv` in the current directory: `Using Python <version> environment at: <path>`.
    ```bash
-   which python    # Verify path
-   uv pip list     # Verify package is listed in THIS env
+   echo "${VIRTUAL_ENV:-unset}"   # a path other than this project's .venv is the cause
+   which python                   # the interpreter you are running
+   uv pip list --python .venv     # the project's environment, whatever is inherited
    ```
+   Fix: name the target on every command. `unset VIRTUAL_ENV` clears it for one shell only, and in Claude Code each Bash call is a new shell, so relaunch from a shell without the variable. A named conda env (`CONDA_PREFIX`) redirects a bare install the same way, and `--python .venv` overrides it too.
 
 2. **Package name differs from import name**:
    ```bash
-   uv pip install python-dotenv    # Package name
+   uv pip install --python .venv python-dotenv    # Package name
    ```
    ```python
    import dotenv                   # Import name (different!)
@@ -253,7 +253,7 @@ For a self-signed corporate proxy, `export SSL_CERT_FILE=/path/to/corp-ca.pem` (
 
 3. **Editable install needed for in-repo code**:
    ```bash
-   uv pip install -e .             # Install current project as editable
+   uv pip install --python .venv -e .             # Install current project as editable
    ```
 
 ### Issue 8: Stale or corrupted cache

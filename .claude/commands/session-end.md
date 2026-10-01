@@ -61,26 +61,9 @@ Quick reminders:
 - Knowledge-graph header: only include relationship fields that actually apply.
 - Body must include Summary and Next Steps. Other sections (Work Completed, Key Decisions, Pillar Compliance, Commits) are added as the session warrants.
 - Prefer Mermaid over ASCII art for any non-trivial diagram (renders natively in GitHub).
-- If the session walked the knowledge base (lineage, backlinks, blast radius), record each walk in Work Completed as a `KB-graph: <traversal run> → <what it changed or confirmed>` line. That line is uptake metric M1 in `.claude/skills/traversing-the-knowledge-base/SKILL.md`; a walk with no line cannot be counted. Write it when the walk happens, before the edit it informs, not at session close.
+- If a traversal informed the session's work, record it in Work Completed as a `KB-graph: <traversal run> → <what it changed or confirmed>` line, in the sub-topic it informed. That line is uptake metric M1 in `.claude/skills/traversing-the-knowledge-base/SKILL.md`; a walk with no line cannot be counted. The skill says when to write it.
 
 Search related sessions with `grep -r "#domain" docs/sessions/` or `grep -r "References.*config" docs/sessions/`.
-
-## Step 5.5: Upward Lesson Channel (fleet-scope lessons)
-
-While writing the session doc, check each lesson's scope. A lesson is **fleet-scope** if other repos in the doctrine family would repeat the failure or benefit from the fix: convention gaps, tooling failure modes, template defects. Project-specific logic stays repo-scope.
-
-For each fleet-scope lesson, append one line to `.claude/upstream-lesson.md` (create the file if absent; never gitignore it):
-
-```
-LESSON (OBSERVED): <one-line claim> | evidence: <repo-relative path or command> | scope: fleet | origin: <this-repo>/docs/sessions/<this-session-doc>.md
-```
-
-Rules:
-
-- This file is the upward mirror of `.claude/upstream-update.md`: doctrine flows down, lessons flow up. The upstream template repo (`tacsop`) harvests it on machine visits and clears it after intake.
-- Append below existing content, separated by a blank line; never rewrite or delete prior lessons.
-- The session doc remains the record of truth; this file is the routing copy. Repo-scope lessons stay in the session doc only.
-- In `tacsop` itself there is no upstream. Skip the file and route the lesson to its owner artifact, or to `docs/tasks.md` when no artifact owns it yet.
 
 ## Step 6: Evaluate Merge Readiness
 - Is this a major functional milestone?

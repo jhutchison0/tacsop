@@ -231,6 +231,14 @@ def test_session_end_requires_the_claims_table():
     assert "`UNVERIFIED: <blocker>`" in step5
 
 
+def test_session_end_defines_what_each_count_holds():
+    """The user's ruling on the two counts: reliance puts a claim in N; a self-retracted claim is in neither."""
+    step5 = _section(SESSION_END.read_text(), "Step 5: Session Documentation")
+    assert "that the user corrected, asked about, or had already relied on" in step5
+    assert "every other claim a reviewer's re-run refuted" in step5
+    assert "is in neither count" in step5
+
+
 def test_session_doc_format_defines_the_claims_table():
     fmt = SESSION_FORMAT.read_text()
     assert "\n## Claims\n" in fmt

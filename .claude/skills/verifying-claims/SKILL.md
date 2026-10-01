@@ -79,7 +79,7 @@ UNVERIFIED: the mirror sync. `git ls-remote mirror refs/heads/main` → `fatal: 
 
 Make the blocker checkable too: paste its error when there is one, and name the machine or the access when there is not. A line is true of the moment it was taken; name the commit or the time when a reader will re-run it later.
 
-`/session-end` gathers the session's claims into a `## Claims` table in the session doc, with two counts below it: `Overclaims the user caught this session: N` and `Overclaims a reviewer caught this session: M`. The format and what each counts live in `docs/session-doc-format.md` and `/session-end`.
+`/session-end` gathers the session's claims into a `## Claims` table in the session doc, with two counts below it: `Overclaims the user caught this session: N` and `Overclaims a reviewer caught this session: M`. `/session-end` defines what each counts; the format lives in `docs/session-doc-format.md`.
 
 ## What This Skill Is Not
 

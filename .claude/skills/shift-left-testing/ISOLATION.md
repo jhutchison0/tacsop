@@ -85,7 +85,7 @@ That list is why the root parameter is the design and the tripwire is the backst
 
 ### False Catches
 
-A library that deletes its own lock or temp file outside the sandbox on first use trips the wire. matplotlib does this when a test imports it inside the test body on a fresh font cache, which is every CI runner and the first run after every matplotlib upgrade. The catch blocks the lock's removal, so `fontlist-*.json.matplotlib-lock` stays in the real cache directory, and matplotlib's next rebuild stops with a lock error that names the file to delete. Import such libraries at module level, where collection runs them disarmed; or set `MPLCONFIGDIR` to a temp dir for the test run; or add the library's cache directory to `isolation_allow`.
+A library that deletes its own lock or temp file outside the sandbox on first use trips the wire. matplotlib does this when a test imports it inside the test body on a fresh font cache: every CI runner, and the first run after a matplotlib release that changes the cache version (patch releases reuse it). The catch blocks the lock's removal, so `fontlist-*.json.matplotlib-lock` stays in the real cache directory. Every later matplotlib import on that machine then waits about 5 seconds, warns `Could not save font_manager cache`, and rebuilds without saving, until someone deletes the lock file. Import such libraries at module level, where collection runs them disarmed; or set `MPLCONFIGDIR` to a temp dir for the test run; or add the library's cache directory to `isolation_allow`.
 
 ## Testing the Tripwire
 
@@ -100,7 +100,7 @@ Do not write `with pytest.raises(OSError): shutil.rmtree("/data/x")`. On a box w
 3. Run the suite with and without `CI=true`, then read `.claude/audits/isolation-tripwire.log`. Each line is a test reaching the real world (fix the test: pass the root in) or a directory that belongs in `isolation_allow`.
 4. Check that `.claude/audits/` is gitignored. The shift-left audit hook already needs it.
 
-Measured at the hub, 2026-09-30, after two merge-gate rounds: 308 existing tests ran armed with 0 catches, with and without `CI=true`, including a forced matplotlib font-cache rebuild outside the temp dir. That rebuild ran at collection, disarmed, because the hub's tests import matplotlib at module level. The 41 tripwire tests pass on Python 3.11.15 and 3.12.13.
+Measured at the hub, 2026-09-30, after three merge-gate rounds: 308 existing tests ran armed with 0 catches, with and without `CI=true`, including a forced matplotlib font-cache rebuild outside the temp dir. That rebuild ran at collection, disarmed, because the hub's tests import matplotlib at module level. The 43 tripwire tests pass on Python 3.11.15 and 3.12.13.
 
 ## See Also
 

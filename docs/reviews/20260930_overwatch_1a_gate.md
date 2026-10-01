@@ -480,3 +480,74 @@ Under the new Status Log rule (Wave 1 exit: GO-WITH-FIXES with every fix applied
 - **R2-S1. The disarm comment overclaims** (`tests/unit/test_isolation.py`, `test_the_hook_returns_early_when_disarmed`). Its comment says "that pytest disarms between tests is pinned by test_fixture_setup_and_teardown_deletes_are_caught's neighbours". M7 (never disarm) passes all 37, so nothing pins it. Rewrite: "Pins the early return only; no test pins the disarm between tests." Or add a fresh-project test whose conftest `pytest_sessionfinish` removes a file outside the allowlist, then assert exit 0 and the file gone.
 - **R2-S2. Missing blank line.** `tests/isolation.py:56-57` has one blank line between `_deleter_paths` and the module globals, where PEP 8 wants two. Moot once the P3 ruff decision lands.
 - **R2-S3. One sentence for both `dir_fd` cases.** Once R2-W2 lands, replace `ISOLATION.md:48`'s last sentence with a sentence that covers both cases.
+
+---
+
+## Round 3: Re-Check of `393d640`
+
+**Date**: 2026-09-30. **Subject**: `393d640` on top of `28e8482`. The harness is unchanged from rounds 1 and 2: victims sit outside a narrowed `TMPDIR`, and mutants run against a refreshed scratch copy of `tests/` and `pyproject.toml`, which passes `349 passed` unmodified.
+
+### Verdict: GO
+
+0 Critical, 0 Warning, 3 Suggestion.
+
+All four round-2 Warnings are fixed and re-verified. No probe is fail-open and unlisted. Every number in the commit message and in `ISOLATION.md:97` re-runs. The Suggestions are wording and test-pinning items that do not block the merge.
+
+### (1) Probes
+
+| Probe | Round 2 | Round 3 |
+|---|---|---|
+| P9 `os.unlink("data.bin", dir_fd=fd)` | deleted, unlisted | CAUGHT (`data.bin` intact) |
+| P1, P1b, P2, P2b, P3, P4, P4b, P6, P6b (rewritten deletion branch) | caught | CAUGHT, all 9; P3 now resolves through `/proc` instead of being refused |
+| Controls C1 to C8 | pass | pass |
+| P5 `env rm`, P7 rename away, P8 `find -delete` | listed | FAIL-OPEN, LISTED (`ISOLATION.md:72`, `:71`) |
+| Q1 `getfqdn()`, Q2 `make_msgid()`, Q3 `HTTPServer(("", 0))`, Q5 `make_server("", 0)`, Q6 `gethostbyname(gethostname())` | tripped | NO-TRIP, all five |
+| Q4 `HTTPServer(("127.0.0.1", 0))` | no trip | NO-TRIP |
+| F6 `urlopen("http://0.0.0.0:<port>/")` (round 1 W7) | tripped at construction | NO-TRIP |
+| N1 to N7, N10, N11 (remote IPv6, mapped IPv4, nip.io, `connect_ex`, lookups, `sendto`, `sendmsg`) | tripped | TRIPPED, all nine |
+| W3 collection, `sessionfinish`, `atexit`, thread / fixture and session teardown | 4 deleted, listed / caught | unchanged |
+| `test_lazy_mpl` on a fresh `MPLCONFIGDIR` | tripped, lock stranded | tripped, lock stranded: documented under False Catches (`ISOLATION.md:86-88`), as the lead chose |
+
+### (2) Mutation Table (41 tests)
+
+| Mutant | Result |
+|---|---|
+| M1, M2, M2b, M8, M10, M11, M13, M14, M15, M18, M20, M22, M23, M24, M25 | 1 failed each |
+| M5, M9, M21 | 4 failed each |
+| M6, M12, M17, M19 | 2 failed each |
+| M3 refuse everything | 41 errors |
+| M4 no tripwire | 21 failed, 20 passed |
+| **M27 (new) no `/proc` resolution** (`base = None`) | 1 failed |
+| **M28 (new) no `_THIS_HOST`** | 3 failed (the three new controls) |
+| **M29 (new) descriptor name resolved against cwd** | 2 failed |
+| M7 never disarm | 41 passed (survives; the test comment now says so) |
+| **M16 no-`/proc` rmtree refusal removed** | **41 passed (survives)** |
+| **M26 trailing-slash branch removed** | **41 passed (survives; killed in round 2)** |
+
+27 of 30 mutants are killed. Neither new survivor is a hole on Linux:
+
+- **M16**: the branch runs only where `/proc` is missing, so no Linux test can reach it.
+- **M26**: the `/proc` resolution now catches rmtree's inner `os.unlink(name, dir_fd=fd)` against the real directory. The trailing-slash test still raises, and its `data.bin` survives. On macOS, with no `/proc`, the branch is the only guard (R3-S2).
+
+### (3) Full Suite
+
+| Run | Result |
+|---|---|
+| `.venv/bin/pytest -q` | `349 passed`; no `isolation-tripwire.log` created (`.claude/audits/` holds only `shift-left-violations.log`) |
+| `CI=1 .venv/bin/pytest -q` | `349 passed` |
+| Python 3.11.15, `tests/unit/test_isolation.py`, with and without `CI=1` | `41 passed` both |
+| pytest-xdist 3.8.0 `-n 2` | `41 passed` |
+
+### (4) Accuracy
+
+- **Commit message**: `26 of 27 mutants killed` (round 2), `349 passed with and without CI=true`, `0 catches in the real log`, `41 tripwire tests pass on 3.11.15 and 3.12.13`, and "three known-good controls pin it" (M28: 3 failed) all hold. One phrase overclaims: "Four Warnings remained; each fixed test-first." R2-W3 and R2-W4 were doc-only fixes, so two of the four had no test (R3-S3).
+- **`ISOLATION.md`**: `:48` and both new limit bullets match the code (`isolation.py:117-127`, `:89`). `:97` re-runs: 349 - 41 = 308, 0 catches both ways, 41 on both Pythons. The rebuild-at-collection qualifier matches round 2's measurement. The False Catches paragraph has two errors (R3-S1).
+
+### Suggestion
+
+- **R3-S1. Two factual errors in the False Catches paragraph** (`ISOLATION.md`, False Catches). "matplotlib's next rebuild stops with a lock error" is wrong. Measured with the stranded lock and the cache JSON removed, the import succeeds after a 5.2 s wait and logs `Could not save font_manager cache Lock error: ... remove this file and try again`. It then saves no cache, so every later matplotlib import in any process pays the rebuild plus the wait until someone deletes the lock. "The first run after every matplotlib upgrade" also overclaims: matplotlib 3.11.1 writes `fontlist-v3.11.0.json`, so a patch upgrade reuses the cache. Rewrite: "...stays in the real cache directory. Every later matplotlib import on that machine then waits about 5 seconds, warns `Could not save font_manager cache`, and rebuilds without saving, until you delete the lock file. A fresh cache means every CI runner and the first run after a matplotlib release that changes the cache version."
+- **R3-S2. Pin the two branches that Linux masks.**
+  - For M26, add a direct check on every platform: `assert not isolation._inside(str(link) + os.sep, (allowed,))`.
+  - For M16 and the listed off-Linux limit, monkeypatch `isolation._descriptor_dir` to `lambda fd: None`. Then assert that `rmtree("x", dir_fd=fd)` raises and that `os.unlink("x", dir_fd=fd)` goes unchecked.
+  - Both tests run on Linux.
+- **R3-S3. Correct "each fixed test-first" when the doctrine entry or Status Log cites this commit.** Two of the four fixes were documentation. A commit message cannot be amended without rewriting branch history, so correct it where the claim is repeated.

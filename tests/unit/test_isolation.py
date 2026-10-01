@@ -522,3 +522,34 @@ def test_unlink_relative_to_a_directory_descriptor_raises(sandbox, monkeypatch):
         os.close(fd)
 
     assert victim.exists()
+
+
+# Two pins for branches that /proc hides on Linux, where rmtree's inner
+# descriptor-relative deletes are caught anyway. Without /proc (macOS), each
+# branch is the only guard.
+
+
+@needs_symlinks
+def test_trailing_slash_on_an_allowed_symlink_resolves_to_its_target(sandbox):
+    allowed, outside = sandbox
+    (allowed / "link").symlink_to(outside, target_is_directory=True)
+
+    assert not isolation._inside(str(allowed / "link") + os.sep, (allowed,))
+
+
+@pytest.mark.skipif(os.name == "nt", reason="rmtree dir_fd needs POSIX fd functions")
+def test_without_proc_an_rmtree_relative_to_a_descriptor_is_refused(sandbox, monkeypatch):
+    allowed, outside = sandbox
+    victim = outside / "cache"
+    victim.mkdir()
+    (victim / "data.bin").write_text("real data")
+    monkeypatch.setattr(isolation, "_descriptor_dir", lambda dir_fd: None)
+    monkeypatch.chdir(allowed)
+    fd = os.open(outside, os.O_RDONLY)
+    try:
+        with pytest.raises(isolation.IsolationError):
+            rmtree_bound_at_import("cache", dir_fd=fd)
+    finally:
+        os.close(fd)
+
+    assert (victim / "data.bin").exists()

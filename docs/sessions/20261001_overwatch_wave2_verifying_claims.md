@@ -86,7 +86,9 @@ Three rounds: GO-WITH-FIXES, GO for 2a to 2c, GO for merge. The Critical finding
 
 Overclaims the user caught this session: 0
 
-Overclaims a reviewer caught this session: 12
+Overclaims a reviewer caught this session: 16
+
+(12 at the close. The review in the addendum refuted 4 more.)
 
 ## Key Decisions
 
@@ -125,6 +127,30 @@ Overclaims a reviewer caught this session: 12
 4. WHETSTONE: settle the Wave 1 session count, and report M1 for prompted and unprompted sessions separately.
 5. Filed this session: the adoption helper copies `session-end.md` without the traversal skill it points to (P3); the review write-scope rule and reviewer memory (P3); a sixth trap for the skill, from lesson 1 (P3, after 2d).
 
+## Addendum: After the Close
+
+The session doc was pushed at `d1deddc`. The user then asked to close the oldest P3 on the list: five untracked decision-science docs.
+
+### 5. The five March docs
+
+The files are the reports of the 2026-03-26 session's "Team Review + Hardening" phase, never committed. They are now tracked (`7968ee0`): four moved to `docs/reviews/` under date-first names, and the gap proposal kept its name. The task is closed (`eede414`), `/pcc` check 5 lost the allowlist line it carried for them (`68486c9`, `[gate]`), and the traversal skill lost a sentence that described that line (`2c24821`).
+
+A fourth review, of this cleanup, returned GO-WITH-FIXES: 0 Critical, 4 Warning, 4 Suggestion ([20261001_march_docs_cleanup_review.md](../reviews/20261001_march_docs_cleanup_review.md)). Three of its findings changed the outcome:
+
+- **The remote had moved.** Another machine pushed `952c7b3` two minutes after this box's session close. A fetch this session did not run moved the local tracking ref, and the lead committed three times on the old tip without checking it. One of the incoming commits was a `[gate]` change to the two lines above the one being removed in check 5.
+- **The record overstated what was undecided.** The lead wrote that three of the gap proposal's items shipped and the rest was never decided. Five of ten shipped.
+- **One phrase was new to the public tree.** The reviewer read all 1,368 lines and found nothing private, and flagged one section heading for the user. The user chose to reword it. The phrase sat in an unpushed commit, so the lead rebuilt the cleanup on the new `origin/main` in place of merging: the old commits never left this machine.
+
+| Claim | State | Evidence |
+|---|---|---|
+| The suite passes after the cleanup | tested | `.venv/bin/pytest -q` → `432 passed, 1 warning in 4.70s`, `exit=0`; `CI=true .venv/bin/pytest -q` → `432 passed, 1 warning in 5.24s`, `exit=0`; Python 3.12.13; at `2c24821` |
+| Check 5 is clean without the allowlist line | tested | Both bash blocks of `pcc.md` section 5, extracted and run as written → no MISSING line, no MISSING-DIR line, `exit=0`; 34 paths; at `2c24821`. Fed one old path, the file pass prints `MISSING`. |
+| Both machines' gate changes to check 5 survive | tested | `git diff 952c7b3 68486c9 -- .claude/commands/pcc.md` → two removed lines, the March allowlist and its bullet, and nothing else |
+| Four of the five files are unchanged from the originals; one differs by one line | written | `sha256sum` before the move and at `7968ee0` → the same four prefixes; `diff` of the fifth against its original → one line removed, one added |
+| The reworded label is in no commit that will be pushed | tested | A `git log -G` search for the label over `origin/main..main` → 0 commits, `exit=0`; `git grep` for it over the tracked tree → `exit=1`; the same search over the discarded commits prints one, so the search can fail; at `2c24821` |
+
+**Lesson 7. Check the remote before committing on top of it.** `git ls-remote origin refs/heads/main` against the commit the work sits on takes one line. Two machines push to this repo's `main`, and `/session-start` is the only step that syncs.
+
 ## Commits
 
 | Commit | Change |
@@ -140,10 +166,12 @@ Overclaims a reviewer caught this session: 12
 | `447a459`, `c58e69e` | The ledger's two counts and their definitions |
 | `ff0d8b2` | Merge tasks 2a to 2c |
 | `84dd487` | Task list |
+| `d1deddc` | Session close |
+| `7968ee0`, `eede414`, `68486c9`, `2c24821` | After the close: the five March docs, the task close, the check 5 allowlist, the traversal skill sentence |
 
 ## Appendix A: The Lead's Claims and Errors, by Who Caught Them
 
-**Refuted by a reviewer's re-run (12, the M count)**
+**Refuted by a reviewer's re-run (16, the M count; 13 to 16 came after the close)**
 
 | # | Claim | Where | Caught by |
 |---|---|---|---|
@@ -159,10 +187,14 @@ Overclaims a reviewer caught this session: 12
 | 10 | "The new tests expect five surfaces" (six) | OVERWATCH Status Log | gate round 2 |
 | 11 | "Every refuted claim lands in one" count | `447a459` | gate round 3 |
 | 12 | The release entry "lists all six" surfaces (no entry exists) | OVERWATCH Status Log | gate round 3 |
+| 13 | The gap proposal's "rest was never decided" (five of ten shipped) | first cleanup commit, rebuilt before push | cleanup review, W2 |
+| 14 | "Four bias items" never decided (one shipped as the range warning) | first task-list line | cleanup review, W2 |
+| 15 | The task was "open since March" (the line dates from 2026-07-20; the files from March) | first cleanup commit | cleanup review, S1 |
+| 16 | `d1deddc` is `origin/main`, and "nothing has gone to origin" (another machine had pushed) | the review brief, and a message to the user | cleanup review, W1 |
 
 Number 6 is counted here although the reviewer marked it unverifiable: the lead said it to the user, and it was true of five rows, not seven. The user did not act on it, so it is not in N. Text defects the reviewers found in the skill (a pasted `exit=1` that `tail` cannot print, the Pushed row, pair 7's line) are findings, not claims, and are in the reports.
 
-**Caught by the lead's own re-run (6, in neither count)**
+**Caught by the lead's own re-run (7, in neither count)**
 
 1. An exit status read after a pipe reported `tail`, not pytest. The trap is now in the skill.
 2. `1b50924`'s message said the tests pass before they ran on that tree. Amended to cite the run; the tree did not change.
@@ -170,3 +202,4 @@ Number 6 is counted here although the reviewer marked it unverifiable: the lead 
 4. A merge command failed (`git merge` cannot read its message from stdin) while the next line printed "merged". The unchanged SHA and the 403 count showed it.
 5. A Status Log draft said 26 Suggestions and "5 of 86" claims; a count of the report's headings gave 25, and 3 of 86 plus 2.
 6. `6bde122` marked the full 3.11 run UNVERIFIED. It was a skipped check; the lead then ran it.
+7. After the close, an exit status read after a pipe a second time (`git grep` piped to `cut`), in the search for the reworded label. Re-run with the status read directly.

@@ -84,6 +84,8 @@ This directory contains agent definitions, team templates, slash commands, and s
 
 **Bold** = primary owner. Regular "Write" = secondary (for tests alongside their code). Dash = no access needed.
 
+The matrix names paths, not repositories. An agent's output goes to the repository that owns the sensitivity of its input: a report, proposal, or audit on another repository's material is written there, or to the scratchpad, never into this repo's `docs/`, whatever directory the agent runs in. This repo is public. Found 2026-10-01, when three agents reviewing another project's plan wrote its internal names into `docs/reviews/` here; `/pcc` check 7 is the deterministic backstop. The test an agent can run: if the material's path is outside this repository's working tree (not under `git rev-parse --show-toplevel`) or it was handed over from outside, write to the scratchpad and name the owning repository in the final message, or describe it when its name is itself private.
+
 ## Team Templates
 
 Team compositions live in `.claude/teams/`. Use `/task promote` or `/task plan` to get recommendations on which team to assemble.
@@ -111,7 +113,7 @@ Agents communicate through shared artifacts; no direct messaging is required for
 - **Config files** — `config/project.yaml` is the shared schema contract and project state
 - **Test results** — `pytest` output validates changes and is the evidence standard for all agents
 - **Task list** — `docs/tasks.md` tracks ownership and status across agent turns
-- **Review reports** — `code-reviewer` and `decision-scientist` write findings to `docs/reviews/` for async review
+- **Review reports** — `code-reviewer` and `decision-scientist` write findings to `docs/reviews/` of the owning repository (Scope Matrix note) for async review
 
 ## Escalation Paths
 

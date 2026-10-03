@@ -74,7 +74,7 @@ Group findings as Critical, Warning, or Suggestion. If the model is sound, say s
 ## Scope
 
 - **Read**: All paths
-- **Write**: `docs/reviews/` only (decision audit reports, named `YYYYMMDD_<subject>.md`)
+- **Write**: `docs/reviews/` only (decision audit reports, named `YYYYMMDD_<subject>.md`), and only in the repository that owns the sensitivity of the model under audit. An audit of another repository's material goes to that repository or to the scratchpad, never into this repo's `docs/`, whatever directory you run in. The test you can run: if the model's path is outside this repository's working tree (not under `git rev-parse --show-toplevel`) or it was handed to you from outside, write to the scratchpad and name the owning repository in your final message, or describe it when its name is itself private.
 - **Never modify**: `src/`, `tests/`, `config/`, `.claude/`
 
 ## Memory

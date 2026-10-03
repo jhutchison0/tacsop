@@ -8,7 +8,7 @@
 
 | Teammate | Role | Responsibility |
 |----------|------|----------------|
-| `proposer` | Analyst | Explore the problem space, propose approaches (including bold ones), write proposal to `docs/plans/` |
+| `proposer` | Analyst | Explore the problem space, propose approaches (including bold ones), write proposal to `docs/plans/` of the owning repository (Scope Matrix note) |
 | `python-prototyper` | Implementer | Implement the approved approach alongside its tests |
 | `test-runner` | Validator | Run tests after each implementation step, report coverage gaps |
 | `code-reviewer` | Quality gate | Challenge proposals before implementation; review code against design pillars after |
@@ -16,7 +16,7 @@
 ## Workflow
 
 1. Lead assigns the feature with scope and acceptance criteria
-2. `proposer` reads the codebase, analyzes the problem, and writes a proposal with multiple approaches to `docs/plans/`
+2. `proposer` reads the codebase, analyzes the problem, and writes a proposal with multiple approaches to `docs/plans/` of the owning repository (Scope Matrix note)
 3. `code-reviewer` challenges the proposal — stress-tests assumptions, identifies risks, flags gaps
 4. Lead decides which approach to proceed with (or asks `proposer` to revise)
 5. `python-prototyper` implements the approved approach with tests in `tests/`

@@ -1,6 +1,6 @@
 # OVERWATCH Release Entries: Draft
 
-**Status**: DRAFT, held. Written 2026-10-02 on Nidhogg. This file lives in `docs/plans/`, which `scripts/propagate_doctrine.py` does not read, so no run can send it. The user's hold of 2026-10-01 stands: no OVERWATCH entry propagates until task 1e (ask rules) and task 2d (the controlled replay) are done, then everything goes in one cycle.
+**Status**: DRAFT, held. Written 2026-10-02. This file lives in `docs/plans/`, which `scripts/propagate_doctrine.py` does not read, so no run can send it. The user's hold of 2026-10-01 stands: no OVERWATCH entry propagates until task 1e (ask rules) and task 2d (the controlled replay) are done, then everything goes in one cycle.
 
 **Plan**: [conop_overwatch_claim_verification_and_irreversible_guards.md](conop_overwatch_claim_verification_and_irreversible_guards.md). **Protocol**: [propagation-protocol.md](../propagation-protocol.md), Rules 2 and 4 (unrelated changes separate; a breaking change alone).
 
@@ -9,56 +9,91 @@
 1. Fill the dates. One date for all; the delivery mark matches headings, not dates, so same-day entries are safe.
 2. Fill entry B's result paragraph from task 2d, and entry G from task 1e.
 3. Settle the two open items below.
-4. Copy each entry to the top of `docs/doctrine-updates.md`, newest first, in the order A to G.
+4. Copy each entry to the top of `docs/doctrine-updates.md`, newest first, in the order A1, A2, B to G.
 5. Pre-flight each against the Evaluation Gate's five questions. Dry run. Propagate on the lead's go.
 
 **Open items**:
 
 1. The WHETSTONE `KB-graph:` capture point (2026-10-01, `85342b4`) rides in the same two files entry B ships, `.claude/commands/session-end.md` and `docs/session-doc-format.md`. Rule 2 says a maintainer must be able to take B and skip it. Either a one-paragraph WHETSTONE entry of its own, or a row in B's table that names the line and says it is WHETSTONE's. Decision needed.
-2. Entry F was implemented on 2026-10-02 after the drafts were begun; its gate review is recorded in `docs/tasks.md`. Confirm the review's verdict before release.
+2. Entry F was implemented on 2026-10-02 after the drafts were begun. Its gate review is `docs/reviews/20261002_private_terms_gate.md` (round 1: GO-WITH-FIXES, fixes applied). Confirm the final verdict before release.
+3. Task 1c is split here into A1 (the pytest line, breaking) and A2 (the tool checks, additive), because protocol Rule 4 keeps a breaking change apart from additive ones. The 2026-10-01 decision read "1c alone as breaking" as one entry; the split needs the user's yes.
 
 ---
 
-## A. YYYY-MM-DD: BREAKING: `/session-start` Step 4 Runs the Project Venv's pytest and Checks the Session's Tools
+## A1. YYYY-MM-DD: BREAKING: `/session-start` Step 4 Runs the Project Venv's pytest
 
-Step 4 of `/session-start` ran a bare `pytest`, which resolves through whatever environment the launching shell left active. In the incident this plan answers, a `VIRTUAL_ENV` inherited from another repo's shell took a `uv pip install` meant for this project. Two more gaps surfaced at the end of sessions instead of the start: a missing git identity, found at commit time, and an unauthenticated `gh` or `glab`, which blocked verification of merge and CI results in 2 sessions.
+Step 4 of `/session-start` ran a bare `pytest`, which resolves through whatever environment the launching shell left active. In the incident this plan answers, a `VIRTUAL_ENV` inherited from another repo's shell took a `uv pip install` meant for this project. Step 4 now runs `.venv/bin/pytest` (Windows: `.venv\Scripts\pytest`).
 
-Step 4 now runs `.venv/bin/pytest` (Windows: `.venv\Scripts\pytest`) and three read-only checks, each printing one line only when something is wrong: no git identity, a `VIRTUAL_ENV` that is not this project's `.venv`, and an installed `gh` or `glab` whose `auth status` fails. Step 5's summary gains item 9, Tools.
-
-**Breaking**: the default test command changes. A repo whose environment is not `.venv` must edit the pytest line and the `VIRTUAL_ENV` comparison. A `glab` older than gitlab-org/cli MR 1453 exits 0 when unauthenticated, so the auth check passes silently there; check your version.
+**Breaking**: the default test command changes. A repo whose environment is not `.venv` must edit the line.
 
 **Audience**: every repo with `.claude/commands/session-start.md`.
 
-**Reversible**: one file. Rollback below.
+**Reversible**: one line. Rollback below.
 
 ### Detect
 
 ```bash
-grep -c 'NO GIT IDENTITY' .claude/commands/session-start.md   # 0: not adopted
-grep -nE '^pytest\b' .claude/commands/session-start.md         # a hit: the bare command is still there
+grep -nE '^pytest\b' .claude/commands/session-start.md   # a hit: the bare command is still there
 ```
 
 ### Adoption-Mode Table
 
 | # | Artifact | Mode | Notes |
 |---|---|---|---|
-| 1 | `.claude/commands/session-start.md` | **TEMPLATE-COPY**, or **PATCH** Step 4 and Step 5 item 9 | Re-copy if yours is unmodified from the template. Otherwise paste the Step 4 block (the pytest line, the three checks, and the two paragraphs after them) and add item 9 to Step 5. |
-| 2 | `tests/unit/test_session_start_checks.py` | **OPTIONAL** | 9 tests that pin the venv pytest line and the three checks. Take it if you keep template pins. |
+| 1 | `.claude/commands/session-start.md`, Step 4 | **PATCH** | Replace the bare `pytest` line with `.venv/bin/pytest      # All tests, on this project's venv (Windows: .venv\Scripts\pytest)`. If your environment is not `.venv`, write your path. |
+
+### Action required
+
+1. Patch the line. Run `/session-start` once; Step 4 runs the suite on the project venv.
+
+### Rollback
+
+Restore the bare `pytest` line.
+
+### Files (tacsop)
+
+```
+.claude/commands/session-start.md          (Step 4, one line; merged d98428a)
+```
+
+---
+
+## A2. YYYY-MM-DD: `/session-start` Step 4 Checks the Session's Tools
+
+Two gaps surfaced at the end of sessions instead of the start: a missing git identity, found at commit time, and an unauthenticated `gh` or `glab`, which blocked verification of merge and CI results in 2 sessions (CONOP OVERWATCH, approved 2026-09-30). Step 4 gains three read-only checks, each printing one line only when something is wrong: no git identity, a `VIRTUAL_ENV` that is not this project's `.venv`, and an installed `gh` or `glab` whose `auth status` fails. Step 5's summary gains item 9, Tools.
+
+A `glab` older than gitlab-org/cli MR 1453 exits 0 when unauthenticated, so the auth check passes silently there; check your version.
+
+**Audience**: every repo with `.claude/commands/session-start.md`. Additive; take it with or without A1.
+
+**Reversible**: one block and one summary line. Rollback below.
+
+### Detect
+
+```bash
+grep -c 'NO GIT IDENTITY' .claude/commands/session-start.md   # 0: not adopted
+```
+
+### Adoption-Mode Table
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 1 | `.claude/commands/session-start.md` | **TEMPLATE-COPY**, or **PATCH** Step 4 and Step 5 item 9 | Re-copy if yours is unmodified from the template (that also applies A1). Otherwise paste the second bash block of Step 4, the two paragraphs after it, and item 9 of Step 5. If your environment is not `.venv`, change the `VIRTUAL_ENV` comparison to your path. |
+| 2 | `tests/unit/test_session_start_checks.py` | **OPTIONAL** | 9 tests that pin the three checks and the venv pytest line of A1. Take it if you keep template pins and have applied A1. |
 
 ### Action required
 
 1. Re-copy or patch the command file.
 2. Run `/session-start` once. Item 9 reads "all present", or lists each line the checks printed.
-3. If your environment is not `.venv`, change the pytest line and the `VIRTUAL_ENV` comparison to your path, in that order.
 
 ### Rollback
 
-Restore the previous Step 4. The checks are read-only; there is no state to undo.
+Remove the block and item 9. The checks are read-only; there is no state to undo.
 
 ### Files (tacsop)
 
 ```
-.claude/commands/session-start.md          (Step 4, Step 5 item 9; merged d98428a)
+.claude/commands/session-start.md          (Step 4 checks, Step 5 item 9; merged d98428a)
 tests/unit/test_session_start_checks.py    (9 pins; 2a2e725)
 ```
 
@@ -98,7 +133,7 @@ grep -c '## Claims' .claude/commands/session-end.md        # 0: the table is not
 | 5 | `CLAUDE.md` | **PATCH** | Paste the `## Claim Style` block from the hub's `CLAUDE.md`. By hand. |
 | 6 | `.claude/agents/code-reviewer.md` | **PATCH** | The "Success claims" checklist line. By hand, alone in a `[gate]` commit. |
 | 7 | `.claude/README.md` | **PATCH** | Name the skill in the skills tree. By hand. |
-| 8 | `tests/unit/test_verifying_claims.py` | **OPTIONAL** | 26 pins. They read all six surfaces above, so take all six or none of the tests. |
+| 8 | `tests/unit/test_verifying_claims.py` | **OPTIONAL** | 26 pins. They read rows 1 to 7 and the skill's two files, so take all seven rows or none of the tests. |
 
 ### Action required
 
@@ -106,10 +141,6 @@ grep -c '## Claims' .claude/commands/session-end.md        # 0: the table is not
 2. Paste the three by-hand surfaces (rows 5 to 7). Commit the reviewer line alone, tagged `[gate]`.
 3. If you took the tests: `.venv/bin/pytest tests/unit/test_verifying_claims.py -q` passes.
 4. At your next `/session-end`, write the `## Claims` table and the two count lines. Zero is a count; write it.
-
-### One lesson that travels
-
-A probe for an absence names what it looks for, and an `Evidence:` line pastes the probe. On 2026-10-01 the hub's own record of keeping five private terms out of this public repo pasted the five terms, in the Evidence line that certified their absence. When the names must stay out, record the count and where the list lives, never the list.
 
 ### Rollback
 
@@ -161,7 +192,7 @@ grep -c 'tests.isolation' pyproject.toml   # 0: not adopted
 
 The four steps under "Adopting Downstream" in `ISOLATION.md`: copy the two files, patch `addopts`, run the suite with and without `CI=true` and read the log, check the gitignore. Each log line is a test reaching the real world (fix the test: pass the root in) or a directory that belongs in `isolation_allow`.
 
-Measured at the hub, 2026-09-30: 308 existing tests ran armed with 0 catches; the 43 tripwire tests pass on Python 3.11.15 and 3.12.13.
+Measured at the hub: 308 existing tests ran armed with 0 catches (2026-09-30, after three gate rounds). The full suite, the 43 tripwire tests included and none of them skipped on Linux, passed on Python 3.11.15 and 3.12.13 on 2026-10-01 at `84dd487` (the Claims table of that day's session record).
 
 ### Rollback
 
@@ -228,7 +259,7 @@ CLAUDE.md, README.md, LANGUAGE.md                         (merged d98428a)
 
 ---
 
-## E. YYYY-MM-DD: TCS Tables Gain a Purpose Column
+## E. YYYY-MM-DD: Task-Condition-Standard Tables Gain a Purpose Column
 
 The TCS table is now `| Task | Purpose | Condition | Standard |`. Purpose names who gets the output and what decision it informs. Fill it before planning the work; if you cannot, ask. Condition and Standard never ask what the output is for, and the task spec is where wrong-question work costs least to catch: a walkthrough built when the need was a calibration cost a session.
 
@@ -271,16 +302,16 @@ docs/plans/OPORD-FORMAT.md               (merged d98428a)
 
 ---
 
-## F. YYYY-MM-DD: An Agent's Output Goes Where Its Input's Sensitivity Lives; `/pcc` Check 7 Keeps Private Terms Out of a Public Tree
+## F. YYYY-MM-DD: An Agent's Output Goes Where Its Input's Sensitivity Lives; Pre-Commit Check 7 Keeps Private Terms Out of a Public Tree
 
-On 2026-10-01 three agents reviewed another project's plan, staged in `/tmp`, and were told to write reports into this repo's `docs/reviews/` and `docs/plans/`. This repo is public. The reports arrived carrying an internal hostname, a colleague's username seventeen times, an internal codename, and another repository's name. Nothing was committed, and `code-reviewer` sanitized its own draft and said so, but that was luck, not a control. The next day the record of the containment pasted the five terms into an `Evidence:` line, and that line was committed and pushed. It was found and redacted the day after.
+On 2026-10-01 three agents reviewed another project's plan, staged in `/tmp`, and were told to write reports into this repo's `docs/reviews/` and `docs/plans/`. This repo is public. The reports arrived carrying an internal hostname, a colleague's username seventeen times, an internal codename, and another repository's name. Nothing was committed, and `code-reviewer` sanitized its own draft and said so, but that was luck, not a control. The same day, the record of the containment pasted the five terms into an `Evidence:` line, committed and pushed. It was found and redacted on 2026-10-02.
 
 Two controls, one at the point of action and one at the push gate:
 
-1. **The rule.** An agent's output goes to the repository that owns the sensitivity of its input, not to the working directory the agent runs in. It is written under the scope matrix in `.claude/README.md` and in the Write scope of each reviewing agent (`code-reviewer`, `proposer`, `decision-scientist`).
-2. **`/pcc` check 7, Private-Term Check.** A list of private terms lives outside every repository, one per line, at `$HOME/.config/tacsop/private-terms` (override with `TACSOP_PRIVATE_TERMS`). The check runs `git grep -c -i -I -F` with that list over the index, so it covers HEAD and anything staged. It prints each file's path and match count, never the term. Any line is FAIL. No list is WARN: the check did not run.
+1. **The rule.** An agent's output goes to the repository that owns the sensitivity of its input, not to the working directory the agent runs in, with one test the agent can run: if the material is not tracked in this repository (`git ls-files --error-unmatch <path>` fails) or was handed over from outside it, write to the scratchpad and name the owning repository in the final message. It is written under the scope matrix in `.claude/README.md`, in the Write scope of each reviewing agent (`code-reviewer`, `proposer`, `decision-scientist`), and in the two team templates that name a destination.
+2. **`/pcc` check 7, Private-Term Check.** A list of private terms lives outside every repository, one per line, at `$HOME/.config/tacsop/private-terms` (override with `TACSOP_PRIVATE_TERMS`). The check runs `git grep -c -i -F` with that list over the index and over every unpushed commit (HEAD when no upstream is set), and also checks tracked file names and unpushed commit messages. It prints a count, and a path only when the path itself holds no term. Any line is FAIL. No list, or no git repository, is WARN: the check did not run.
 
-**Audience**: every public repo with agents. The list is per machine, not per repo, and it is never committed anywhere.
+**Audience**: the rule, every repo whose agents read another repository's material. The check, every public repo. The list is per machine, not per repo, and it is never committed anywhere.
 
 **Reversible**: yes. Rollback below.
 
@@ -297,15 +328,19 @@ test -s "${TACSOP_PRIVATE_TERMS:-$HOME/.config/tacsop/private-terms}" || echo "n
 |---|---|---|---|
 | 1 | `.claude/commands/pcc.md` | **PATCH** | Check 7 and its Quick Reference row. Alone in a `[gate]` commit. |
 | 2 | `.claude/agents/code-reviewer.md` | **PATCH** | One sentence in the Write scope. Alone in a `[gate]` commit. |
-| 3 | `.claude/agents/proposer.md`, `.claude/agents/decision-scientist.md`, `.claude/README.md` | **PATCH** | The same sentence; one paragraph under the scope matrix. |
-| 4 | `tests/unit/test_pcc_private_terms.py` | **OPTIONAL** | Pins the check and runs it against a scratch repo: a planted term fails, the term is not in the output, an empty list warns. |
-| 5 | `$HOME/.config/tacsop/private-terms` | **CREATE**, per machine | Hostnames, usernames, codenames, repository names that must not appear in a public tree. Outside every repo. |
+| 3 | `.claude/agents/proposer.md`, `.claude/agents/decision-scientist.md`, `.claude/README.md`, `.claude/teams/feature-development.md`, `.claude/teams/decision-science.md` | **PATCH** | The same sentences; one paragraph under the scope matrix; one clause where a template names `docs/plans/` or `docs/reviews/` as a destination. |
+| 4 | `tests/unit/test_pcc_private_terms.py` | **OPTIONAL** | Runs the check in scratch repos: content, path names, file names, unpushed commits and their messages, a binary, a subdirectory, list trimming, no list, no repo; the term is never in the output. Pins the rule on six surfaces. |
+| 5 | `$HOME/.config/tacsop/private-terms` | **Per machine**, not an artifact in the repo | Hostnames, usernames, codenames, repository names that must not appear in a public tree. One per line; matched case-insensitively as fixed strings, inside words too, so choose distinctive terms. |
 
 ### Action required
 
 1. Write the list on each machine you push from. Terms are matched case-insensitively as fixed strings.
 2. Patch the gate surfaces, each in its own `[gate]` commit.
 3. Run check 7 once against HEAD. A FAIL line on an old commit is a leak already pushed: redact forward, then decide about history.
+
+### One lesson that travels
+
+A probe for an absence names what it looks for, and an `Evidence:` line pastes the probe. On 2026-10-01 the hub's own record of keeping five private terms out of this public repo pasted the five terms, in the Evidence line that certified their absence. When the names must stay out, record the count and where the list lives, never the list.
 
 ### Rollback
 
@@ -318,7 +353,9 @@ Remove the check and the sentences. The list file is harmless on its own.
 .claude/agents/code-reviewer.md
 .claude/agents/proposer.md
 .claude/agents/decision-scientist.md
-.claude/README.md                          (under the Scope Matrix)
+.claude/README.md                          (under the Scope Matrix, and one line)
+.claude/teams/feature-development.md
+.claude/teams/decision-science.md
 tests/unit/test_pcc_private_terms.py
 ```
 

@@ -65,7 +65,7 @@ If everything looks good, say so briefly.
 ## Scope
 
 - **Read**: All paths
-- **Write**: `docs/reviews/` only (review reports, named `YYYYMMDD_<subject>.md`), and only in the repository that owns the sensitivity of the material under review. A report on another repository's material goes to that repository or to the scratchpad, never into this repo's `docs/`, whatever directory you run in.
+- **Write**: `docs/reviews/` only (review reports, named `YYYYMMDD_<subject>.md`), and only in the repository that owns the sensitivity of the material under review. A report on another repository's material goes to that repository or to the scratchpad, never into this repo's `docs/`, whatever directory you run in. The test you can run: if the material is not tracked in this repository (`git ls-files --error-unmatch <path>` fails) or was handed to you from outside it, write to the scratchpad and name the owning repository in your final message.
 - **Never modify**: `src/`, `tests/`, `config/`, `.claude/`
 
 ## Memory

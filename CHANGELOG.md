@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tests/unit/test_logger.py::TestTimezoneFallback::test_setup_logger_falls_back_when_zoneinfo_data_missing` — regression coverage for the `ZoneInfoNotFoundError` fix.
 
 ### Security
-- **Five private terms redacted from one Evidence line** in `docs/sessions/20261001_assay_bootstrap_and_agent_output_destination.md` (`0f80aad`). The line certified their absence from this public repo and pasted the probe that searched for them. `git grep` over local HEAD matches 0 files. The redaction reaches the public tip when `main` is pushed; `5a04f2b` stays reachable in history either way, and that decision is a P1 in `docs/tasks.md`.
+- **Five private terms redacted from one Evidence line** in `docs/sessions/20261001_assay_bootstrap_and_agent_output_destination.md` (`7af6625`). The line certified their absence from this public repo and pasted the probe that searched for them. `git grep` over local HEAD matches 0 files. The redaction reaches the public tip when `main` is pushed; `5a04f2b` stays reachable in history either way, and that decision is a P1 in `docs/tasks.md`.
 
 ## [0.1.0] - 2026-03-12
 

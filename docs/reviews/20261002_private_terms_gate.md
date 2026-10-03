@@ -4,7 +4,7 @@
 **Date**: 2026-10-02
 **Type**: Code review (gate surfaces, tests, release draft); non-author review under CONOP WHETSTONE D4
 
-**Branch**: `topic/overwatch-private-terms`, `0f80aad..680f080`, five commits: `371b5b5` [gate], `37b4250` [infra], `e968dcc` [gate], `874b1d2` [test], `680f080` [doc].
+**Branch**: `topic/overwatch-private-terms`, `7af6625..bae2873`, five commits: `6d06553` [gate], `e90c512` [infra], `0f5a6b2` [gate], `5fded32` [test], `bae2873` [doc].
 
 **Method**. Every probe used an invented term (`zq-review-term-9182`). The real list at `~/.config/tacsop/private-terms` was touched only by count-producing commands; no term from it appears in this report. Scratch repos live under the session scratchpad. The hub tree was not modified: `git status --porcelain` printed nothing after the probes.
 
@@ -43,7 +43,7 @@ A corrected block (`scratchpad/check7_fixed.sh`, sketched under C1 below) ran ag
 
 ## 2. Mutation test of `tests/unit/test_pcc_private_terms.py`
 
-The seven surfaces (`pcc.md`, `README.md`, three agent files, the test) were copied to a scratch tree; each mutation is one edit to a fresh copy; `.venv/bin/pytest -q -c /dev/null --rootdir <scratch>`. Baseline `12 passed`. Against `main`'s copies of the five surfaces: `6 failed, 6 errors`, matching the red-state claim in `874b1d2`.
+The seven surfaces (`pcc.md`, `README.md`, three agent files, the test) were copied to a scratch tree; each mutation is one edit to a fresh copy; `.venv/bin/pytest -q -c /dev/null --rootdir <scratch>`. Baseline `12 passed`. Against `main`'s copies of the five surfaces: `6 failed, 6 errors`, matching the red-state claim in `5fded32`.
 
 | # | Edit | Result | Caught by |
 |---|---|---|---|
@@ -107,7 +107,7 @@ Claims re-run (all against this tree unless stated):
 | B: six-rule kernel, four states, five traps, seven pairs plus one clean report | grep | 6 numbered rules; 4 state rows; "Five traps the table cannot hold"; 7 numbered pairs plus "A clean report" | HOLDS |
 | B: 26 tests, `ff0d8b2` | `pytest --co -q`; `git show --stat` | `26`; merge touches all listed surfaces | HOLDS |
 | B: the six surfaces the tests read | grep paths in `test_verifying_claims.py` | CLAUDE.md, SKILLS_FRAMEWORK.md, code-reviewer.md, session-end.md, session-doc-format.md, README.md (`:212`), plus SKILL.md and EXAMPLES.md | HOLDS; row 8 wording (S8) |
-| B: helper copies rows 1 to 4 (from 2026-10-02) | grep `adopt_doctrine.py`; `git log` | the four paths are in the copy list; `2840c0f 2026-10-02` | HOLDS |
+| B: helper copies rows 1 to 4 (from 2026-10-02) | grep `adopt_doctrine.py`; `git log` | the four paths are in the copy list; `7495612 2026-10-02` | HOLDS |
 | B: 16 refuted, user caught 0 (:75) | grep session doc | `:87` user 0; `:89` reviewer 16 | HOLDS |
 | B Detect | four commands | `1`, `1`, `1`, no "skill missing" | HOLDS |
 | C: `shift-left-testing` 2.2.0 at `d03e66a`; now 2.2.1 | grep; git show | `2.2.1` in tree; `d03e66a` touches SKILL.md | HOLDS |
@@ -129,19 +129,19 @@ Work-system or private names: `Nidhogg` at `:3` (S7). No term from the real list
 
 | Claim | Where | Command | Output | Status |
 |---|---|---|---|---|
-| `12 passed` | `874b1d2` | `.venv/bin/pytest tests/unit/test_pcc_private_terms.py -q` | `12 passed in 0.31s`, exit 0 | HOLDS |
-| Red before: 6 failed, 6 errors | `874b1d2` | tests against `main`'s five surfaces in the scratch tree | `6 failed, 6 errors in 0.21s` | HOLDS |
+| `12 passed` | `5fded32` | `.venv/bin/pytest tests/unit/test_pcc_private_terms.py -q` | `12 passed in 0.31s`, exit 0 | HOLDS |
+| Red before: 6 failed, 6 errors | `5fded32` | tests against `main`'s five surfaces in the scratch tree | `6 failed, 6 errors in 0.21s` | HOLDS |
 | `445 passed`, with and without `CI=true` | lead's message | `env -u CI .venv/bin/pytest -q`; `CI=true .venv/bin/pytest -q`; `--co -q` | `445 passed, 1 warning in 5.08s` exit 0; `445 passed, 1 warning in 6.18s` exit 0; `445 tests collected` | HOLDS |
-| Check 7 prints nothing on this tree | `e968dcc` | `bash check7.sh` at HEAD | no output, exit 0; list has 5 non-blank lines | HOLDS |
-| Grep against `5a04f2b` yields 1 file | `e968dcc`, CHANGELOG, tasks | `git grep -c -i -I -F -f <list> 5a04f2b -- .` | `5a04f2b:docs/sessions/20261001_assay_bootstrap_and_agent_output_destination.md:1` | HOLDS |
-| HEAD matches 0 files | CHANGELOG `:110`, tasks `:128` | same at `HEAD`, `0f80aad`, and each of the five branch commits | no output, exit 1, every time | HOLDS |
-| Quick Reference row: Block push | `e968dcc` | grep | `:156` | HOLDS |
-| Block exits 0 either way | `e968dcc` | probes 5, 6 | exit 0 | HOLDS |
+| Check 7 prints nothing on this tree | `0f5a6b2` | `bash check7.sh` at HEAD | no output, exit 0; list has 5 non-blank lines | HOLDS |
+| Grep against `5a04f2b` yields 1 file | `0f5a6b2`, CHANGELOG, tasks | `git grep -c -i -I -F -f <list> 5a04f2b -- .` | `5a04f2b:docs/sessions/20261001_assay_bootstrap_and_agent_output_destination.md:1` | HOLDS |
+| HEAD matches 0 files | CHANGELOG `:110`, tasks `:128` | same at `HEAD`, `7af6625`, and each of the five branch commits | no output, exit 1, every time | HOLDS |
+| Quick Reference row: Block push | `0f5a6b2` | grep | `:156` | HOLDS |
+| Block exits 0 either way | `0f5a6b2` | probes 5, 6 | exit 0 | HOLDS |
 | 70 deliveries | tasks `:127` | 16 notification files, mtime `20:10:00`; `grep -c '^## 2026-'` sums to 101; 15 of 16 are untracked in their repos; the format has no per-delivery stamp; paperboy's tracked diff shows 6 headings added since its last commit, which spans earlier cycles | cannot be reconstructed | UNVERIFIABLE |
 | 15 repos | tasks `:127` | `find ~/projects -path '*/.claude/upstream-update.md' -newermt '2026-10-02'` | 16 files, all `20:10:00` | REFUTED (16) |
 | 18 marks at 15 headings | tasks `:127` | `find ... doctrine-delivered`; `wc -l` each | 19 files; every one 15 lines | REFUTED on 18 (19); 15 HOLDS |
 | fist, schelling-point, daily_weather up to date | tasks `:127` | mark line counts and mtimes; notification present? | 15 lines each; `20:08:38`, `20:08:38`, `10:22:31`; no notification file in any of the three | HOLDS |
-| Five marks seeded first | tasks `:127`, `680f080` | the three above predate the run; propter and stx-server received one entry each, consistent with seeding | the run rewrote their marks at `20:10:00` | UNVERIFIABLE beyond three |
+| Five marks seeded first | tasks `:127`, `bae2873` | the three above predate the run; propter and stx-server received one entry each, consistent with seeding | the run rewrote their marks at `20:10:00` | UNVERIFIABLE beyond three |
 | Second incident dated 2026-10-02 | `pcc.md:104` | `git log -1 --date=iso 5a04f2b` | `2026-10-01 17:40:46 -0500` | REFUTED (W6) |
 
 Discovery coverage: every `.claude/commands/` directory under `~/projects` at depth 2 has a mark; none is missing. The repos at `~/projects/cad/*` and `~/projects/sony/*` are top-level repos, not nested.
@@ -150,13 +150,13 @@ Discovery coverage: every `.claude/commands/` directory under `~/projects` at de
 
 | Commit | Files | Alone? |
 |---|---|---|
-| `371b5b5` [gate] | `.claude/agents/code-reviewer.md` | yes |
-| `37b4250` [infra] | `README.md`, `proposer.md`, `decision-scientist.md` | n/a (not gate surfaces) |
-| `e968dcc` [gate] | `.claude/commands/pcc.md` | yes |
-| `874b1d2` [test] | the test file | yes |
-| `680f080` [doc] | CHANGELOG, draft, tasks | yes |
+| `6d06553` [gate] | `.claude/agents/code-reviewer.md` | yes |
+| `e90c512` [infra] | `README.md`, `proposer.md`, `decision-scientist.md` | n/a (not gate surfaces) |
+| `0f5a6b2` [gate] | `.claude/commands/pcc.md` | yes |
+| `5fded32` [test] | the test file | yes |
+| `bae2873` [doc] | CHANGELOG, draft, tasks | yes |
 
-Both gate surfaces are alone and tagged. `.claude/agents/code-reviewer.md` is a gate surface by the 2026-10-01 convention (`1edf0d4`, `1b50924`, the Wave 2 session doc `:59`, and this branch's `371b5b5`) and by the draft's own instruction to downstream (entry B row 6, entry F row 2). It is not in D4's deterministic path list (CONOP WHETSTONE `:108`) and check 6's regex does not match it: `echo .claude/agents/code-reviewer.md | grep -E '^\.claude/(hooks/|settings\.json|commands/(pcc|pci)\.md)'` prints nothing. See S5.
+Both gate surfaces are alone and tagged. `.claude/agents/code-reviewer.md` is a gate surface by the 2026-10-01 convention (`1edf0d4`, `1b50924`, the Wave 2 session doc `:59`, and this branch's `6d06553`) and by the draft's own instruction to downstream (entry B row 6, entry F row 2). It is not in D4's deterministic path list (CONOP WHETSTONE `:108`) and check 6's regex does not match it: `echo .claude/agents/code-reviewer.md | grep -E '^\.claude/(hooks/|settings\.json|commands/(pcc|pci)\.md)'` prints nothing. See S5.
 
 ---
 
@@ -165,7 +165,7 @@ Both gate surfaces are alone and tagged. `.claude/agents/code-reviewer.md` is a 
 ### Critical
 
 **C1. The output can carry a term, and `pcc.md:118` tells the reader to paste it.**
-`.claude/commands/pcc.md:103` ("the output names a file and a count, never the term"), `:116-118`, `e968dcc`'s subject line, CHANGELOG `:101`, draft `:281`, and the test's docstring all make the claim. Probe 14 refutes it: a term in a directory name prints as `FAIL private term in: zq-review-term-9182/readme.md:1`. Line `:118` then says "Give the count and the path." One of the four term categories the check names is "sibling repo names", which is what file names in `docs/reviews/` carry (`YYYYMMDD_<subject>.md`). Following the instruction reproduces the `5a04f2b` shape. Probe 15 is the companion: a term only in a file name is not detected at all.
+`.claude/commands/pcc.md:103` ("the output names a file and a count, never the term"), `:116-118`, `0f5a6b2`'s subject line, CHANGELOG `:101`, draft `:281`, and the test's docstring all make the claim. Probe 14 refutes it: a term in a directory name prints as `FAIL private term in: zq-review-term-9182/readme.md:1`. Line `:118` then says "Give the count and the path." One of the four term categories the check names is "sibling repo names", which is what file names in `docs/reviews/` carry (`YYYYMMDD_<subject>.md`). Following the instruction reproduces the `5a04f2b` shape. Probe 15 is the companion: a term only in a file name is not detected at all.
 Fix, verified against all sixteen cases and the hub (`scratchpad/check7_fixed.sh`): collect the hits, count the ones whose path holds a term and print only the count, print the rest; add a `git ls-files --cached | grep -c -i -F -f <list>` line for names. Sketch:
 
 ```bash
@@ -191,7 +191,7 @@ Then change `:118` to "Give the count and the path, unless the path itself is th
 
 **W5. The tests do not pin `--cached`, `-F`, `-I`, or the pathspec, and the rule pins hold a phrase, not the rule.** M02, M03, M04, M05, M18, M19, M20 survive. Fix: (a) a test with a tracked file whose index copy holds the term and whose working copy does not (catches M02); (b) a term with `.` and `[` in the fixture list (M03); (c) once C1 lands, a path-name case (M04 can wait); (d) on all four surfaces, pin "never into this repo's `docs/`" and "scratchpad" alongside the phrase (M18 to M20).
 
-**W6. The second incident is misdated on a gate surface and in the draft.** `pcc.md:104` says "Two incidents, 2026-10-01 and 2026-10-02"; draft `:276` says "The next day the record of the containment pasted the five terms". `git log -1 --date=iso 5a04f2b` -> `2026-10-01 17:40:46 -0500`; the reflog shows pushes to `origin/main` at 17:40 and 18:01 that day. The paste was the same day; the redaction (`0f80aad`, 2026-10-02 20:08) was the next day. `docs/tasks.md:128` has it right. Fix `:104` in a `[gate]` commit; fix `:276`.
+**W6. The second incident is misdated on a gate surface and in the draft.** `pcc.md:104` says "Two incidents, 2026-10-01 and 2026-10-02"; draft `:276` says "The next day the record of the containment pasted the five terms". `git log -1 --date=iso 5a04f2b` -> `2026-10-01 17:40:46 -0500`; the reflog shows pushes to `origin/main` at 17:40 and 18:01 that day. The paste was the same day; the redaction (`7af6625`, 2026-10-02 20:08) was the next day. `docs/tasks.md:128` has it right. Fix `:104` in a `[gate]` commit; fix `:276`.
 
 **W7. The rule has no decision procedure.** Four surfaces (`code-reviewer.md:68`, `proposer.md:63`, `decision-scientist.md:77`, `README.md:87`). "Owns the sensitivity" asks for a judgment the incident's agents could not make from a path in `/tmp`. Fix: add one test an agent can run, on all four surfaces: "If the material is not tracked in this repository (`git ls-files --error-unmatch <path>` fails) or was handed to you from outside it, write to the scratchpad and name the owning repository in your final message." The scratchpad becomes the default when ownership is unknown, not one option of two.
 
@@ -245,7 +245,7 @@ Verdict: GO-WITH-FIXES. The gate catches the index cases it names and every comm
 | 12 tests pass on this tree | `.venv/bin/pytest tests/unit/test_pcc_private_terms.py -q` | `12 passed in 0.31s`, exit 0 |
 | 445 pass with and without CI | `env -u CI .venv/bin/pytest -q`; `CI=true .venv/bin/pytest -q` | `445 passed, 1 warning in 5.08s` exit 0; `445 passed, 1 warning in 6.18s` exit 0 |
 | Check 7 as written prints nothing at HEAD | `bash scratchpad/check7.sh` at the hub root | no output, exit 0 |
-| `5a04f2b` holds a term in 1 file; HEAD, `0f80aad`, and all five branch commits hold none | `git grep -c -i -I -F -f <list> <rev> -- .` for each rev | `5a04f2b:docs/sessions/20261001_assay_bootstrap_and_agent_output_destination.md:1`; otherwise no output, exit 1 |
+| `5a04f2b` holds a term in 1 file; HEAD, `7af6625`, and all five branch commits hold none | `git grep -c -i -I -F -f <list> <rev> -- .` for each rev | `5a04f2b:docs/sessions/20261001_assay_bootstrap_and_agent_output_destination.md:1`; otherwise no output, exit 1 |
 | `5a04f2b` was committed 2026-10-01 | `git log -1 --format='%ad %cd' --date=iso 5a04f2b` | `2026-10-01 17:40:46 -0500` both |
 | 19 marks, 15 lines each; 16 notification files at 20:10:00; 3 repos with no notification | `find ~/projects -maxdepth 5 -path '*/.claude/doctrine-delivered'` with `wc -l` and `stat`; same for `upstream-update.md` | section 5 rows |
 | Detect commands print the adopted values | section 4 commands | `1`; nothing; `1 1 1`; `1`; nothing; `1 1 1`; `1` |
@@ -253,7 +253,7 @@ Verdict: GO-WITH-FIXES. The gate catches the index cases it names and every comm
 | Skill versions 1.0.0, 2.2.1, 3.1.0; SKILL.md 105 lines | `grep version`; `wc -l` | as stated |
 | `43 tripwire` entered ISOLATION.md at `5e7bcac` | `git log -S'43 tripwire' -- .claude/skills/shift-left-testing/ISOLATION.md` | `5e7bcac 2026-09-30` |
 | No 3.11 interpreter here | `uv python list --only-installed` | 3.12.13 and 3.12.3 only |
-| Each cited SHA exists and touches the files named | `git show --stat --format= <sha>` for `d98428a 2a2e725 ff0d8b2 d03e66a 85342b4 5a04f2b 0f80aad d602c8e` | section 4 and 5 rows |
+| Each cited SHA exists and touches the files named | `git show --stat --format= <sha>` for `d98428a 2a2e725 ff0d8b2 d03e66a 85342b4 5a04f2b 7af6625 d602c8e` | section 4 and 5 rows |
 | No em dash in the branch's added prose | `git diff main..HEAD \| grep '^+' \| grep -c <the em dash character>` | `0` |
 
 Overclaims the user caught this session: 0
@@ -263,9 +263,9 @@ Overclaims a reviewer caught this session: 4 (the "never the term" claim; the 20
 
 ## Round 2
 
-**Scope**: `680f080..755286f`, five commits: `a670f9a` [gate] pcc.md, `b773260` [gate] code-reviewer.md, `f5273b0` [infra] README, two agents, two team templates, `ed25fb8` [test] 25 tests, `755286f` [doc] draft, tasks, CHANGELOG. Same method as round 1: invented term `zq-review-term-9182` (and `abe` for one case), the real list touched only by count-producing commands, hub tree untouched (`git status --porcelain` shows only this report). Gate surfaces are alone in their commits; the check 6 regex at `pcc.md` is unchanged and still does not name `code-reviewer.md` (filed as a P3, per S5).
+**Scope**: `bae2873..8c719fc`, five commits: `1c3895d` [gate] pcc.md, `9bdc0d7` [gate] code-reviewer.md, `b6d5ca2` [infra] README, two agents, two team templates, `b9f2229` [test] 25 tests, `8c719fc` [doc] draft, tasks, CHANGELOG. Same method as round 1: invented term `zq-review-term-9182` (and `abe` for one case), the real list touched only by count-producing commands, hub tree untouched (`git status --porcelain` shows only this report). Gate surfaces are alone in their commits; the check 6 regex at `pcc.md` is unchanged and still does not name `code-reviewer.md` (filed as a P3, per S5).
 
-**Summary**. The round 1 defects are closed: a path that holds a term is withheld and counted, a term only in a file name is a FAIL, the whole tree is scanned from any directory, binaries are scanned, list lines are trimmed, unpushed commits and their messages are scanned when an upstream is set, and the dates are right. The 25 tests catch 30 of 32 mutations; the two survivors are a behavior-neutral edit and a reworded unconditional line. Three things remain. The redaction commit `0f80aad` has not reached the remote: `git ls-remote` puts `refs/heads/main` at `368dd5a`, whose tree still holds the line, so the public tip is not yet redacted and the branch's records say "redacted" without naming the state. A hex-only term that happens to sit inside a commit's seven-character sha prefix vanishes from the output with no count. And the no-upstream fallback scans HEAD alone, which on this very branch is 1 of the 12 commits a push would carry. One Critical, three Warnings, nine Suggestions.
+**Summary**. The round 1 defects are closed: a path that holds a term is withheld and counted, a term only in a file name is a FAIL, the whole tree is scanned from any directory, binaries are scanned, list lines are trimmed, unpushed commits and their messages are scanned when an upstream is set, and the dates are right. The 25 tests catch 30 of 32 mutations; the two survivors are a behavior-neutral edit and a reworded unconditional line. Three things remain. The redaction commit `7af6625` has not reached the remote: `git ls-remote` puts `refs/heads/main` at `368dd5a`, whose tree still holds the line, so the public tip is not yet redacted and the branch's records say "redacted" without naming the state. A hex-only term that happens to sit inside a commit's seven-character sha prefix vanishes from the output with no count. And the no-upstream fallback scans HEAD alone, which on this very branch is 1 of the 12 commits a push would carry. One Critical, three Warnings, nine Suggestions.
 
 ### R2.1 Probe harness against the block as now written
 
@@ -307,7 +307,7 @@ The block at the hub root and from `docs/`, with the real list: no output, exit 
 
 ### R2.2 Mutations against the 25 tests
 
-Scratch tree of the seven surfaces and the test; baseline `25 passed`. Against `680f080`'s surfaces: `15 failed, 10 passed`, matching `ed25fb8`.
+Scratch tree of the seven surfaces and the test; baseline `25 passed`. Against `bae2873`'s surfaces: `15 failed, 10 passed`, matching `b9f2229`.
 
 | # | Edit | Result | Caught by |
 |---|---|---|---|
@@ -358,24 +358,24 @@ No, in all 22 cases, including the three withheld-count lines, which carry a cou
 
 | Claim | Command | Output | Status |
 |---|---|---|---|
-| `a670f9a`: closes C1, W1 to W4, W6, S1, S2 | harness cases 14, 15, 12, 17, 11, 9b, 13, 10; `pcc.md` comment line 6 and bullets | as tabulated | HOLDS (W2 for the upstream case; see R2-W2) |
-| `a670f9a`: paths withheld counted once per path | case 21 | `2 path name(s)` for one path | REFUTED in the differing-count case (R2-S1) |
-| `a670f9a`: three count branches are if/fi, exit 0 when silent | block lines 27, 30, 32; case 1 | exit 0 | HOLDS |
-| `a670f9a`: hub root and `docs/` -> no output, exit 0 | re-run | no output, exit 0 both | HOLDS, noting the branch has no upstream so the scan was index plus HEAD |
-| `a670f9a`: the harness results for cases 12, 12b, 13, 14, 15, 16 | re-run | as stated | HOLDS |
-| `b773260`: the sentence is on code-reviewer.md | grep | `:68` | HOLDS |
-| `f5273b0`: same test on two agents and the matrix; three lines say "of the owning repository (Scope Matrix note)" | grep | `:63`, `:77`, `:87`; `:116`, `:11`, `:19`, `:11`, `:12`, `:20` | HOLDS |
-| `ed25fb8`: 13 new cases; 25 passed; red 15 failed, 10 passed | `--co`; pytest; scratch run against `680f080` | `25`; `25 passed in 0.76s` exit 0; `15 failed, 10 passed` | HOLDS |
-| `ed25fb8`: 458 passed, with and without `CI=true` | pytest | `458 passed, 1 warning in 5.40s` exit 0; `458 passed, 1 warning in 6.21s` exit 0; `--co` 458 | HOLDS |
-| `755286f`: A split into A1 and A2 with an open item | draft `:23`, `:61`, open item 3 | present | HOLDS |
-| `755286f`: F dates both incidents 2026-10-01 | draft F paragraph | "The same day, the record ... committed and pushed. It was found and redacted on 2026-10-02." | HOLDS |
-| `755286f`: audience split, list row's mode word, lesson moved from B to F | draft F `:10`, `:29`, `:37`; B has 0 "lesson that travels" | present | HOLDS |
-| `755286f`: C cites the 3.11.15 run at `84dd487`; the 43 have no library skips | session record `:76` (`394 passed, 5 skipped`, 3.11.15, `84dd487`); `test_isolation.py` unchanged since `84dd487`; its six skips are `os.name == "nt"`, `posix_spawn`, `sendmsg`, `/proc` | 432 at `84dd487` = 394 + 35 (two matplotlib modules, 8 + 27, skipped as items) + 3 (pandas tests in `test_scorer.py`); the 43 are in the 394 | HOLDS; I read the evidence as the lead does (W10 closed) |
-| `755286f`: E and F headings spell out TCS and `/pcc` | draft `:262`, `:305` | "Task-Condition-Standard", "Pre-Commit Check 7" | HOLDS |
-| `755286f`: machine name dropped; "rows 1 to 7"; 2-sessions figure cites the CONOP | grep | no `Nidhogg`; `:136`; `:63` "(CONOP OVERWATCH, approved 2026-09-30)" | HOLDS on the first two; the CONOP does not carry the figure (R2-S7) |
+| `1c3895d`: closes C1, W1 to W4, W6, S1, S2 | harness cases 14, 15, 12, 17, 11, 9b, 13, 10; `pcc.md` comment line 6 and bullets | as tabulated | HOLDS (W2 for the upstream case; see R2-W2) |
+| `1c3895d`: paths withheld counted once per path | case 21 | `2 path name(s)` for one path | REFUTED in the differing-count case (R2-S1) |
+| `1c3895d`: three count branches are if/fi, exit 0 when silent | block lines 27, 30, 32; case 1 | exit 0 | HOLDS |
+| `1c3895d`: hub root and `docs/` -> no output, exit 0 | re-run | no output, exit 0 both | HOLDS, noting the branch has no upstream so the scan was index plus HEAD |
+| `1c3895d`: the harness results for cases 12, 12b, 13, 14, 15, 16 | re-run | as stated | HOLDS |
+| `9bdc0d7`: the sentence is on code-reviewer.md | grep | `:68` | HOLDS |
+| `b6d5ca2`: same test on two agents and the matrix; three lines say "of the owning repository (Scope Matrix note)" | grep | `:63`, `:77`, `:87`; `:116`, `:11`, `:19`, `:11`, `:12`, `:20` | HOLDS |
+| `b9f2229`: 13 new cases; 25 passed; red 15 failed, 10 passed | `--co`; pytest; scratch run against `bae2873` | `25`; `25 passed in 0.76s` exit 0; `15 failed, 10 passed` | HOLDS |
+| `b9f2229`: 458 passed, with and without `CI=true` | pytest | `458 passed, 1 warning in 5.40s` exit 0; `458 passed, 1 warning in 6.21s` exit 0; `--co` 458 | HOLDS |
+| `8c719fc`: A split into A1 and A2 with an open item | draft `:23`, `:61`, open item 3 | present | HOLDS |
+| `8c719fc`: F dates both incidents 2026-10-01 | draft F paragraph | "The same day, the record ... committed and pushed. It was found and redacted on 2026-10-02." | HOLDS |
+| `8c719fc`: audience split, list row's mode word, lesson moved from B to F | draft F `:10`, `:29`, `:37`; B has 0 "lesson that travels" | present | HOLDS |
+| `8c719fc`: C cites the 3.11.15 run at `84dd487`; the 43 have no library skips | session record `:76` (`394 passed, 5 skipped`, 3.11.15, `84dd487`); `test_isolation.py` unchanged since `84dd487`; its six skips are `os.name == "nt"`, `posix_spawn`, `sendmsg`, `/proc` | 432 at `84dd487` = 394 + 35 (two matplotlib modules, 8 + 27, skipped as items) + 3 (pandas tests in `test_scorer.py`); the 43 are in the 394 | HOLDS; I read the evidence as the lead does (W10 closed) |
+| `8c719fc`: E and F headings spell out TCS and `/pcc` | draft `:262`, `:305` | "Task-Condition-Standard", "Pre-Commit Check 7" | HOLDS |
+| `8c719fc`: machine name dropped; "rows 1 to 7"; 2-sessions figure cites the CONOP | grep | no `Nidhogg`; `:136`; `:63` "(CONOP OVERWATCH, approved 2026-09-30)" | HOLDS on the first two; the CONOP does not carry the figure (R2-S7) |
 | tasks `:127`: 70 deliveries to 16 repos, 10 appended, 6 new | heading counts of the 16 files: six at 1, 1, 3, 5, 5, 5 (new: 20 entries) and ten above 5 (appended, 5 each: 50) | 20 + 50 = 70 | consistent; still not independently recorded (the lead says so) |
 | tasks `:127`: 19 marks at 15 headings, 18 written by the run | mtimes | 16 at `20:10:00`; `fist`, `schelling-point` at `20:08:38`; `daily_weather` at `10:22:31` | 19 and 15 HOLD; 18 is 16 unless the seeding counts as the run (R2-S6) |
-| CHANGELOG `:38`, tasks `:8`: redacted at `0f80aad`; HEAD 0 files; `5a04f2b` reachable on `origin/main` | `git ls-remote origin refs/heads/main`; `git rev-list --count origin/main..main`; count-only grep at `origin/main` | `368dd5a`; `2` (`0f80aad`, `2840c0f`); `origin/main: docs/sessions/20261001_assay_bootstrap_and_agent_output_destination.md:1` | the local claims HOLD; the state is committed, not pushed: the public tip still carries the line (R2-C1) |
+| CHANGELOG `:38`, tasks `:8`: redacted at `7af6625`; HEAD 0 files; `5a04f2b` reachable on `origin/main` | `git ls-remote origin refs/heads/main`; `git rev-list --count origin/main..main`; count-only grep at `origin/main` | `368dd5a`; `2` (`7af6625`, `7495612`); `origin/main: docs/sessions/20261001_assay_bootstrap_and_agent_output_destination.md:1` | the local claims HOLD; the state is committed, not pushed: the public tip still carries the line (R2-C1) |
 | CHANGELOG Added line describes the fixed check | read | index and unpushed commits, names, messages, path only when clean, WARN outside a repo | HOLDS |
 | A1 and A2 Detect | run | `^pytest\b` nothing; `venv/bin/pytest` 1; `NO GIT IDENTITY` 1 | HOLDS |
 
@@ -413,7 +413,7 @@ Closed 18, partial 4, deferred 1.
 
 **Critical**
 
-**R2-C1. The redaction is committed, not pushed; the public tip still carries the line.** `git ls-remote origin refs/heads/main` -> `368dd5a` (2026-10-01 18:01). `git rev-list --count origin/main..main` -> `2` (`0f80aad`, `2840c0f`). Count-only grep at `origin/main` -> `docs/sessions/20261001_assay_bootstrap_and_agent_output_destination.md:1`. CHANGELOG `:38` and tasks `:8` say "redacted" and "git grep over HEAD: 0 files", which is true of the local HEAD and reads as the public state; the P1's "the commit stays reachable on origin/main" understates it, since the tip itself is unredacted about 26 hours after the push. The verifying-claims kernel, rule 1: name the state. Fix: push `main` (the user's action, not mine), then re-run `git ls-remote origin refs/heads/main` and the count-only grep at the new `origin/main` and write both outputs as the Evidence under the CHANGELOG and P1 lines; until then say "redacted locally, not yet pushed". Note for the P1 decision: `2840c0f` predates the redaction and holds the line in its tree, so the push adds one more such commit to history (already there via `5a04f2b` and `368dd5a`).
+**R2-C1. The redaction is committed, not pushed; the public tip still carries the line.** `git ls-remote origin refs/heads/main` -> `368dd5a` (2026-10-01 18:01). `git rev-list --count origin/main..main` -> `2` (`7af6625`, `7495612`). Count-only grep at `origin/main` -> `docs/sessions/20261001_assay_bootstrap_and_agent_output_destination.md:1`. CHANGELOG `:38` and tasks `:8` say "redacted" and "git grep over HEAD: 0 files", which is true of the local HEAD and reads as the public state; the P1's "the commit stays reachable on origin/main" understates it, since the tip itself is unredacted about 26 hours after the push. The verifying-claims kernel, rule 1: name the state. Fix: push `main` (the user's action, not mine), then re-run `git ls-remote origin refs/heads/main` and the count-only grep at the new `origin/main` and write both outputs as the Evidence under the CHANGELOG and P1 lines; until then say "redacted locally, not yet pushed". Note for the P1 decision: `7495612` predates the redaction and holds the line in its tree, so the push adds one more such commit to history (already there via `5a04f2b` and `368dd5a`).
 
 **Warnings**
 
@@ -455,7 +455,7 @@ Verdict: GO-WITH-FIXES. The round 1 defects are closed and the tests now pin the
 | 22 probe cases as tabulated | `bash scratchpad/probe_r2.sh` | section R2.1 |
 | Case 20 mechanism and fix | diagnostic in `probes_r2/r20` | hits `0f33abe:hit.md:1`; n 0; printed 0; path-only withhold prints the line |
 | 32 mutations, 30 caught | `.venv/bin/python scratchpad/mutate2.py` | section R2.2 |
-| Red state against `680f080` | scratch run | `15 failed, 10 passed in 0.49s` |
+| Red state against `bae2873` | scratch run | `15 failed, 10 passed in 0.49s` |
 | 25 and 458 pass | `.venv/bin/pytest tests/unit/test_pcc_private_terms.py -q`; `env -u CI .venv/bin/pytest -q`; `CI=true .venv/bin/pytest -q` | `25 passed in 0.76s`; `458 passed, 1 warning in 5.40s`; `458 passed, 1 warning in 6.21s`; all exit 0 |
 | Block clean at the hub, root and `docs/` | `bash scratchpad/check7_r2.sh` | no output, exit 0 both |
 | Five new commits clean (tree, names, message) | count-only greps per commit | `0 0 0` x5 |
@@ -473,7 +473,7 @@ Overclaims a reviewer caught this session (round 2): 3 (the redaction's state; "
 
 ## Round 3
 
-**Scope**: `755286f..9a2ad3d`, five commits: `5f83e12` [gate] pcc.md, `2e113fa` [gate] code-reviewer.md, `4b4e1c5` [infra] README and two agents, `51c871e` [test] 29 tests, `9a2ad3d` [doc] CHANGELOG, draft, tasks. Same method and constraints as rounds 1 and 2. Gate surfaces alone in their commits; the two team templates are unchanged since round 2 (`git diff --stat 755286f 9a2ad3d -- .claude/teams/` empty).
+**Scope**: `8c719fc..0db0c35`, five commits: `f01a8ce` [gate] pcc.md, `6f89c62` [gate] code-reviewer.md, `0f0ca35` [infra] README and two agents, `e3bc491` [test] 29 tests, `0db0c35` [doc] CHANGELOG, draft, tasks. Same method and constraints as rounds 1 and 2. Gate surfaces alone in their commits; the two team templates are unchanged since round 2 (`git diff --stat 8c719fc 0db0c35 -- .claude/teams/` empty).
 
 **Summary**. The redesign closes R2-W1 by construction: `git grep -l` yields paths, the 40-hex prefix is stripped, paths are deduplicated, and one `grep` over the same strings splits withheld from printed, so no hit can fall between the two whatever the term is made of. `rev-list HEAD --not --remotes` closes R2-W2; the working-tree test closes R2-W3. Both harnesses (27 and 18 cases) print no term anywhere; the five cases that failed in round 2 now print their hits or count once. 35 of 36 mutations are caught, including all five round 2 edits; the one survivor is behavior-neutral. The one FAIL line the check prints at the hub is a true positive about an unpushed commit and is the right treatment. I retract R2-S7 and round 1's S11: the CONOP carries the 2-sessions figure at line 267; my grep matched that line both times and I cut the output short and misread it. Zero Critical, zero Warnings, four Suggestions. Verdict GO.
 
@@ -497,11 +497,11 @@ Block re-extracted: 31 lines, sha1 prefix `6092f82f`. Round 2 harness (22 cases)
 
 Evidence: `bash scratchpad/probe_r3.sh`; `bash scratchpad/probe_r1_on_r3.sh`.
 
-At the hub, with the real list: root prints `FAIL private term in: docs/sessions/20261001_assay_bootstrap_and_agent_output_destination.md`, exit 0, in 0.23 s; from `docs/`, the same path relative to `docs/`. `git rev-list --count HEAD --not --remotes` -> `17`; `2840c0f` is in that set; a count-only grep per unpushed commit finds the hit in `2840c0f` alone. The five new commits are clean (tree, names, message: `0 0 0` each).
+At the hub, with the real list: root prints `FAIL private term in: docs/sessions/20261001_assay_bootstrap_and_agent_output_destination.md`, exit 0, in 0.23 s; from `docs/`, the same path relative to `docs/`. `git rev-list --count HEAD --not --remotes` -> `17`; `7495612` is in that set; a count-only grep per unpushed commit finds the hit in `7495612` alone. The five new commits are clean (tree, names, message: `0 0 0` each).
 
 ### R3.2 Mutations against the 29 tests
 
-Baseline `29 passed`. Against `755286f`'s surfaces: `8 failed, 21 passed`, matching `51c871e`.
+Baseline `29 passed`. Against `8c719fc`'s surfaces: `8 failed, 21 passed`, matching `e3bc491`.
 
 | Group | Result |
 |---|---|
@@ -521,23 +521,23 @@ Baseline `29 passed`. Against `755286f`'s surfaces: `8 failed, 21 passed`, match
 
 | Claim | Command | Output | Status |
 |---|---|---|---|
-| `5f83e12`: closes R2-W1, R2-W2, R2-S1, R2-S2, R2-S5 | cases 20, 16, 24, 21, 2, 25; comment line 7 | as tabulated; "the second found 2026-10-02" | HOLDS |
-| `5f83e12`: hub root one FAIL line naming the assay doc; from `docs/` the same path relative; `2840c0f` holds the line; 12 commits | re-run | one line, path only; relative from `docs/`; `2840c0f: 1 file(s)`; now 17 with the five new commits | HOLDS |
-| `5f83e12`: remote tip `368dd5a` holds the same line | `git ls-remote origin refs/heads/main`; count-only grep at `origin/main` (round 2) | `368dd5a`; one file | HOLDS |
-| `5f83e12`: both harnesses term-in-output no; cases 16, 20 print; 21 counts one | re-run | as stated | HOLDS |
-| `2e113fa`, `4b4e1c5`: working-tree test and private-name clause on four surfaces | grep | code-reviewer `:68`, proposer `:63`, decision-scientist `:77`, README matrix note | HOLDS |
-| `51c871e`: four new cases; 29 passed; 462 both; red 8 failed, 21 passed | `--co`; pytest; scratch run | `29`; `29 passed in 0.89s` exit 0; `462 passed, 1 warning in 5.19s` and `6.21s`... `5.99s` exit 0; `8 failed, 21 passed` | HOLDS |
-| `9a2ad3d`: CHANGELOG and P1 name the redaction's state | read `:38`, tasks `:8` | "over local HEAD", "reaches the public tip when `main` is pushed", "Until `main` is pushed, the public tip itself still holds the line", the `2840c0f` flag explained | HOLDS (R2-C1 wording closed) |
-| `9a2ad3d`: 16 marks written by the run, 2 seeded, 1 older | tasks | present; matches the mtimes | HOLDS |
-| `9a2ad3d`: the CONOP's Status Log entry carries the 2-sessions figure | `sed -n 267p conop_overwatch...md \| grep -o` | "an unauthenticated `glab` blocked verification in 2 sessions" | HOLDS; my round 2 grep listed line 267 and I cut it at 260 characters |
-| `9a2ad3d`: entry C says 394 passed apart from the 38, the 43 in the run | draft C `:31` of the section | present | HOLDS |
-| `9a2ad3d`: F and CHANGELOG describe the check as rewritten | draft F `:8`; CHANGELOG `:27` | F says `git grep -l -i -F`; CHANGELOG still says `git grep -c -i -F` | F HOLDS; CHANGELOG stale on one flag (R3-S1) |
+| `f01a8ce`: closes R2-W1, R2-W2, R2-S1, R2-S2, R2-S5 | cases 20, 16, 24, 21, 2, 25; comment line 7 | as tabulated; "the second found 2026-10-02" | HOLDS |
+| `f01a8ce`: hub root one FAIL line naming the assay doc; from `docs/` the same path relative; `7495612` holds the line; 12 commits | re-run | one line, path only; relative from `docs/`; `7495612: 1 file(s)`; now 17 with the five new commits | HOLDS |
+| `f01a8ce`: remote tip `368dd5a` holds the same line | `git ls-remote origin refs/heads/main`; count-only grep at `origin/main` (round 2) | `368dd5a`; one file | HOLDS |
+| `f01a8ce`: both harnesses term-in-output no; cases 16, 20 print; 21 counts one | re-run | as stated | HOLDS |
+| `6f89c62`, `0f0ca35`: working-tree test and private-name clause on four surfaces | grep | code-reviewer `:68`, proposer `:63`, decision-scientist `:77`, README matrix note | HOLDS |
+| `e3bc491`: four new cases; 29 passed; 462 both; red 8 failed, 21 passed | `--co`; pytest; scratch run | `29`; `29 passed in 0.89s` exit 0; `462 passed, 1 warning in 5.19s` and `6.21s`... `5.99s` exit 0; `8 failed, 21 passed` | HOLDS |
+| `0db0c35`: CHANGELOG and P1 name the redaction's state | read `:38`, tasks `:8` | "over local HEAD", "reaches the public tip when `main` is pushed", "Until `main` is pushed, the public tip itself still holds the line", the `7495612` flag explained | HOLDS (R2-C1 wording closed) |
+| `0db0c35`: 16 marks written by the run, 2 seeded, 1 older | tasks | present; matches the mtimes | HOLDS |
+| `0db0c35`: the CONOP's Status Log entry carries the 2-sessions figure | `sed -n 267p conop_overwatch...md \| grep -o` | "an unauthenticated `glab` blocked verification in 2 sessions" | HOLDS; my round 2 grep listed line 267 and I cut it at 260 characters |
+| `0db0c35`: entry C says 394 passed apart from the 38, the 43 in the run | draft C `:31` of the section | present | HOLDS |
+| `0db0c35`: F and CHANGELOG describe the check as rewritten | draft F `:8`; CHANGELOG `:27` | F says `git grep -l -i -F`; CHANGELOG still says `git grep -c -i -F` | F HOLDS; CHANGELOG stale on one flag (R3-S1) |
 
 ### R3.4 The two questions
 
 **(1) R2-S7.** You are right and I was wrong. `grep -n -i -E 'in 2 sessions|two sessions|blocked verif|unauthenticated'` over the CONOP prints line 267, and that line reads "an unauthenticated `glab` blocked verification in 2 sessions". In round 2 I piped the match through `cut -c1-260`, saw the line's opening clause, and wrote "finds nothing". Round 1's S11 was the same miss through a 240-character cut. Both retracted; the draft's citation to the 2026-09-30 approved entry is correct and more precise than the original.
 
-**(2) The FAIL at the hub.** The behavior is right and the block should not exclude content a remote already holds. Three reasons. First, the check's contract is "what a push would carry"; `2840c0f` is carried and its tree holds the line, so the line is a true statement. Second, the exclusion would be wrong in the one scenario where it matters most: after option (b) in the P1, a history rewrite, a stale local commit carrying the content is exactly what must not be pushed, and "a remote already holds it" would be read from the tracking refs, which are a cache of the pre-rewrite remote. Third, the cost of the true positive is one line that clears when `main` is pushed, and pushing `main` before this branch is the right order anyway, since it puts the redaction on the public tip first. The bullet "a hit in an old commit is already public: redact forward first, then decide about history" fits this case, with the P1 carrying the decision. One clause would make the bullet cover this shape without the P1: "a hit in an unpushed commit whose content the remote already holds is still a FAIL: the push re-sends it, and after a history rewrite that is how the content comes back; push or rewrite to clear it" (R3-S2).
+**(2) The FAIL at the hub.** The behavior is right and the block should not exclude content a remote already holds. Three reasons. First, the check's contract is "what a push would carry"; `7495612` is carried and its tree holds the line, so the line is a true statement. Second, the exclusion would be wrong in the one scenario where it matters most: after option (b) in the P1, a history rewrite, a stale local commit carrying the content is exactly what must not be pushed, and "a remote already holds it" would be read from the tracking refs, which are a cache of the pre-rewrite remote. Third, the cost of the true positive is one line that clears when `main` is pushed, and pushing `main` before this branch is the right order anyway, since it puts the redaction on the public tip first. The bullet "a hit in an old commit is already public: redact forward first, then decide about history" fits this case, with the P1 carrying the decision. One clause would make the bullet cover this shape without the P1: "a hit in an unpushed commit whose content the remote already holds is still a FAIL: the push re-sends it, and after a history rewrite that is how the content comes back; push or rewrite to clear it" (R3-S2).
 
 ### R3.5 Round 2 findings
 
@@ -584,10 +584,10 @@ Verdict: GO. Every Critical and Warning from rounds 1 and 2 is closed and pinned
 | Block extracted matches `pcc.md` | python with the test's regex | `extracted 31 lines; sha 6092f82f` |
 | 27 and 18 harness cases as tabulated, no term in output | `bash scratchpad/probe_r3.sh`; `bash scratchpad/probe_r1_on_r3.sh` | section R3.1; `0` |
 | 36 mutations, 35 caught | `.venv/bin/python scratchpad/mutate3.py` | section R3.2 |
-| Red state against `755286f` | scratch run | `8 failed, 21 passed in 0.77s` |
+| Red state against `8c719fc` | scratch run | `8 failed, 21 passed in 0.77s` |
 | 29 and 462 pass | `.venv/bin/pytest tests/unit/test_pcc_private_terms.py -q`; `env -u CI .venv/bin/pytest -q`; `CI=true .venv/bin/pytest -q`; `--co -q` | `29 passed in 0.89s`; `462 passed, 1 warning in 5.19s`; `462 passed, 1 warning in 5.99s`; `462 tests collected`; all exit 0 |
 | Hub run: one true-positive line, 0.23 s | `time bash scratchpad/check7_r3.sh` at the root and from `docs/` | the assay session doc path, exit 0 both |
-| `2840c0f` is the only unpushed commit holding the hit; 17 commits unpushed | per-commit count-only grep; `git rev-list --count HEAD --not --remotes` | `2840c0f: 1 file(s)`; `17` |
+| `7495612` is the only unpushed commit holding the hit; 17 commits unpushed | per-commit count-only grep; `git rev-list --count HEAD --not --remotes` | `7495612: 1 file(s)`; `17` |
 | Remote main still `368dd5a`; local main 2 ahead | `git ls-remote origin refs/heads/main`; `git rev-list --count origin/main..main` | `368dd5a`; `2` |
 | Five new commits clean | count-only greps (tree, names, message) | `0 0 0` x5 |
 | CONOP line 267 carries the 2-sessions figure | `sed -n 267p ... \| grep -o -i -E '.{60}in 2 sessions.{20}'` | "...because an unauthenticated `glab` blocked verification in 2 sessions. The 2026-10-16 dat" |
@@ -596,3 +596,32 @@ Verdict: GO. Every Critical and Warning from rounds 1 and 2 is closed and pinned
 Overclaims the user caught this session: 0
 Overclaims a reviewer caught this session (round 3): 1 (CHANGELOG `:27` still says `-c`)
 Reviewer's own overclaims retracted this round: 2 (round 1 S11 and round 2 R2-S7, the same misread of CONOP line 267)
+
+## Commit SHA remap (lead, 2026-10-02, after the round 3 GO)
+
+The 22 unpushed commits this report cites were rebuilt before push so that the redaction commit precedes the adoption-helper commit, whose tree otherwise carried the redacted line: the one FAIL line check 7 printed at the hub in Round 3. Trees, messages, and order are unchanged apart from those two swapping places; the SHAs changed. The lead substituted the new SHAs throughout this report. The map, old to new:
+
+| Old | New | Subject |
+|---|---|---|
+| `2840c0f` | `7495612` | [infra] adopt_doctrine.py copies every Level 0 skill the framework nam |
+| `0f80aad` | `7af6625` | [doc] Redact five private terms from one Evidence line in the 2026-10- |
+| `371b5b5` | `6d06553` | [gate] code-reviewer: a report goes to the repository that owns the se |
+| `37b4250` | `e90c512` | [infra] proposer, decision-scientist, scope matrix: output goes where  |
+| `e968dcc` | `0f5a6b2` | [gate] /pcc check 7, Private-Term Check: the list lives outside the re |
+| `874b1d2` | `5fded32` | [test] Pin /pcc check 7 and the destination rule (12 tests) |
+| `680f080` | `bae2873` | [doc] OVERWATCH release entries drafted (A to G); the backlog cycle, t |
+| `a670f9a` | `1c3895d` | [gate] /pcc check 7, gate round 1 fixes: paths withheld when they hold |
+| `b773260` | `9bdc0d7` | [gate] code-reviewer: the destination rule gets a test the agent can r |
+| `f5273b0` | `b6d5ca2` | [infra] The destination rule's test on proposer, decision-scientist, a |
+| `ed25fb8` | `b9f2229` | [test] Pin check 7's gate-round-1 behaviors and the rule's operative c |
+| `755286f` | `8c719fc` | [doc] Release draft and records after gate round 1 (W6, W9, W10, W11,  |
+| `5f83e12` | `f01a8ce` | [gate] /pcc check 7, gate round 2 fixes: hits are paths, split once by |
+| `2e113fa` | `6f89c62` | [gate] code-reviewer: the destination test is the working tree, not th |
+| `4b4e1c5` | `0f0ca35` | [infra] The same working-tree test and private-name clause on proposer |
+| `51c871e` | `e3bc491` | [test] Pin the round 2 fixes (29 tests) |
+| `9a2ad3d` | `0db0c35` | [doc] Records after gate round 2: the redaction's state named; counts  |
+| `016c03a` | `8baad24` | [gate] /pcc check 7 bullet: the tracking refs are a cache; fetch first |
+| `ed3c865` | `a0539bc` | [doc] CHANGELOG: check 7 lists paths with -l over commits not on any r |
+| `bbceabc` | `667ff59` | Merge topic/overwatch-private-terms: the output-destination rule and / |
+| `6f3221e` | `16c208b` | [doc] Gate review record: the private-terms gate, three rounds (code-r |
+| `89e4afa` | `c41b293` | [doc] Task list: the agent-output-destination task closes on the round |

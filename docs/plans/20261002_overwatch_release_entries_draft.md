@@ -60,7 +60,7 @@ Restore the bare `pytest` line.
 
 ## A2. YYYY-MM-DD: `/session-start` Step 4 Checks the Session's Tools
 
-Two gaps surfaced at the end of sessions instead of the start: a missing git identity, found at commit time, and an unauthenticated `gh` or `glab`, which blocked verification of merge and CI results in 2 sessions (CONOP OVERWATCH, approved 2026-09-30). Step 4 gains three read-only checks, each printing one line only when something is wrong: no git identity, a `VIRTUAL_ENV` that is not this project's `.venv`, and an installed `gh` or `glab` whose `auth status` fails. Step 5's summary gains item 9, Tools.
+Two gaps surfaced at the end of sessions instead of the start: a missing git identity, found at commit time, and an unauthenticated `gh` or `glab`, which blocked verification of merge and CI results in 2 sessions (CONOP OVERWATCH Status Log, the 2026-09-30 approved entry). Step 4 gains three read-only checks, each printing one line only when something is wrong: no git identity, a `VIRTUAL_ENV` that is not this project's `.venv`, and an installed `gh` or `glab` whose `auth status` fails. Step 5's summary gains item 9, Tools.
 
 A `glab` older than gitlab-org/cli MR 1453 exits 0 when unauthenticated, so the auth check passes silently there; check your version.
 
@@ -192,7 +192,7 @@ grep -c 'tests.isolation' pyproject.toml   # 0: not adopted
 
 The four steps under "Adopting Downstream" in `ISOLATION.md`: copy the two files, patch `addopts`, run the suite with and without `CI=true` and read the log, check the gitignore. Each log line is a test reaching the real world (fix the test: pass the root in) or a directory that belongs in `isolation_allow`.
 
-Measured at the hub: 308 existing tests ran armed with 0 catches (2026-09-30, after three gate rounds). The full suite, the 43 tripwire tests included and none of them skipped on Linux, passed on Python 3.11.15 and 3.12.13 on 2026-10-01 at `84dd487` (the Claims table of that day's session record).
+Measured at the hub: 308 existing tests ran armed with 0 catches (2026-09-30, after three gate rounds). The full suite, apart from the 38 matplotlib and pandas tests, passed on Python 3.11.15 on 2026-10-01 at `84dd487` (the Claims table of that day's session record); the 43 tripwire tests have no library skips, so they were in that run, and they pass on 3.12.13.
 
 ### Rollback
 
@@ -308,8 +308,8 @@ On 2026-10-01 three agents reviewed another project's plan, staged in `/tmp`, an
 
 Two controls, one at the point of action and one at the push gate:
 
-1. **The rule.** An agent's output goes to the repository that owns the sensitivity of its input, not to the working directory the agent runs in, with one test the agent can run: if the material is not tracked in this repository (`git ls-files --error-unmatch <path>` fails) or was handed over from outside it, write to the scratchpad and name the owning repository in the final message. It is written under the scope matrix in `.claude/README.md`, in the Write scope of each reviewing agent (`code-reviewer`, `proposer`, `decision-scientist`), and in the two team templates that name a destination.
-2. **`/pcc` check 7, Private-Term Check.** A list of private terms lives outside every repository, one per line, at `$HOME/.config/tacsop/private-terms` (override with `TACSOP_PRIVATE_TERMS`). The check runs `git grep -c -i -F` with that list over the index and over every unpushed commit (HEAD when no upstream is set), and also checks tracked file names and unpushed commit messages. It prints a count, and a path only when the path itself holds no term. Any line is FAIL. No list, or no git repository, is WARN: the check did not run.
+1. **The rule.** An agent's output goes to the repository that owns the sensitivity of its input, not to the working directory the agent runs in, with one test the agent can run: if the material's path is outside this repository's working tree (not under `git rev-parse --show-toplevel`) or it was handed over from outside, write to the scratchpad and name the owning repository in the final message, or describe it when its name is itself private. It is written under the scope matrix in `.claude/README.md`, in the Write scope of each reviewing agent (`code-reviewer`, `proposer`, `decision-scientist`), and in the two team templates that name a destination.
+2. **`/pcc` check 7, Private-Term Check.** A list of private terms lives outside every repository, one per line, at `$HOME/.config/tacsop/private-terms` (override with `TACSOP_PRIVATE_TERMS`). The check runs `git grep -l -i -F` with that list over the index and over every commit not on any remote, and also checks tracked file names and unpushed commit messages. It prints each hit as a path with no commit prefix or count, withholds the paths that themselves hold a term and reports those as a count, and does the same for file names and messages. Any line is FAIL. No list, or no git repository, is WARN: the check did not run.
 
 **Audience**: the rule, every repo whose agents read another repository's material. The check, every public repo. The list is per machine, not per repo, and it is never committed anywhere.
 

@@ -65,7 +65,7 @@ If everything looks good, say so briefly.
 ## Scope
 
 - **Read**: All paths
-- **Write**: `docs/reviews/` only (review reports, named `YYYYMMDD_<subject>.md`)
+- **Write**: `docs/reviews/` only (review reports, named `YYYYMMDD_<subject>.md`), and only in the repository that owns the sensitivity of the material under review. A report on another repository's material goes to that repository or to the scratchpad, never into this repo's `docs/`, whatever directory you run in.
 - **Never modify**: `src/`, `tests/`, `config/`, `.claude/`
 
 ## Memory

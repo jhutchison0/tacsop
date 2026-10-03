@@ -130,7 +130,7 @@ else
   if [ "$k" -gt 0 ]; then echo "FAIL private term in $k unpushed commit message line(s); not printed"; fi
 fi
 ```
-- Expected output: empty. FAIL on any line. `FAIL private term in: <path>` names a file whose path is clean, in the index or in a commit not on any remote. The other three FAIL lines give counts only, because the path, the name, or the message is itself the hit: find them locally with the same grep, and do not paste what it prints. A hit in an old commit is already public: redact forward first, then decide about history. A repository with no remote scans all of HEAD's history, which is what a first push carries.
+- Expected output: empty. FAIL on any line. `FAIL private term in: <path>` names a file whose path is clean, in the index or in a commit not on any remote. The other three FAIL lines give counts only, because the path, the name, or the message is itself the hit: find them locally with the same grep, and do not paste what it prints. A hit in an old commit is already public: redact forward first, then decide about history. A repository with no remote scans all of HEAD's history, which is what a first push carries. "Not on any remote" reads the tracking refs, which are a cache: `git fetch` first when another machine may have pushed.
 - WARN means this machine has no list, or this directory is not a git repository. Write the list (one term per line, matched case-insensitively as a fixed string, inside words too, so choose distinctive terms; a false positive is safe) before trusting a clean run. The list is per machine and is never committed anywhere.
 - Never paste a term into this check's output, a commit message, a review, or a session doc. Give the count and, when it is clean, the path.
 

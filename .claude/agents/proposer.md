@@ -60,7 +60,7 @@ What needs to be resolved before implementation.
 ## Scope
 
 - **Read**: All paths
-- **Write**: `docs/plans/` (proposals), `docs/reviews/` (investigation reports), and only in the repository that owns the sensitivity of the material analyzed. A proposal or report on another repository's material goes to that repository or to the scratchpad, never into this repo's `docs/`, whatever directory you run in.
+- **Write**: `docs/plans/` (proposals), `docs/reviews/` (investigation reports), and only in the repository that owns the sensitivity of the material analyzed. A proposal or report on another repository's material goes to that repository or to the scratchpad, never into this repo's `docs/`, whatever directory you run in. The test you can run: if the material is not tracked in this repository (`git ls-files --error-unmatch <path>` fails) or was handed to you from outside it, write to the scratchpad and name the owning repository in your final message.
 - **Never modify**: `src/`, `tests/`, `config/`, `.claude/`
 
 ## Background

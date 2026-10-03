@@ -96,6 +96,27 @@ fi
 ```
 - WARN only; the fix is two commits, with the gate change isolated and tagged `[gate]`
 
+### 7. Private-Term Check
+```bash
+# Private terms (hostnames, usernames, codenames, sibling repo names) stay out
+# of a public tree. The list lives outside every repo, so this check cannot
+# republish it; the output names a file and a count, never the term.
+# Two incidents, 2026-10-01 and 2026-10-02: agents wrote another repo's names
+# into docs/reviews/, and the record of containing that pasted the five terms
+# into an Evidence line, committed and pushed. Scans the index: HEAD plus
+# anything staged. A line printed is the finding; the block itself exits 0.
+terms="${TACSOP_PRIVATE_TERMS:-$HOME/.config/tacsop/private-terms}"
+if [ "$(sed '/^[[:space:]]*$/d' "$terms" 2>/dev/null | wc -l)" -eq 0 ]; then
+  echo "WARN: no private-term list at $terms; check 7 did not run"
+else
+  git grep -c -i -I -F -f <(sed '/^[[:space:]]*$/d' "$terms") --cached -- . \
+    | sed 's/^/FAIL private term in: /'
+fi
+```
+- Expected output: empty. FAIL on any line: the file at that path holds a term, in HEAD or staged. Redact before pushing. A hit in an old commit is already public: redact forward first, then decide about history.
+- WARN means this machine has no list. Write one (one term per line, matched case-insensitively as a fixed string) before trusting a clean run. The list is per machine and is never committed anywhere.
+- Never paste a term into this check's output, a commit message, a review, or a session doc. Give the count and the path.
+
 ## Output Format
 
 ```
@@ -132,6 +153,7 @@ PCC Status: NOT READY - 1 failure, resolve before pushing
 | Git state | Clean or intentional | Info only |
 | Reference integrity | Zero MISSING paths in living docs (allowlist current) | Warn only |
 | Gate separation | Gate surfaces staged alone (`[gate]` commit) | Warn only |
+| Private terms | Zero hits for this machine's private-term list over the index, list present | Block push |
 
 ## Integration
 

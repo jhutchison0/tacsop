@@ -174,6 +174,34 @@ class TestCheck7PathsAndHistory:
         assert "FAIL" in r.stdout and "commit message" in r.stdout
         _no_term_in(r)
 
+    def test_branch_without_upstream_scans_every_commit_not_on_a_remote(self, repo):
+        _with_upstream(repo)
+        repo["git"]("checkout", "-q", "-b", "topic")  # no upstream of its own
+        _commit(repo, "mid.md", f"{TERM}\n", "add")
+        repo["git"]("rm", "-q", "mid.md")
+        repo["git"]("commit", "-q", "-m", "remove")
+        r = _run(repo)
+        assert "FAIL" in r.stdout and "mid.md" in r.stdout
+
+    def test_repo_with_no_remote_scans_all_of_history_as_a_first_push_would_carry_it(self, repo):
+        _commit(repo, "mid.md", f"{TERM}\n", "add")
+        repo["git"]("rm", "-q", "mid.md")
+        repo["git"]("commit", "-q", "-m", "remove")
+        r = _run(repo)
+        assert "FAIL" in r.stdout and "mid.md" in r.stdout
+
+    def test_each_printed_hit_is_one_clean_path_with_no_commit_prefix_or_count(self, repo):
+        _with_upstream(repo)
+        _commit(repo, "leak.md", f"{TERM}\n")  # in the index and in an unpushed commit
+        lines = [l for l in _run(repo).stdout.splitlines() if l.startswith("FAIL private term in: ")]
+        assert lines == ["FAIL private term in: leak.md"]
+
+    def test_term_that_would_match_only_a_hit_count_is_not_lost(self, repo):
+        repo["terms"].write_text("1\n")  # a digits-only term; the old output's ':1' count matched it
+        _commit(repo, "leak.md", "1\n")
+        r = _run(repo)
+        assert "FAIL" in r.stdout and "leak.md" in r.stdout
+
 
 class TestCheck7List:
     def test_missing_list_warns_once_and_exits_0(self, repo):
@@ -221,8 +249,9 @@ class TestDestinationRule:
         text = (REPO_ROOT / path).read_text(encoding="utf-8")
         assert "the repository that owns the sensitivity" in text
         assert "never into this repo's `docs/`" in text
-        assert "git ls-files --error-unmatch" in text  # the test an agent can run
+        assert "git rev-parse --show-toplevel" in text  # the test an agent can run
         assert "write to the scratchpad and name the owning repository" in text  # the default when unsure
+        assert "or describe it when its name is itself private" in text
 
     @pytest.mark.parametrize(
         "path",
@@ -231,5 +260,5 @@ class TestDestinationRule:
     def test_no_surface_sends_output_to_docs_unconditionally(self, path):
         text = (REPO_ROOT / path).read_text(encoding="utf-8")
         for line in text.splitlines():
-            if re.search(r"write[s]? (?:a )?(?:proposal|findings|report)[^|]*to `docs/", line):
+            if re.search(r"(?:write|writes|put|save)[^|]*`docs/(?:reviews|plans)/", line):
                 assert "owning repository" in line or "Scope Matrix" in line, line

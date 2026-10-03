@@ -65,7 +65,7 @@ dropped.
 
 | Claim | State | Evidence |
 |---|---|---|
-| No internal hostname, colleague username, codename, or sibling repo name reached this public repo, at `HEAD` or in the working tree | observed | `for s in dis.anl.gov KEIRA ai-budget-tracker dgolden titanx.dis; do git grep -lI "$s" HEAD \| wc -l; grep -rlI "$s" . --exclude-dir=.git \| wc -l; done` → `0` for all ten checks, at `e7cf1ae` |
+| No internal hostname, colleague username, codename, or sibling repo name reached this public repo, at `HEAD` or in the working tree | observed | `for s in <five private terms, listed outside this repo>; do git grep -lI "$s" HEAD \| wc -l; grep -rlI "$s" . --exclude-dir=.git \| wc -l; done` → `0` for all ten checks, at `e7cf1ae` |
 | This repo's suite passes after merging the 29 commits from the other box | tested | `.venv/bin/pytest -q` → `432 passed, 1 warning in 7.71s` |
 | The `docs/tasks.md` merge kept one Active entry per CONOP and lost neither of this box's two findings | tested | `grep -c` on four keys → OVERWATCH 1 Active (second hit is in Completed), WHETSTONE 1 Active, audit-hook blind spot 1, sibling-path class 1 |
 | The new repository is bootstrapped, tested and pushed | deployed | `git status -sb` → `## main...origin/main` with no divergence; `.venv/bin/pytest -q` → `137 passed` |

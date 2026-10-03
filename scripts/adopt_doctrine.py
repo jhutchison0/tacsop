@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Downstream-side helper to adopt the 2026-05-19 doctrine bundle from tacsop.
+"""Downstream-side helper to adopt tacsop's Level 0 doctrine.
 
-Copies TEMPLATE-COPY artifacts verbatim, substitutes the package name inside the
+Copies every Level 0 skill and the other TEMPLATE-COPY artifacts of the
+2026-05-19 bundle verbatim, substitutes the package name inside the
 shift-left audit hook, merges the PostToolUse block into .claude/settings.json,
 and appends to .gitignore. For CUSTOMIZE/CONDITIONAL/SKIP artifacts, prints a
 manual-attention checklist with section references back to docs/doctrine-updates.md.
@@ -39,13 +40,20 @@ HOOK_TIMEOUT_SECONDS = 10
 GITIGNORE_LINES = [".claude/audits/", "docs/design/hold/"]
 
 VERBATIM_COPIES: list[tuple[str, str]] = [
-    # (relative path, kind) — same path on both sides
+    # (relative path, kind) — same path on both sides. The directories are every
+    # Level 0 skill SKILLS_FRAMEWORK.md names; a test pins the two lists together.
     (".claude/skills/maintaining-ubiquitous-language", "dir"),
     (".claude/skills/maintaining-project-context", "dir"),
     (".claude/skills/recording-architecture-decisions", "dir"),
     (".claude/skills/shift-left-testing", "dir"),
     (".claude/skills/configuration-management", "dir"),
     (".claude/skills/python-venv-management", "dir"),
+    (".claude/skills/using-topic-branches", "dir"),
+    (".claude/skills/writing-simple-and-direct", "dir"),
+    (".claude/skills/traversing-the-knowledge-base", "dir"),
+    (".claude/skills/designing-clear-data-displays", "dir"),
+    (".claude/skills/lake-conventions", "dir"),
+    (".claude/skills/verifying-claims", "dir"),
     (".claude/skills/SKILLS_FRAMEWORK.md", "file"),
     ("docs/adr/ADR-FORMAT.md", "file"),
     ("docs/session-doc-format.md", "file"),

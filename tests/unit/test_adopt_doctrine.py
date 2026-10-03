@@ -1,11 +1,13 @@
 """Tests for scripts/adopt_doctrine.py."""
 
+import re
 import sys
 from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 import adopt_doctrine
 
@@ -55,7 +57,7 @@ class TestPlanCopies:
         plan = adopt_doctrine._plan_copies(upstream)
         # Plan is a list of (src, dst, kind) tuples
         dsts = {dst for _src, dst, _kind in plan}
-        # The six directory-form skills
+        # The six original directory-form skills; the pin test below covers the rest
         assert ".claude/skills/maintaining-ubiquitous-language" in dsts
         assert ".claude/skills/maintaining-project-context" in dsts
         assert ".claude/skills/recording-architecture-decisions" in dsts
@@ -72,6 +74,21 @@ class TestPlanCopies:
         plan = adopt_doctrine._plan_copies(Path("/fake"))
         for _src, _dst, kind in plan:
             assert kind in {"dir", "file"}
+
+    def test_copies_every_level_0_directory_skill_the_framework_names(self):
+        """Pin: the copy list matches SKILLS_FRAMEWORK.md's Level 0 roster.
+
+        Without this the list drifts: on 2026-10-02 it held 6 of the 12
+        directory-form skills, while the session-end.md and
+        session-doc-format.md it copies pointed at two of the missing six.
+        """
+        framework = (REPO_ROOT / ".claude" / "skills" / "SKILLS_FRAMEWORK.md").read_text(encoding="utf-8")
+        level_0 = framework.split("## Level 0: Universal Foundation Skills", 1)[1].split("\n## ", 1)[0]
+        named = re.findall(r"^### (\S+) \(directory form\)$", level_0, re.MULTILINE)
+        assert "shift-left-testing" in named  # the section parsed
+        copied = {rel for rel, kind in adopt_doctrine.VERBATIM_COPIES if kind == "dir"}
+        missing = [name for name in named if f".claude/skills/{name}" not in copied]
+        assert missing == []
 
     def test_sources_rooted_at_upstream(self):
         upstream = Path("/fake/upstream")
@@ -385,9 +402,9 @@ class TestPrintManualChecklist:
 
 @pytest.fixture
 def full_upstream(tmp_path):
-    """A full fake upstream with all 10 verbatim copy targets + the hook."""
+    """A full fake upstream with every verbatim copy target + the hook."""
     root = tmp_path / "upstream"
-    # All ten verbatim COPY artifacts
+    # Every verbatim COPY artifact
     for rel, kind in adopt_doctrine.VERBATIM_COPIES:
         target = root / rel
         if kind == "dir":

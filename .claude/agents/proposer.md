@@ -60,7 +60,7 @@ What needs to be resolved before implementation.
 ## Scope
 
 - **Read**: All paths
-- **Write**: `docs/plans/` (proposals), `docs/reviews/` (investigation reports)
+- **Write**: `docs/plans/` (proposals), `docs/reviews/` (investigation reports), and only in the repository that owns the sensitivity of the material analyzed. A proposal or report on another repository's material goes to that repository or to the scratchpad, never into this repo's `docs/`, whatever directory you run in.
 - **Never modify**: `src/`, `tests/`, `config/`, `.claude/`
 
 ## Background

@@ -100,22 +100,39 @@ fi
 ```bash
 # Private terms (hostnames, usernames, codenames, sibling repo names) stay out
 # of a public tree. The list lives outside every repo, so this check cannot
-# republish it; the output names a file and a count, never the term.
-# Two incidents, 2026-10-01 and 2026-10-02: agents wrote another repo's names
-# into docs/reviews/, and the record of containing that pasted the five terms
-# into an Evidence line, committed and pushed. Scans the index: HEAD plus
-# anything staged. A line printed is the finding; the block itself exits 0.
+# republish it, and the output carries a count, and a path only when the path
+# itself is clean. Two incidents on 2026-10-01, found 2026-10-02: agents wrote
+# another repo's names into docs/reviews/, and the record of containing that
+# pasted the five terms into an Evidence line, committed and pushed. Scans what
+# a push would carry: the index, and every unpushed commit (HEAD when no
+# upstream is set), their file names and messages included. A line printed is
+# the finding; the block itself exits 0.
 terms="${TACSOP_PRIVATE_TERMS:-$HOME/.config/tacsop/private-terms}"
-if [ "$(sed '/^[[:space:]]*$/d' "$terms" 2>/dev/null | wc -l)" -eq 0 ]; then
+clean=$(sed -e 's/^[[:space:]]*//;s/[[:space:]]*$//' -e '/^$/d' "$terms" 2>/dev/null)
+if [ -z "$clean" ]; then
   echo "WARN: no private-term list at $terms; check 7 did not run"
+elif ! git rev-parse --git-dir >/dev/null 2>&1; then
+  echo "WARN: not inside a git repository; check 7 did not run"
 else
-  git grep -c -i -I -F -f <(sed '/^[[:space:]]*$/d' "$terms") --cached -- . \
-    | sed 's/^/FAIL private term in: /'
+  revs=$(git rev-list '@{upstream}..HEAD' 2>/dev/null || git rev-parse HEAD 2>/dev/null)
+  hits=$(for rev in --cached $revs; do
+           git grep -c -i -F -f <(printf '%s\n' "$clean") $rev -- ':/' \
+             | sed -E 's/^([0-9a-f]{7})[0-9a-f]{33}:/\1:/'
+         done | sort -u)
+  names=$({ git ls-files --cached; for rev in $revs; do git ls-tree -r --name-only "$rev"; done; } | sort -u)
+  msgs=$(for rev in $revs; do git log -1 --format=%B "$rev"; done)
+  n=$(printf '%s\n' "$hits" | sed -E 's/^[0-9a-f]{7}://' | sort -u | grep -c -i -F -f <(printf '%s\n' "$clean"))
+  if [ "$n" -gt 0 ]; then echo "FAIL private term in $n path name(s) with content hits; paths withheld"; fi
+  printf '%s\n' "$hits" | grep -v -i -F -f <(printf '%s\n' "$clean") | sed '/^$/d; s/^/FAIL private term in: /'
+  m=$(printf '%s\n' "$names" | grep -c -i -F -f <(printf '%s\n' "$clean"))
+  if [ "$m" -gt 0 ]; then echo "FAIL private term in $m tracked file name(s); names withheld"; fi
+  k=$(printf '%s\n' "$msgs" | grep -c -i -F -f <(printf '%s\n' "$clean"))
+  if [ "$k" -gt 0 ]; then echo "FAIL private term in $k unpushed commit message line(s); not printed"; fi
 fi
 ```
-- Expected output: empty. FAIL on any line: the file at that path holds a term, in HEAD or staged. Redact before pushing. A hit in an old commit is already public: redact forward first, then decide about history.
-- WARN means this machine has no list. Write one (one term per line, matched case-insensitively as a fixed string) before trusting a clean run. The list is per machine and is never committed anywhere.
-- Never paste a term into this check's output, a commit message, a review, or a session doc. Give the count and the path.
+- Expected output: empty. FAIL on any line. `FAIL private term in: <path>:<count>` names a file whose path is clean. The other three FAIL lines give counts only, because the path, the name, or the message is itself the hit: find them locally with the same grep, and do not paste what it prints. A hit in an old commit is already public: redact forward first, then decide about history. With no upstream set, only HEAD's commit is scanned; before a first push, run every commit through the same grep (`git rev-list HEAD`).
+- WARN means this machine has no list, or this directory is not a git repository. Write the list (one term per line, matched case-insensitively as a fixed string, inside words too, so choose distinctive terms; a false positive is safe) before trusting a clean run. The list is per machine and is never committed anywhere.
+- Never paste a term into this check's output, a commit message, a review, or a session doc. Give the count and, when it is clean, the path.
 
 ## Output Format
 
@@ -153,7 +170,7 @@ PCC Status: NOT READY - 1 failure, resolve before pushing
 | Git state | Clean or intentional | Info only |
 | Reference integrity | Zero MISSING paths in living docs (allowlist current) | Warn only |
 | Gate separation | Gate surfaces staged alone (`[gate]` commit) | Warn only |
-| Private terms | Zero hits for this machine's private-term list over the index, list present | Block push |
+| Private terms | Zero hits for this machine's private-term list over the index and unpushed commits, list present | Block push |
 
 ## Integration
 

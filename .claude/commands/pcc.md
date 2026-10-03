@@ -100,13 +100,14 @@ fi
 ```bash
 # Private terms (hostnames, usernames, codenames, sibling repo names) stay out
 # of a public tree. The list lives outside every repo, so this check cannot
-# republish it, and the output carries a count, and a path only when the path
-# itself is clean. Two incidents on 2026-10-01, found 2026-10-02: agents wrote
-# another repo's names into docs/reviews/, and the record of containing that
-# pasted the five terms into an Evidence line, committed and pushed. Scans what
-# a push would carry: the index, and every unpushed commit (HEAD when no
-# upstream is set), their file names and messages included. A line printed is
-# the finding; the block itself exits 0.
+# republish it, and the output carries each hit as a path, withholding any
+# path, file name, or commit message that is itself a hit and reporting those
+# as counts. Two incidents on 2026-10-01, the second found 2026-10-02: agents
+# wrote another repo's names into docs/reviews/, and the record of containing
+# that pasted the five terms into an Evidence line, committed and pushed.
+# Scans what a push would carry: the index, and every commit not on any
+# remote, their file names and messages included. A line printed is the
+# finding; the block itself exits 0.
 terms="${TACSOP_PRIVATE_TERMS:-$HOME/.config/tacsop/private-terms}"
 clean=$(sed -e 's/^[[:space:]]*//;s/[[:space:]]*$//' -e '/^$/d' "$terms" 2>/dev/null)
 if [ -z "$clean" ]; then
@@ -114,23 +115,22 @@ if [ -z "$clean" ]; then
 elif ! git rev-parse --git-dir >/dev/null 2>&1; then
   echo "WARN: not inside a git repository; check 7 did not run"
 else
-  revs=$(git rev-list '@{upstream}..HEAD' 2>/dev/null || git rev-parse HEAD 2>/dev/null)
-  hits=$(for rev in --cached $revs; do
-           git grep -c -i -F -f <(printf '%s\n' "$clean") $rev -- ':/' \
-             | sed -E 's/^([0-9a-f]{7})[0-9a-f]{33}:/\1:/'
-         done | sort -u)
+  revs=$(git rev-list HEAD --not --remotes 2>/dev/null)
+  paths=$(for rev in --cached $revs; do
+            git grep -l -i -F -f <(printf '%s\n' "$clean") $rev -- ':/'
+          done | sed -E 's/^[0-9a-f]{40}://' | sort -u)
   names=$({ git ls-files --cached; for rev in $revs; do git ls-tree -r --name-only "$rev"; done; } | sort -u)
   msgs=$(for rev in $revs; do git log -1 --format=%B "$rev"; done)
-  n=$(printf '%s\n' "$hits" | sed -E 's/^[0-9a-f]{7}://' | sort -u | grep -c -i -F -f <(printf '%s\n' "$clean"))
-  if [ "$n" -gt 0 ]; then echo "FAIL private term in $n path name(s) with content hits; paths withheld"; fi
-  printf '%s\n' "$hits" | grep -v -i -F -f <(printf '%s\n' "$clean") | sed '/^$/d; s/^/FAIL private term in: /'
-  m=$(printf '%s\n' "$names" | grep -c -i -F -f <(printf '%s\n' "$clean"))
+  held=$(printf '%s\n' "$paths" | sed '/^$/d' | grep -c -i -F -f <(printf '%s\n' "$clean"))
+  if [ "$held" -gt 0 ]; then echo "FAIL private term in $held path name(s) with content hits; paths withheld"; fi
+  printf '%s\n' "$paths" | sed '/^$/d' | grep -v -i -F -f <(printf '%s\n' "$clean") | sed 's/^/FAIL private term in: /'
+  m=$(printf '%s\n' "$names" | sed '/^$/d' | grep -c -i -F -f <(printf '%s\n' "$clean"))
   if [ "$m" -gt 0 ]; then echo "FAIL private term in $m tracked file name(s); names withheld"; fi
   k=$(printf '%s\n' "$msgs" | grep -c -i -F -f <(printf '%s\n' "$clean"))
   if [ "$k" -gt 0 ]; then echo "FAIL private term in $k unpushed commit message line(s); not printed"; fi
 fi
 ```
-- Expected output: empty. FAIL on any line. `FAIL private term in: <path>:<count>` names a file whose path is clean. The other three FAIL lines give counts only, because the path, the name, or the message is itself the hit: find them locally with the same grep, and do not paste what it prints. A hit in an old commit is already public: redact forward first, then decide about history. With no upstream set, only HEAD's commit is scanned; before a first push, run every commit through the same grep (`git rev-list HEAD`).
+- Expected output: empty. FAIL on any line. `FAIL private term in: <path>` names a file whose path is clean, in the index or in a commit not on any remote. The other three FAIL lines give counts only, because the path, the name, or the message is itself the hit: find them locally with the same grep, and do not paste what it prints. A hit in an old commit is already public: redact forward first, then decide about history. A repository with no remote scans all of HEAD's history, which is what a first push carries.
 - WARN means this machine has no list, or this directory is not a git repository. Write the list (one term per line, matched case-insensitively as a fixed string, inside words too, so choose distinctive terms; a false positive is safe) before trusting a clean run. The list is per machine and is never committed anywhere.
 - Never paste a term into this check's output, a commit message, a review, or a session doc. Give the count and, when it is clean, the path.
 

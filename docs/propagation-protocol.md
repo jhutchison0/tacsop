@@ -77,12 +77,12 @@ The script discovers downstream repos by recursive scan of `~/projects/` for any
 
 - No explicit registry. A new downstream repo is auto-discovered the moment it gets a `.claude/commands/` directory.
 - A repo that adopts our template but is in a non-standard parent path (not under `~/projects/`) is invisible. This is acceptable for now but should be revisited if it ever bites.
-- A repo that intentionally opts out cannot. The only workaround is to delete its `.claude/commands/` directory, which defeats the purpose.
+- A repo the hub must not write into is listed in `config/project.yaml` under `propagation.exclude`, as its path relative to `~/projects` (the form a dry run prints). Discovery still finds it; the run prints `[skip] <path>: excluded by config/project.yaml propagation.exclude` and writes neither a notification nor a mark. The list is on the hub's side because the decision is the hub's: a marker file inside the repo (`.claude/no-propagate`) would itself be a write into a repo that must not be written to, and a mirror's sync may not keep it. A path matches on one machine's layout only; a repo cloned elsewhere under another path is not excluded there.
 - **A repo that gitignores `.claude/` is undiscoverable on any fresh clone.** Discovery reads the filesystem, not the roster, so an ignored and therefore untracked `.claude/` is absent the moment the repo is cloned somewhere new. Observed 2026-08-22 in `aar_ai_pipeline`: on the roster since before 2026-07-26, ignoring `.claude/` since commit `1020a43`, and undiscoverable in the clone at `~/projects/gitlab/ops_research/`. **Ignoring `.claude/` is often deliberate** — a repo shared with outside collaborators is commonly scoped to the deliverable, with internal workflow tooling versioned elsewhere. Discovery does not distinguish that from a repo that has simply lost its tooling, and it cannot: both look like an absent directory. The consumer-side fix is the private-sidecar mode in the 2026-08-22 amendment to the 2026-08-21 entry, which restores discovery as a side effect, because a sidecar cloned to `.claude/` puts `.claude/commands` back on disk. Until a consumer adopts one of the two modes, **hand-delivery is the only channel into it.**
 
 **Discovery is not a census.** It reports what is on this machine right now. A name absent from a discovery run may be alive on another machine, cloned without its `.claude/`, or genuinely gone, and the run cannot tell you which. Never prune the roster on a single machine's discovery output.
 
-**Open question (track in `docs/tasks.md` if it becomes pressing)**: should the script support an opt-out file (`.claude/no-propagate`)?
+**Opt-out, settled 2026-10-04**: the hub-side list above, not an opt-out file. The first entry is `github/assay`, a GitHub mirror of a work repository that this hub never writes into.
 
 ---
 

@@ -103,3 +103,13 @@ def test_no_orientation_surface_keeps_a_drifting_count(surface):
     kept = [m.group(0) for m in DRIFTING_COUNT.finditer(text)]
     kept += [m.group(0) for m in STALE_LATEST.finditer(text)]
     assert kept == []
+
+
+@pytest.mark.parametrize(
+    "surface",
+    ORIENTATION + [f".claude/commands/{c}.md" for c in ("session-start", "session-end", "sitrep")],
+)
+def test_no_surface_picks_the_session_doc_by_modification_time(surface):
+    # A fresh clone gives every session doc the same modification time; names
+    # are date-first. Slice 2 fixed two surfaces and a traversal found a third.
+    assert not re.search(r"most recently modified|ls -t docs/sessions", _read(surface), re.I)

@@ -8,10 +8,10 @@ Generate a team-facing status report summarizing what was built, what was found,
 
 Read ALL of these to build the report:
 
-1. `config/project.yaml` — `state.active_work`, `state.last_session`, `lessons_learned`
-2. `docs/tasks.md` — active and pending items, and the defects KNOWN ISSUES reports
+1. `config/project.yaml` — version and phase (identity), and `lessons_learned` if the repo keeps one
+2. `docs/tasks.md` — the `## Focus` section (the campaign's order), active and pending items, and the defects KNOWN ISSUES reports
 3. `docs/gaps.md` — open gaps: what nobody can see yet, and the decision each one blocks
-4. Most recent file in `docs/sessions/` — last session details
+4. Newest file in `docs/sessions/` by name (`ls docs/sessions/*.md | sort | tail -1`; on a date with two docs, both) — last session details
 5. `git log --oneline -10` — recent commit messages
 6. `git log --oneline main..HEAD` — commits not yet on main (if on a dev branch)
 
@@ -32,7 +32,7 @@ A good sitrep includes specifics, not just summaries. When reporting on a capabi
 - **Functions**: Find the actual function/class signature and include it
 - **Config**: Find the actual config values, thresholds, settings
 - **Test results**: Run `pytest -q 2>&1 | tail -5` for current counts
-- **Metrics**: Pull specific numbers from session docs
+- **Metrics**: Pull specific numbers from session docs with the date each was taken; a number a reader will act on today is measured again, not restated
 - **Known issues**: Include the specific symptom and magnitude, not just "there's an issue"
 
 ## Output Format
@@ -67,7 +67,7 @@ BLOCKED:
   - [Item]: [what's blocking it]
 
 NEXT:
-  - [Priority items from task list]
+  - [The Focus section's next steps, then priority items from the task list]
 
 OPEN DECISIONS:
   - [Decisions that need team input, if any]

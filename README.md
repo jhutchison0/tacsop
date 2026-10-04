@@ -15,8 +15,8 @@ This repo serves two purposes:
 |----------|----------|
 | **Utilities** | Logging (colored, timezone-aware), geo (haversine, bearing), Excel tables, Slack webhooks, PostgreSQL/JSONB, multiprocessing patterns, SMARTER weights |
 | **Decision Science** | MAUT scorer with 7 value functions, sensitivity analysis (OAT, Monte Carlo), visualization (radar, tornado, heatmap) — all config-driven via YAML |
-| **Agent Workflow** | 4 agents (test-runner, code-reviewer, proposer, python-prototyper), team templates, session commands (`/session-start`, `/session-end`, `/pcc`, `/pci`, `/task`) |
-| **Testing** | 189 tests, 53% coverage, pytest-cov configured |
+| **Agent Workflow** | Agents in `.claude/agents/` (roster in `.claude/README.md`), team templates, session commands (`/session-start`, `/session-end`, `/pcc`, `/pci`, `/task`) |
+| **Testing** | pytest suites with pytest-cov configured; `.venv/bin/pytest --cov` measures the count and the coverage |
 
 ## Line of Effort 1: Build a New Repo
 
@@ -81,8 +81,8 @@ tacsop/
 │       └── visualization.py
 ├── .claude/                # Agent definitions, teams, commands, skills
 ├── scripts/                # Doctrine propagation tooling
-├── config/project.yaml     # Project identity, phases, state
-├── tests/                  # 189 tests (pytest)
+├── config/project.yaml     # Project identity, phases, machines
+├── tests/                  # pytest suites
 ├── docs/
 │   ├── design/             # Pillars, roadmap, template guide
 │   ├── sessions/           # Session documentation

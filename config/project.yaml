@@ -78,14 +78,13 @@ testing:
     - "tests/unit/test_*.py"
     - "tests/integration/test_*.py"
 
-# Session state
-state:
-  last_session:
-    date: "2026-10-02"
-    file: "docs/sessions/20261002_backlog_cycle_private_terms_and_release_drafts.md"
-    summary: "Three asks landed on Nidhogg: the OVERWATCH release entries are drafted in docs/plans/ (A1, A2, B to G; outside the file the script reads; the hold on propagating them stands); the doctrine backlog (08-21 to 09-18) reached 16 repos in one cycle, 70 deliveries, five marks seeded first; and the agent-output-destination rule shipped as prose on six surfaces plus /pcc check 7, a Private-Term Check whose term list lives outside every repo, after three code-reviewer rounds (GO-WITH-FIXES, GO-WITH-FIXES, GO). The session also found that the 2026-10-01 record of keeping five private terms out of this public repo had pasted the five terms into its own Evidence line, pushed; the line was redacted, the unpushed history rebuilt so no pushed tree carries it, and the user accepted that seven public commits keep it in history. The adoption helper now copies all 12 Level 0 skills (it copied 6). Tests 432 to 462. Found at close: a GitHub mirror of a GitLab work repo sits under ~/projects with .claude/commands/, so discovery would notify it; a P1 keeps propagation out of it."
-  active_work: "Before any propagation run from any box: keep ~/projects/github/assay (a mirror this hub never writes to) out of discovery, hub-side, test-first (P1). Then the work terminal: OVERWATCH Wave 0 falsifiers (0b to 0d), task 1e, task 2d; 2d decides Wave 2 and lifts the release hold. Then the release in one cycle from docs/plans/20261002_overwatch_release_entries_draft.md: fill dates and the 2d paragraph, settle the three open items (the A1/A2 split, the KB-graph capture point's own entry, entry F's final verdict is recorded), copy to docs/doctrine-updates.md, pre-flight, dry run, propagate. After 2d: the three held traps for the verifying-claims skill. Still open from before: the WHETSTONE Wave 1 count, launch-control and veil-engine harvests, the audit-hook pin, the dev/prod config-profile ADR, the configuration-management reconciliation, the fleet ledger, the 0.2.0 cut, the propter check 6 and D4 reconciliation (P3)."
-  # Known unknowns live in docs/gaps.md, the gap register; defects are tasks.
+# No state block. This file is identity, the slowest-moving facts; a sentence of
+# state kept here reads as current long after it stops being true. Instead:
+#   last session      the newest file in docs/sessions/ by name (date-first)
+#   campaign focus    the ## Focus section at the head of docs/tasks.md (intent)
+#   known unknowns    docs/gaps.md, the gap register
+#   suite, git, tools measured by command at /session-start, never written down
+# See .claude/skills/maintaining-the-common-operating-picture/ADOPTION.md.
 
 # Slash commands reference
 commands:

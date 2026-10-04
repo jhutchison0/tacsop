@@ -4,7 +4,78 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
-## 2026-10-04: The Common Operating Picture (`maintaining-the-common-operating-picture` 0.1.1)
+## 2026-10-04: The State Block Leaves the Config (picture slice 2; `maintaining-project-context` 1.1.0)
+
+The second slice of the common operating picture, after the gap register in the 2026-10-04
+entry "The Common Operating Picture" (the skill's entry; a notification lists it first). A sentence of state kept in a maintained file reads as current after it stops
+being true. At the hub on 2026-10-04, three did: `README.md` said 189 tests while the
+suite ran 491, and `CONTEXT.md` and `LANGUAGE.md` named the 2026-04-21 propagation as
+the latest after three later cycles. Slice 2 removes the places such sentences lived and
+pins their absence with a test.
+
+`config/project.yaml` holds identity only. The campaign focus moves to a `## Focus`
+section at the head of `docs/tasks.md`, written as intent with absolute dates; the last
+session is the newest file in `docs/sessions/`; known unknowns are already in the gap
+register. `/session-start` tags every summary line with where it came from (`measured`,
+`identity`, `record`, `intent`, or `register`), so the first thing an agent reads in a
+session separates what was measured that turn from what a document held when it was
+written. `CONTEXT.md` Current State names where each part of the state lives and holds
+no snapshot.
+
+This takes the parts of `/session-start`, `/session-end` and `/sitrep` named in rows 2 to 4
+out of the skill entry's row 6 (DEFER). Rendering a picture at `/session-start` is slice 3
+and stays deferred, as does `/task brief`.
+
+Audience: every repo with a `state:` block in its config or a Current State snapshot in
+its `CONTEXT.md`.
+
+Reversible: restore the block and the command text from git, and delete
+`tests/unit/test_state_block.py`.
+
+### Detect
+
+```bash
+# A state block, or a command that writes or reads one:
+grep -n -E '^state:|active_work|last_session' config/project.yaml .claude/commands/*.md CONTEXT.md .claude/README.md
+# A count or a percentage that drifts, kept in an orientation file:
+grep -n -E '\b[0-9][0-9,]*(\.[0-9]+)?(%| ([a-z]+ )?(tests?|repos?|repositories|consumers?|agents?|passed|passing)\b)' README.md CONTEXT.md LANGUAGE.md CLAUDE.md .claude/README.md | grep -v -i -E 'level[ -][0-9]+ agent'
+# A "latest" pinned to a date:
+grep -n -i -E '(most recent|latest)[^.]*20[0-9]{2}-[0-9]{2}-[0-9]{2}' README.md CONTEXT.md LANGUAGE.md CLAUDE.md .claude/README.md
+```
+
+Any hit is a line this slice moves.
+
+### Adoption-Mode Table
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 1 | `config/project.yaml` `state:` block | **CUSTOMIZE** | Write `active_work`'s content into a `## Focus` section at the head of `docs/tasks.md` as intent: the order of the next steps, absolute dates, no counts. Then delete the block and add the hub's comment. `last_session` needs no new home. Anything else in the block goes to its one home: identity stays in the config, a gap goes to the register, a measurement becomes the command that takes it. |
+| 2 | `/session-end` Step 4.5 | **PATCH** | Replace it with the hub's "Update Focus and Gaps". `adopt_doctrine.py` skips an existing `session-end.md`, so patch by hand. |
+| 3 | `/session-start` Steps 3, 3.5, 3.7 and 5 | **PATCH** | Copy Step 3 (the newest session doc by name, not by modification time, which a fresh clone makes equal), the Focus bullet, Step 3.7 (read the gap register; it needs slice 1's register), and Step 5's tags and rule. Keep your own summary items and give each a tag. |
+| 4 | `/sitrep` sources 1 and 2, `.claude/README.md` Work Organization | **PATCH** | Both read the Focus section instead of `state.active_work`. |
+| 5 | `CONTEXT.md` Current State, Reading Order, and the artifact table | **CUSTOMIZE** | Replace the snapshot with where each part of the state lives; the hub's list is the model. |
+| 6 | `.claude/skills/maintaining-project-context/` 1.1.0 | **TEMPLATE-COPY** | `adopt_doctrine.py` copies it only where the directory is absent; diff an existing copy and patch it. |
+| 7 | Counts in `README.md`, `LANGUAGE.md`, `CLAUDE.md`, `.claude/README.md` | **CUSTOMIZE** | Replace each count of tests, repos, consumers, or agents with the command that measures it, not with today's number. |
+| 8 | `tests/unit/test_state_block.py` | **CUSTOMIZE** | Copy it and cut `SURFACES` and `ORIENTATION` to the files your repo has. |
+| 9 | `/pcc` check 5's task-list range | **PATCH** | Change `sed -n '/^## Active/,/^## Completed/p' docs/tasks.md` to `sed -n '1,/^## Completed/p' docs/tasks.md`, so the Focus section's paths are checked. Commit it alone, per check 6. |
+
+### Action required
+
+1. Move `active_work` into `## Focus`, delete the `state:` block, and add the comment (row 1).
+2. Patch `/session-end`, `/session-start`, `/sitrep` and `.claude/README.md` (rows 2 to 4).
+3. Rewrite `CONTEXT.md` Current State and update `maintaining-project-context` (rows 5 and 6).
+4. Replace drifting counts with commands (row 7), copy the test (row 8), and run it.
+5. Widen check 5's task-list range (row 9) in its own commit.
+
+### Rollback
+
+Move the Focus section's steps back into `active_work` and restore the `state:` block, the
+four commands, `CONTEXT.md`, and check 5's range from git; return
+`maintaining-project-context` to 1.0.0; delete `tests/unit/test_state_block.py`.
+
+---
+
+## 2026-10-04: The Common Operating Picture (`maintaining-the-common-operating-picture` 0.1.2)
 
 A new Level 0 skill for how a repo knows its own state. A statement about a host, a
 count, a schedule or a coverage figure goes stale the moment it is written, and a stale

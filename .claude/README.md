@@ -111,7 +111,7 @@ Team compositions live in `.claude/teams/`. Use `/task promote` or `/task plan` 
 
 Agents communicate through shared artifacts; no direct messaging is required for most workflows:
 
-- **Config files** — `config/project.yaml` is the shared schema contract and project state
+- **Config files** — `config/project.yaml` is the shared schema contract and the project's identity
 - **Test results** — `pytest` output validates changes and is the evidence standard for all agents
 - **Task list** — `docs/tasks.md` tracks ownership and status across agent turns
 - **Review reports** — `code-reviewer` and `decision-scientist` write findings to `docs/reviews/` of the owning repository (Scope Matrix note) for async review
@@ -131,7 +131,7 @@ Involve the user when:
 
 Work is tracked at two levels:
 
-- **Strategic**: `config/project.yaml` → `state.active_work` (campaign focus, blockers, priorities)
+- **Strategic**: the `## Focus` section at the head of `docs/tasks.md` (the campaign's order, as intent); what nobody can see yet is in `docs/gaps.md`
 - **Tactical**: `docs/tasks.md` (individual items with owners, priorities, status)
 
 The `/task` command manages the tactical layer and includes an escalation ladder for promoting complex work into planning documents in `docs/plans/`:

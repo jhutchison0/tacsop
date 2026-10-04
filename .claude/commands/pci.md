@@ -127,6 +127,6 @@ Typical workflow:
 
 | Purpose | File |
 |---------|------|
-| Project status & phases | `config/project.yaml` |
+| Project identity & phases | `config/project.yaml` |
 | Design principles | `docs/design/pillars.md` |
 | Project roadmap | `docs/design/roadmap.md` |

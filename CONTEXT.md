@@ -93,7 +93,7 @@ When an agent or human is introduced to this project, point them at these files 
 6. [docs/propagation-protocol.md](docs/propagation-protocol.md) — required reading if touching anything that propagates downstream.
 7. [docs/adr/](docs/adr/) — accepted architecture decisions; check before reopening any decision they cover.
 8. [.claude/skills/lake-conventions/](.claude/skills/lake-conventions/) — required reading before writing to the lake, in repos that do; its `HOME-STORAGE.md` sidecar is the same for personal repos writing to home storage.
-9. [docs/sessions/](docs/sessions/) — recent session for live context (most recently modified file).
+9. [docs/sessions/](docs/sessions/) — recent session for live context (the newest file by name; names are date-first).
 
 ---
 

@@ -59,7 +59,7 @@ A single propagation cycle has six steps:
 
 1. **Draft entry.** Add a `## YYYY-MM-DD: <Subject>` section to the top of `docs/doctrine-updates.md` (most recent first). Include: files changed, files added, change description, scope per audience, **Action Required** checklist.
 2. **Pre-flight review.** Run the change through the Evaluation Gate (five questions above). If any fails, fix or downgrade.
-3. **Dry run.** `python scripts/propagate_doctrine.py --dry-run` prints, per repo, how many entries it would be sent, their dates, and how its mark would change. Confirm the repo list and that no repo is sent an entry it already holds.
+3. **Dry run.** `python scripts/propagate_doctrine.py --dry-run` prints, per repo, how many entries it would be sent, their dates, and how its mark would change. Confirm the repo list and that no repo is sent an entry it already holds. Each repo in `propagation.exclude` that is on this machine prints a `[skip]` line; resolve any `[warn]` line (a typo, or a repo not cloned here) before step 4.
 4. **Propagate.** `python scripts/propagate_doctrine.py` writes `.claude/upstream-update.md` in each downstream repo, or appends to an unread one, and then updates that repo's delivery mark. A repo with no mark gets the newest entry only, unless `--since YYYY-MM-DD` names the oldest entry it may lack.
 5. **Log the cycle.** In the next session doc, record: cycle number (continuing from prior count), repo count (new vs appended), and any anomalies (missing repos, append-target mismatches).
 6. **Track unread.** Append mode means notifications accumulate until a downstream maintainer deletes the file. This is intentional — never overwrite — but it means you should check `docs/sessions/` for a doctrine consumption record before propagating again.
@@ -73,16 +73,20 @@ The script discovers downstream repos by recursive scan of `~/projects/` for any
 - **The `tacsop` repo itself is excluded.** Hardcoded by path equality.
 - **Nested repos are excluded.** If repo A is inside repo B, only B is notified — A is treated as a submodule or sub-checkout, not an independent consumer.
 
+A third rule applies at the run, not at discovery: a repo at or under a path in `propagation.exclude` is skipped (see the Implications below).
+
 **Implications**:
 
 - No explicit registry. A new downstream repo is auto-discovered the moment it gets a `.claude/commands/` directory.
 - A repo that adopts our template but is in a non-standard parent path (not under `~/projects/`) is invisible. This is acceptable for now but should be revisited if it ever bites.
-- A repo that intentionally opts out cannot. The only workaround is to delete its `.claude/commands/` directory, which defeats the purpose.
+- A repo the hub must not write into is listed in `config/project.yaml` under `propagation.exclude`, as its path relative to `~/projects` (the form a dry run prints). Discovery still finds it; the run prints `[skip] <path>: excluded by config/project.yaml propagation.exclude` and writes neither a notification nor a mark there, nor in any repo under that path. The list is on the hub's side because the decision is the hub's: a marker file inside the repo (`.claude/no-propagate`) would itself be a write into a repo that must not be written to, and a mirror's sync may not keep it.
+  - **Read so a slip excludes more, never less.** Whitespace, a leading `./`, a trailing `/` and Windows separators are dropped and case is folded. A list that is present but unreadable (a single value instead of a list, YAML that does not parse) refuses the run: `Refused, nothing written`. An entry that matches no discovered repo prints `[warn] <entry>: in propagation.exclude, but no discovered repo is at or under it`, and the run goes on, because a machine without that repo cloned is a legitimate case.
+  - **The match is a path, not a repo.** It is exact against the root two levels above the hub checkout. A second clone of the same repository at another path, on this machine or another, is not excluded by it.
 - **A repo that gitignores `.claude/` is undiscoverable on any fresh clone.** Discovery reads the filesystem, not the roster, so an ignored and therefore untracked `.claude/` is absent the moment the repo is cloned somewhere new. Observed 2026-08-22 in `aar_ai_pipeline`: on the roster since before 2026-07-26, ignoring `.claude/` since commit `1020a43`, and undiscoverable in the clone at `~/projects/gitlab/ops_research/`. **Ignoring `.claude/` is often deliberate** — a repo shared with outside collaborators is commonly scoped to the deliverable, with internal workflow tooling versioned elsewhere. Discovery does not distinguish that from a repo that has simply lost its tooling, and it cannot: both look like an absent directory. The consumer-side fix is the private-sidecar mode in the 2026-08-22 amendment to the 2026-08-21 entry, which restores discovery as a side effect, because a sidecar cloned to `.claude/` puts `.claude/commands` back on disk. Until a consumer adopts one of the two modes, **hand-delivery is the only channel into it.**
 
 **Discovery is not a census.** It reports what is on this machine right now. A name absent from a discovery run may be alive on another machine, cloned without its `.claude/`, or genuinely gone, and the run cannot tell you which. Never prune the roster on a single machine's discovery output.
 
-**Open question (track in `docs/tasks.md` if it becomes pressing)**: should the script support an opt-out file (`.claude/no-propagate`)?
+**Opt-out, settled 2026-10-04**: the hub-side list above, not an opt-out file. The first entry is `github/assay`, a GitHub mirror of a work repository that this hub never writes into. Every exclusion for a repo on this machine prints a `[skip]` line in the dry run (Cycle Anatomy, step 3); a `[warn]` line is read before the live run.
 
 ---
 
@@ -127,7 +131,7 @@ Then run `--dry-run` and confirm that repo is sent exactly the entries it lacks.
 
 The template's `version` in `config/project.yaml` is currently `0.1.0` and does not formally constrain downstream repos. Downstream repos are not expected to track our version explicitly.
 
-**However**: a doctrine entry that depends on a specific template version (e.g., "requires `propagate_doctrine.py` v2 with the new opt-out flag") should say so at the top of the entry. Do not assume downstream repos pull our latest template before applying our doctrine.
+**However**: a doctrine entry that depends on a specific template version (e.g., "requires the `propagate_doctrine.py` that reads delivery marks") should say so at the top of the entry. Do not assume downstream repos pull our latest template before applying our doctrine.
 
 If a doctrine change ever becomes version-gated, this protocol gets an ADR.
 

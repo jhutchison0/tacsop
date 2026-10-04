@@ -88,6 +88,8 @@ When a term is missing or contested, invoke the `maintaining-ubiquitous-language
 
 **Append Mode**: A propagation behavior that preserves unread notifications in downstream repos by appending new updates instead of overwriting. Default since 2026-03-30.
 
+**Propagation Exclusion**: A repo, named by its path under `~/projects`, that this hub never writes into. Listed in `config/project.yaml` under `propagation.exclude`; the run prints `[skip]` for it and writes no notification or mark there. Settled 2026-10-04 with `github/assay`, a mirror of a work repository, as the first entry. _Avoid:_ opt-out (the repo does not choose; the hub does).
+
 ---
 
 ## Workflow Artifacts
@@ -105,6 +107,12 @@ When a term is missing or contested, invoke the `maintaining-ubiquitous-language
 **ADR**: Architecture Decision Record, a numbered file in `docs/adr/NNNN-<slug>.md` capturing one decision that satisfies the triple filter: hard to reverse AND surprising without context AND result of a real trade-off. Maintained via the `recording-architecture-decisions` skill. See `docs/adr/ADR-FORMAT.md`.
 
 **Triple Filter**: The gate for whether a decision warrants an ADR. All three required: hard to reverse, surprising without context, real trade-off. Source: Matt Pocock's ADR format.
+
+**Focus**: The `## Focus` section at the head of `docs/tasks.md`: the campaign's next steps, in order, as intent, with absolute dates and no counts or status. Rewritten by `/session-end` Step 4.5 when the order changes. Replaced `state.active_work` in `config/project.yaml` on 2026-10-04.
+
+**Gap Register**: `docs/gaps.md`, the list of what this repo cannot see yet. Each open row names the collector that would close it and the decision it blocks; a row closes or is superseded in place, never deleted; the list is never empty. Pinned by `tests/unit/test_gaps.py`. Replaced `state.known_issues` on 2026-10-04.
+
+**Common Operating Picture**: One rendered display over the data every reader shares, never a maintained paragraph. It and its terms (measurement, estimate, projection, horizon, surprise, gap, collector, universe) are defined once, in the vocabulary table of `.claude/skills/maintaining-the-common-operating-picture/SKILL.md`; this file points there rather than redefining them.
 
 ---
 

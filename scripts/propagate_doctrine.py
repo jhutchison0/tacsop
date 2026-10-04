@@ -23,6 +23,8 @@ import sys
 from datetime import date
 from pathlib import Path
 
+import yaml
+
 TACSOP_ROOT = Path(__file__).resolve().parent.parent
 PROJECTS_DIR = TACSOP_ROOT.parent.parent  # ~/projects
 DOCTRINE_FILE = TACSOP_ROOT / "docs" / "doctrine-updates.md"
@@ -52,6 +54,19 @@ def find_downstream_repos() -> list[Path]:
         if not any(repo != other and repo.is_relative_to(other) for other in repos):
             filtered.append(repo)
     return filtered
+
+
+def excluded_repos() -> set[str]:
+    """Repos this hub never writes into, as paths relative to PROJECTS_DIR.
+
+    Listed in config/project.yaml under propagation.exclude. Discovery still
+    finds them, so its universe is unchanged; the run names each one it skips.
+    """
+    config = TACSOP_ROOT / "config" / "project.yaml"
+    if not config.exists():
+        return set()
+    data = yaml.safe_load(config.read_text(encoding="utf-8")) or {}
+    return set((data.get("propagation") or {}).get("exclude") or [])
 
 
 ENTRY_HEADING = re.compile(r"^## (\d{4}-\d{2}-\d{2}):", re.MULTILINE)
@@ -193,9 +208,13 @@ def propagate(dry_run: bool = False, since: str | None = None) -> int:
         return 0
 
     offered = {_heading(e) for e in entries}
+    excluded = excluded_repos()
     failures = 0
     for repo in repos:
         rel = repo.relative_to(PROJECTS_DIR)
+        if rel.as_posix() in excluded:
+            print(f"[skip] {rel}: excluded by config/project.yaml propagation.exclude")
+            continue
         target = repo / NOTIFICATION_FILENAME
         mark_file = repo / MARK_FILENAME
         try:

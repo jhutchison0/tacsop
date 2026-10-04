@@ -52,6 +52,13 @@ paths:
   plans: "docs/plans"
   reviews: "docs/reviews"
 
+# Doctrine propagation: repos that discovery finds under ~/projects and this hub
+# never writes into, as paths relative to ~/projects (the form a dry run prints).
+# The run names each one it skips. Read by scripts/propagate_doctrine.py.
+propagation:
+  exclude:
+    - github/assay  # a mirror of a work repository (the user's rule, 2026-10-02)
+
 # Build phases — update status as work progresses
 # Statuses: not_started, in_progress, complete
 build_phases:

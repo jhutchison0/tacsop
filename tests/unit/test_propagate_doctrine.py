@@ -198,6 +198,35 @@ class TestPropagate:
         assert "[dry-run]" in captured.out
         assert "(new)" in captured.out
 
+    def _exclude(self, setup, *paths):
+        config = setup["doctrine"].parents[1] / "config" / "project.yaml"
+        config.parent.mkdir(parents=True)
+        config.write_text("propagation:\n  exclude:\n" + "".join(f"    - {p}\n" for p in paths))
+
+    def test_an_excluded_repo_gets_no_notification_and_no_mark(self, setup, capsys):
+        # A mirror the hub must never write into is still discovered; the run
+        # names it as skipped, so the exclusion is visible, and writes nothing.
+        self._exclude(setup, "gitlab/repo_b")
+        repo_a, repo_b = setup["repos"]
+
+        propagate_doctrine.propagate(dry_run=False)
+
+        assert (repo_a / ".claude" / "upstream-update.md").exists()
+        assert not (repo_b / ".claude" / "upstream-update.md").exists()
+        assert not (repo_b / ".claude" / "doctrine-delivered").exists()
+        out = capsys.readouterr().out
+        assert "[skip] gitlab/repo_b: excluded by config/project.yaml propagation.exclude" in out
+
+    def test_a_dry_run_names_an_excluded_repo_as_skipped(self, setup, capsys):
+        self._exclude(setup, "gitlab/repo_b")
+
+        propagate_doctrine.propagate(dry_run=True)
+
+        out = capsys.readouterr().out
+        assert "[skip] gitlab/repo_b: excluded by config/project.yaml propagation.exclude" in out
+        assert "[dry-run] gitlab/repo_b" not in out
+        assert "[dry-run] gitlab/repo_a" in out
+
     def test_no_doctrine_file(self, projects_dir, monkeypatch, capsys):
         utils = _make_repo(projects_dir, "github/utils")
         monkeypatch.setattr(propagate_doctrine, "PROJECTS_DIR", projects_dir)
@@ -655,3 +684,16 @@ def test_an_indented_fence_still_hides_its_headings(tmp_path):
     doctrine.write_text(FENCED_EXAMPLE.replace("```markdown\n## 2026-10-05: REVERT, Old subject\n```", "  ```markdown\n## 2026-10-05: REVERT, Old subject\n  ```"))
 
     assert [d for d, _ in propagate_doctrine.extract_entries(doctrine)] == ["2026-10-01", "2026-09-18"]
+
+
+# --- the hub's own exclusions ---
+
+
+def test_the_hub_never_writes_into_the_assay_mirror():
+    # ~/projects/github/assay mirrors a work repository; the user's rule
+    # (2026-10-02) is that this hub never writes into it.
+    import yaml
+
+    config = Path(__file__).resolve().parents[2] / "config" / "project.yaml"
+    exclude = yaml.safe_load(config.read_text(encoding="utf-8"))["propagation"]["exclude"]
+    assert "github/assay" in exclude

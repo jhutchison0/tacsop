@@ -47,7 +47,7 @@ See `/pcc` for the full checklist and output format.
   - `last_session.file` - path to session doc
   - `last_session.summary` - one-line summary
   - `active_work` - update if changed
-  - `known_issues` - add/resolve any discovered
+- **docs/gaps.md**, the gap register (rule 5 of `.claude/skills/maintaining-the-common-operating-picture/SKILL.md`): add a row for each thing the session found that nobody can see yet, naming the collector that would close it and the decision it blocks. When a collector now covers a gap, or a measurement found it absent, set its Status to `closed YYYY-MM-DD by <pointer>`; when a newer row restates it, to `superseded YYYY-MM-DD by <pointer>`; never delete a row. A defect is a task, not a gap. Step 2 ran before this edit, so run the register's test again after it (here, `.venv/bin/pytest tests/unit/test_gaps.py -q`). A repo without the register starts it with its first row (the skill's `ADOPTION.md`, first slice).
 - Include these updates in the commit (amend if needed)
 
 ## Step 5: Session Documentation

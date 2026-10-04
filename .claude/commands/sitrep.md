@@ -8,11 +8,12 @@ Generate a team-facing status report summarizing what was built, what was found,
 
 Read ALL of these to build the report:
 
-1. `config/project.yaml` — `state.active_work`, `state.last_session`, `state.known_issues`, `lessons_learned`
+1. `config/project.yaml` — `state.active_work`, `state.last_session`, `lessons_learned`
 2. `docs/tasks.md` — active and pending items
-3. Most recent file in `docs/sessions/` — last session details
-4. `git log --oneline -10` — recent commit messages
-5. `git log --oneline main..HEAD` — commits not yet on main (if on a dev branch)
+3. `docs/gaps.md` — open gaps: what nobody can see yet, and the decision each one blocks
+4. Most recent file in `docs/sessions/` — last session details
+5. `git log --oneline -10` — recent commit messages
+6. `git log --oneline main..HEAD` — commits not yet on main (if on a dev branch)
 
 ## Scope Filtering
 
@@ -58,6 +59,9 @@ TEST STATUS:
 
 KNOWN ISSUES:
   - [Issue]: [specific symptom and magnitude]
+
+GAPS (open rows in docs/gaps.md):
+  - [What nobody can see yet]: [the decision it blocks]
 
 BLOCKED:
   - [Item]: [what's blocking it]

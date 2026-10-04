@@ -1,8 +1,11 @@
 """Tests for src/myproject/utils/gaps.py, and the pin on docs/gaps.md."""
 
 import pytest
+import yaml
 
 from src.myproject.utils import gaps
+
+REPO = gaps.REGISTER.parents[1]
 
 # --- fixtures ---
 
@@ -22,6 +25,18 @@ def register(*rows: str) -> str:
 
 def test_the_repo_register_holds_rule_5():
     assert gaps.problems(gaps.REGISTER.read_text()) == []
+
+
+@pytest.mark.parametrize("command", ["session-end.md", "sitrep.md"])
+def test_known_unknowns_live_only_in_the_register(command):
+    # The config's known_issues list was the register's predecessor; two homes
+    # for one list let them drift. The commands that wrote and read it now point
+    # here, so the next session cannot put the key back.
+    state = yaml.safe_load((REPO / "config" / "project.yaml").read_text()).get("state", {})
+    assert "known_issues" not in state
+    text = (REPO / ".claude" / "commands" / command).read_text()
+    assert "known_issues" not in text
+    assert "docs/gaps.md" in text
 
 
 def test_a_well_formed_register_has_no_problems():

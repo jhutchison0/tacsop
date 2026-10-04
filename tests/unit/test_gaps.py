@@ -1,0 +1,81 @@
+"""Tests for src/myproject/utils/gaps.py, and the pin on docs/gaps.md."""
+
+import pytest
+
+from src.myproject.utils import gaps
+
+# --- fixtures ---
+
+HEADER = """\
+# Gap Register
+
+| ID | Gap | Collector that would close it | Decision it blocks | Opened | Status |
+|---|---|---|---|---|---|
+"""
+
+OPEN = "| G1 | Fleet membership | a fleet ledger | the roster | 2026-10-02 | open |\n"
+
+
+def register(*rows: str) -> str:
+    return HEADER + "".join(rows)
+
+
+def test_the_repo_register_holds_rule_5():
+    assert gaps.problems(gaps.REGISTER.read_text()) == []
+
+
+def test_a_well_formed_register_has_no_problems():
+    assert gaps.problems(register(OPEN)) == []
+
+
+def test_an_empty_register_is_a_problem():
+    assert gaps.problems("") == ["no open gap: the list is never empty (rule 5)"]
+
+
+def test_a_register_of_closed_and_superseded_rows_counts_as_empty():
+    closed = OPEN.replace("| open |", "| closed 2026-10-04 by tests/unit/test_x.py |")
+    superseded = OPEN.replace("G1", "G2").replace("| open |", "| superseded 2026-10-04 by G3 |")
+    assert gaps.problems(register(closed, superseded)) == [
+        "no open gap: the list is never empty (rule 5)"
+    ]
+
+
+@pytest.mark.parametrize("filler", ["", "-", "TBD", "none", "N/A", "?"])
+def test_an_open_gap_must_name_its_collector(filler):
+    row = OPEN.replace("| a fleet ledger |", f"| {filler} |")
+    assert gaps.problems(register(row)) == ["G1: names no collector that would close it"]
+
+
+@pytest.mark.parametrize("filler", ["", "TBD"])
+def test_an_open_gap_must_name_the_decision_it_blocks(filler):
+    row = OPEN.replace("| the roster |", f"| {filler} |")
+    assert gaps.problems(register(row)) == ["G1: names no decision it blocks"]
+
+
+@pytest.mark.parametrize(
+    "status", ["Open", "done", "closed 2026-10-04", "superseded by G3", "closed by G3"]
+)
+def test_a_status_outside_the_three_marks_is_a_problem(status):
+    # A typo would hide the row from the field checks; a mark without a date or
+    # a pointer would break rule 4's "points at what replaced it".
+    odd = OPEN.replace("| open |", f"| {status} |")
+    other = OPEN.replace("G1", "G2")
+    assert gaps.problems(register(odd, other)) == [
+        "G1: status must be open, closed YYYY-MM-DD by <pointer>, "
+        "or superseded YYYY-MM-DD by <pointer>"
+    ]
+
+
+@pytest.mark.parametrize(
+    ("row", "cells"),
+    [
+        (OPEN.replace("a fleet ledger", "a `Write|Edit` hook"), 7),
+        (OPEN.replace("| 2026-10-02 ", ""), 5),
+    ],
+)
+def test_a_row_whose_cells_do_not_match_the_header_is_a_problem(row, cells):
+    # A `|` inside a cell shifts every cell after it; a dropped cell does the same.
+    other = OPEN.replace("G1", "G2")
+    assert gaps.problems(register(row, other)) == [
+        f"G1: has {cells} cells where the header has 6 (a | inside a cell?)"
+    ]

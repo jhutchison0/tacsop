@@ -62,8 +62,10 @@ git status --short
 # Extension bound is {2,8}, not {2,4}: a 4-cap truncates .geojson/.service/.shtml
 # and then reports the truncated path as MISSING (found by the launch-control
 # canary 2026-08-17, where it produced 3 false positives against real files).
+# The task list is scanned from its first line, so the ## Focus section above
+# ## Active is covered; ## Completed and below are records and are not.
 { cat CLAUDE.md CONTEXT.md README.md LANGUAGE.md .claude/README.md 2>/dev/null; \
-  sed -n '/^## Active/,/^## Completed/p' docs/tasks.md; } \
+  sed -n '1,/^## Completed/p' docs/tasks.md; } \
   | grep -oE '(docs|src|tests|config|scripts|\.claude|\.github)/[A-Za-z0-9_./-]+\.[A-Za-z0-9]{2,8}' \
   | grep -vE '^\.claude/(upstream-update\.md|upstream-lesson\.md|audits/)' \
   | sort -u | while read -r p; do [ -e "$p" ] || echo "MISSING: $p"; done

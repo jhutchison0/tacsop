@@ -54,6 +54,7 @@ VERBATIM_COPIES: list[tuple[str, str]] = [
     (".claude/skills/designing-clear-data-displays", "dir"),
     (".claude/skills/lake-conventions", "dir"),
     (".claude/skills/verifying-claims", "dir"),
+    (".claude/skills/maintaining-the-common-operating-picture", "dir"),
     (".claude/skills/SKILLS_FRAMEWORK.md", "file"),
     ("docs/adr/ADR-FORMAT.md", "file"),
     ("docs/session-doc-format.md", "file"),

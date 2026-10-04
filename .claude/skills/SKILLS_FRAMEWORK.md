@@ -218,6 +218,16 @@ These skills are portable to any software project. They contain no project names
 
 **Use when**: Reporting that something passed, landed, synced, exists, or is absent; repeating a number measured earlier; writing or reviewing a session's Claims table.
 
+### maintaining-the-common-operating-picture (directory form)
+
+**Path**: `.claude/skills/maintaining-the-common-operating-picture/SKILL.md` + 3 sidecars (`DOCTRINE.md`, `EXAMPLES.md`, `ADOPTION.md`).
+
+**Focus**: How a repo knows its own state. Two ideas and eight kernel rules: mark every line as a measurement or an estimate, and place every line by how it moves. The vocabulary (assessment, measurement, estimate, projection, horizon, surprise, gap, collector, universe, picture) is defined once, with its ADP 5-0 and 6-0 sources. `verifying-claims` governs a claim about what this turn changed; this skill governs standing facts this turn did not touch, and where they live.
+
+**Key concepts**: the rendered picture is generated and never hand-edited while its registers are authored; a measurement carries value, time, collector, subject identity, universe and shape (exact, bound, interval); an estimate carries a range and the observation that would prove it wrong; every quantity declares its motion (constant, drifting, scheduled), its horizon per decision, and its surprise condition; supersede in place; gaps name their collector and the decision they block and the list is never empty; read the picture before you measure; one horizon per line (current operations, running estimate, plans) with records keeping all three; never report clean (checked with fields, or unchecked with a reason). Success criterion open, in the five-session shape.
+
+**Use when**: Writing or reading any statement about what is true now; before measuring something that may already be measured; designing a probe, a status document or the session-start summary; deciding where a fact lives; reviewing a plan whose gate states a measurement.
+
 ### task management (command: `/task`)
 
 **Focus**: Military-inspired work tracking with structured escalation from tasks to operations orders.

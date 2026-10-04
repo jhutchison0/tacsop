@@ -54,6 +54,7 @@ Any hit is a line this slice moves.
 | 6 | `.claude/skills/maintaining-project-context/` 1.1.0 | **TEMPLATE-COPY** | `adopt_doctrine.py` copies it only where the directory is absent; diff an existing copy and patch it. |
 | 7 | Counts in `README.md`, `LANGUAGE.md`, `CLAUDE.md`, `.claude/README.md` | **CUSTOMIZE** | Replace each count of tests, repos, consumers, or agents with the command that measures it, not with today's number. |
 | 8 | `tests/unit/test_state_block.py` | **CUSTOMIZE** | Copy it and cut `SURFACES` and `ORIENTATION` to the files your repo has. |
+| 9 | `/pcc` check 5's task-list range | **PATCH** | Change `sed -n '/^## Active/,/^## Completed/p' docs/tasks.md` to `sed -n '1,/^## Completed/p' docs/tasks.md`, so the Focus section's paths are checked. Commit it alone, per check 6. |
 
 ### Action required
 
@@ -61,11 +62,12 @@ Any hit is a line this slice moves.
 2. Patch `/session-end`, `/session-start`, `/sitrep` and `.claude/README.md` (rows 2 to 4).
 3. Rewrite `CONTEXT.md` Current State and update `maintaining-project-context` (rows 5 and 6).
 4. Replace drifting counts with commands (row 7), copy the test (row 8), and run it.
+5. Widen check 5's task-list range (row 9) in its own commit.
 
 ### Rollback
 
-Restore the `state:` block, the four commands, and `CONTEXT.md` from git; return
-`maintaining-project-context` to 1.0.0; delete `tests/unit/test_state_block.py`.
+Restore the `state:` block, the four commands, `CONTEXT.md`, and check 5's range from git;
+return `maintaining-project-context` to 1.0.0; delete `tests/unit/test_state_block.py`.
 
 ---
 

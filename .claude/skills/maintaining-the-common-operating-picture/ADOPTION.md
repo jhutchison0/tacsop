@@ -101,6 +101,11 @@ One session, any repo, no store, no probe, no cadence:
    would close it and the decision it blocks.
 2. One test that fails when the file is empty, when an entry lacks either field, or when
    only superseded entries remain.
+3. If the config already keeps a known-issues list, move it in the same slice, each entry
+   to its one home (a known unknown to the register, a defect to the task list, a decision
+   to its record, an operating note to the command it governs), delete the key, and point
+   the commands that wrote and read it at the register. Two homes for one list drift, and
+   only one of them is tested. The hub did this on 2026-10-04: eight entries, five gaps.
 
 That is rule 5 alone, and it is the piece that makes refusing confirmation bias something a
 repo can fail rather than something it intends.

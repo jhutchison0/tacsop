@@ -1,7 +1,7 @@
 ---
 name: maintaining-the-common-operating-picture
 description: House rule for how a repo knows its own state. Two ideas and eight kernel rules, with the vocabulary (measurement, estimate, projection, horizon, surprise, gap) defined once. Mark every line as a measurement or an estimate; place every line by how it moves. Use when writing or reading any statement about what is true now, before measuring something that may already be measured, when designing a probe or a status report, and when deciding where a fact lives.
-version: "0.1.0"
+version: "0.1.1"
 ---
 
 # Maintaining the Common Operating Picture
@@ -174,6 +174,10 @@ once the window opens. No cell triggers automatically.
 
 ## Version History
 
+- **0.1.1** (2026-10-04): `ADOPTION.md`'s first slice moves an existing known-issues list
+  into the register in the same slice, so the list has one home. Learned from the hub's own
+  first slice the same day (`docs/gaps.md`), whose gate review also found that a filler
+  such as `None exists.` passed the two-field check until punctuation was stripped.
 - **0.1.0** (2026-10-04): Draft. Kernel, vocabulary and procedure after a three-agent
   pre-draft review (proposer, code-reviewer, decision-scientist) of an earlier eight-rule
   draft; the decay model from the owner's convoy example. Success criterion open.

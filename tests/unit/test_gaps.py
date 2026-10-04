@@ -1,5 +1,7 @@
 """Tests for src/myproject/utils/gaps.py, and the pin on docs/gaps.md."""
 
+import re
+
 import pytest
 import yaml
 
@@ -32,11 +34,13 @@ def test_known_unknowns_live_only_in_the_register(command):
     # The config's known_issues list was the register's predecessor; two homes
     # for one list let them drift. The commands that wrote and read it now point
     # here, so the next session cannot put the key back.
-    state = yaml.safe_load((REPO / "config" / "project.yaml").read_text()).get("state", {})
+    state = yaml.safe_load((REPO / "config" / "project.yaml").read_text()).get("state") or {}
     assert "known_issues" not in state
     text = (REPO / ".claude" / "commands" / command).read_text()
     assert "known_issues" not in text
-    assert "docs/gaps.md" in text
+    # On a list item: an instruction to write it, or a source to read. A heading
+    # that merely mentions the file does not count.
+    assert re.search(r"^\s*(?:[-*]|\d+\.)\s.*docs/gaps\.md", text, re.MULTILINE)
 
 
 def test_a_well_formed_register_has_no_problems():
@@ -55,20 +59,34 @@ def test_a_register_of_closed_and_superseded_rows_counts_as_empty():
     ]
 
 
-@pytest.mark.parametrize("filler", ["", "-", "TBD", "none", "N/A", "?"])
+@pytest.mark.parametrize(
+    "filler",
+    ["", "-", "TBD", "none", "N/A", "?", "None exists.", "TBD.", "—", "`none`", "*unknown*"],
+)
 def test_an_open_gap_must_name_its_collector(filler):
+    # Punctuation and markup do not make a filler name something. "None exists."
+    # alone is a filler; "None exists. A Stop hook ..." names the instrument.
     row = OPEN.replace("| a fleet ledger |", f"| {filler} |")
     assert gaps.problems(register(row)) == ["G1: names no collector that would close it"]
 
 
-@pytest.mark.parametrize("filler", ["", "TBD"])
+@pytest.mark.parametrize("filler", ["", "TBD", "TBD."])
 def test_an_open_gap_must_name_the_decision_it_blocks(filler):
     row = OPEN.replace("| the roster |", f"| {filler} |")
     assert gaps.problems(register(row)) == ["G1: names no decision it blocks"]
 
 
 @pytest.mark.parametrize(
-    "status", ["Open", "done", "closed 2026-10-04", "superseded by G3", "closed by G3"]
+    "status",
+    [
+        "Open",
+        "opened",
+        "done",
+        "closed 2026-10-04",
+        "superseded by G3",
+        "closed by G3",
+        "closed today by G3",
+    ],
 )
 def test_a_status_outside_the_three_marks_is_a_problem(status):
     # A typo would hide the row from the field checks; a mark without a date or

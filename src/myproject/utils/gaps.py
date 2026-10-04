@@ -14,8 +14,9 @@ EMPTY = "no open gap: the list is never empty (rule 5)"
 
 SEPARATOR = re.compile(r"^\|[\s:|-]+\|$")
 
-# A cell that fills a field without naming anything.
-FILLERS = {"", "-", "tbd", "none", "n/a", "?"}
+# A cell that fills a field without naming anything, once punctuation and markup
+# are stripped. A cell of punctuation alone strips to nothing.
+FILLERS = {"tbd", "none", "none exists", "n/a", "unknown", "nothing"}
 
 # The two fields rule 5 requires of every open gap, by header key.
 REQUIRED = {
@@ -49,8 +50,14 @@ def problems(text: str) -> list[str]:
         f"{row['id']}: {message}"
         for row in live
         for key, message in REQUIRED.items()
-        if row[key].lower() in FILLERS
+        if _says_nothing(row[key])
     ]
+
+
+def _says_nothing(cell: str) -> bool:
+    """True when a cell, stripped of punctuation and markup, names nothing."""
+    words = re.sub(r"[^a-z0-9/]+", " ", cell.lower()).split()
+    return not words or " ".join(words) in FILLERS
 
 
 def _table(text: str) -> tuple[list[str], list[list[str]]]:

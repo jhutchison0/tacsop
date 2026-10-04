@@ -4,7 +4,7 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
-## 2026-10-04: The Common Operating Picture (`maintaining-the-common-operating-picture` 0.1.0)
+## 2026-10-04: The Common Operating Picture (`maintaining-the-common-operating-picture` 0.1.1)
 
 A new Level 0 skill for how a repo knows its own state. A statement about a host, a
 count, a schedule or a coverage figure goes stale the moment it is written, and a stale
@@ -30,8 +30,9 @@ criterion is open and takes the five-session shape when the first repo renders a
 Audience: every repo. A repo with one box and no shared store adopts the same skill; the
 degenerate cases are stated in `ADOPTION.md`.
 
-Reversible: delete the directory and the CLAUDE.md section, and if you moved
-`known_issues` into a gap register (row 4), restore the key and revert row 5's two edits.
+Reversible: delete the directory and the CLAUDE.md section. If you adopted rows 4 and 5,
+also restore `known_issues`, revert row 5's two edits, and delete
+`test_known_unknowns_live_only_in_the_register`, which fails once the key returns.
 
 ### Detect
 
@@ -50,9 +51,9 @@ Any hit is a line the skill moves.
 |---|---|---|---|
 | 1 | `.claude/skills/maintaining-the-common-operating-picture/` | **TEMPLATE-COPY** | Level 0: `adopt_doctrine.py` copies it. Four files. |
 | 2 | `CLAUDE.md` Picture Style section | **PATCH** | The ambient kernel, beside Prose, Figure and Claim Style. Copy the section verbatim. |
-| 3 | A gap register under `docs/` plus its test | **CUSTOMIZE** | The first slice (`ADOPTION.md`). The rows are yours. The hub's register is `docs/gaps.md`, checked by `problems(text)` in `src/myproject/utils/gaps.py` and pinned by `tests/unit/test_gaps.py`; both copy with only the package name in the test's import changed, and the last test's parameters cut to the commands your repo has. |
-| 4 | `config/project.yaml` `state:` block | **CONDITIONAL** | `known_issues` moves with the first slice: a known unknown becomes a gap row, a defect becomes a task, and the key is deleted, so the list has one home. The rest of the block waits for slice 2 (`ADOPTION.md`). |
-| 5 | `/session-end` Step 4.5, `/sitrep` sources and output | **PATCH** | Both write and read the gap register instead of `known_issues`. `adopt_doctrine.py` copies `session-end.md`; patch `sitrep.md` by hand. |
+| 3 | A gap register under `docs/` plus its test | **CUSTOMIZE** | The first slice (`ADOPTION.md`). The rows are yours; keep the header. The hub's register is `docs/gaps.md`, checked by `problems(text)` in `src/myproject/utils/gaps.py` and pinned by `tests/unit/test_gaps.py`. In a repo laid out like the template (`src/<pkg>/utils/`, tests importing `src.<pkg>`), both copy with the package name in the test's import changed and the parameters of `test_known_unknowns_live_only_in_the_register` cut to the commands your repo has. Another layout changes `parents[3]` in `gaps.py`. |
+| 4 | `config/project.yaml` `state:` block | **CONDITIONAL** | Where the config carries `known_issues`: the list moves with the first slice, each entry to its one home (a known unknown to a gap row, a defect to the task list, a decision to its record, an operating note to the command it governs), and the key is deleted. The rest of the block waits for the second slice (`ADOPTION.md`). |
+| 5 | `/session-end` Step 4.5, `/sitrep` sources and output | **PATCH** | Both write and read the gap register instead of `known_issues`. Patch both by hand: `adopt_doctrine.py` never overwrites, so it skips `session-end.md` in any repo that has one. Copy the hub's Step 4.5 `docs/gaps.md` bullet, and `/sitrep`'s third source and GAPS block. |
 | 6 | `/session-start`, `/task brief`, and the rest of `/session-end` and `/sitrep` | **DEFER** | Rewrites land in the hub once the first repo has rendered a picture; until then the kernel governs what they may say. |
 
 ### Action required
@@ -66,14 +67,16 @@ diff -r ~/projects/github/tacsop/.claude/skills/maintaining-the-common-operating
 
 2. Add the Picture Style section to `CLAUDE.md` after Claim Style.
 3. Write the first slice: one gap, two fields, one test. Move `known_issues` into it in
-   the same commit and patch `/sitrep` (rows 4 and 5). Record a `COP:` line in the
-   session doc when the picture is first rendered, which opens the success window.
+   the same commit (row 4) and patch `/session-end` Step 4.5 and `/sitrep` (row 5).
+   Record a `COP:` line in the session doc when the picture is first rendered, which
+   opens the success window.
 
 ### Rollback
 
 Delete the directory, remove the CLAUDE.md section and the `adopt_doctrine.py` line. If
-you adopted rows 4 and 5, restore `known_issues` from the register's open rows and
-revert Step 4.5 and the `/sitrep` source.
+you adopted rows 4 and 5, restore `known_issues` from the register's open rows, revert
+the Step 4.5 and `/sitrep` edits, and delete `test_known_unknowns_live_only_in_the_register`,
+which fails once the key returns.
 
 ---
 

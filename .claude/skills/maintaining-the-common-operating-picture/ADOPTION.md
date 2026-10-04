@@ -110,7 +110,10 @@ One session, any repo, no store, no probe, no cadence:
 That is rule 5 alone, and it is the piece that makes refusing confirmation bias something a
 repo can fail rather than something it intends.
 
-The second slice marks every existing status line in the orientation surfaces as a
-measurement (with its fields) or an estimate (with its range), which is where the config's
-prose block starts to shrink. The third is one probe with the two-shape contract and a
+The second slice takes every existing status line out of the orientation surfaces, or
+marks it as a measurement (with its fields) or an estimate (with its range) where it must
+stay. Most lines leave: a count becomes the command that measures it, a focus paragraph
+becomes intent at the head of the task list, a known unknown becomes a gap row. That is
+where the config's prose block goes. The hub removed its block on 2026-10-04 and kept no
+marked line. The third is one probe with the two-shape contract and a
 render over an empty root. Do not start with the join or the shared store.

@@ -26,12 +26,12 @@ This project is not a research artifact, not a product, and not a one-off tool. 
 
 ## Current State
 
-This section names where each part of the current state lives; it holds no snapshot. Until 2026-10-04 a snapshot here still named the 2026-04-21 propagation as the latest, after cycles on 2026-07-20, 2026-08-03 and 2026-10-02 (the `maintaining-the-common-operating-picture` skill).
+This section names where each part of the current state lives and holds no snapshot, because a snapshot here reads as current after it stops being true. The `maintaining-the-common-operating-picture` skill says why.
 
 - **Version and phase**: [config/project.yaml](config/project.yaml), `project.version` and `build_phases`. Identity; it changes only when someone edits it.
 - **Campaign focus**: the `## Focus` section at the head of [docs/tasks.md](docs/tasks.md). Intent, not state.
 - **Known unknowns**: [docs/gaps.md](docs/gaps.md), each with the decision it blocks.
-- **Last session**: the newest file in [docs/sessions/](docs/sessions/). A record, true as of its date.
+- **Last session**: the newest file in [docs/sessions/](docs/sessions/) by name (names are date-first). A record, true as of its date.
 - **Downstream consumers on this machine**: `.venv/bin/python scripts/propagate_doctrine.py --dry-run`, which writes nothing. Discovery is per machine; no command lists the whole fleet (gap G3).
 - **Doctrine history**: [docs/doctrine-updates.md](docs/doctrine-updates.md) holds every entry; the session doc for each propagation cycle records what it reached.
 - **Suite, branch, and tools**: measured by command at `/session-start`, never written down.

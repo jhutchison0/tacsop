@@ -65,6 +65,8 @@ The body should fit on one or two screens. If CONTEXT.md is creeping past ~250 l
 | `CONTEXT.md` | *What is this project and what does it care about?* |
 | `LANGUAGE.md` | *What do specific terms mean in this project?* |
 | `config/project.yaml` | *What is the project's machine-readable identity?* |
+| `docs/tasks.md` | *What comes next, and in what order?* (the `## Focus` section) |
+| `docs/gaps.md` | *What can nobody see yet, and what does that block?* |
 | `CLAUDE.md` | *What conventions and commands does the agent need at hand?* |
 | `docs/sessions/` | *What was just worked on?* |
 | `docs/plans/` | *What is planned next?* |

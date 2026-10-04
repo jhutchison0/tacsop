@@ -80,7 +80,7 @@ testing:
 
 # No state block. This file is identity, the slowest-moving facts; a sentence of
 # state kept here reads as current long after it stops being true. Instead:
-#   last session      the newest file in docs/sessions/
+#   last session      the newest file in docs/sessions/ by name (date-first)
 #   campaign focus    the ## Focus section at the head of docs/tasks.md (intent)
 #   known unknowns    docs/gaps.md, the gap register
 #   suite, git, tools measured by command at /session-start, never written down

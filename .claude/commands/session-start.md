@@ -37,7 +37,7 @@ Read `config/project.yaml` build_phases section:
 
 ## Step 3: Load Recent Session
 
-Find and read the most recently modified file in `docs/sessions/` to understand what was done last session.
+Find the newest session doc by name, `ls docs/sessions/*.md | sort | tail -1`, and read it to understand what was done last session. Names are date-first; modification times are not, and a fresh clone gives every file the same one. When that date has two docs, read both.
 
 ## Step 3.5: Check Task List
 
@@ -107,6 +107,7 @@ written:
 - `[record: <file>, <date>]`: history; true as of that date, not now.
 - `[intent: <file>]`: what is planned; not a state.
 - `[register: <file>]`: maintained estimates and gaps.
+- `[unchecked: <reason>]`: could not be measured this turn; give the reason and no value.
 
 Never restate a count or a status from a record or the task list as if it were
 current. If a decision today rests on it, run the command that measures it (Picture
@@ -115,9 +116,9 @@ Style rule 6) and report that instead.
 1. **Machine**: Which box this is, from Step 1.5 `[measured: .venv/bin/python -m src.myproject.utils.machine]`
 2. **Version**: Current version `[identity: config/project.yaml]`
 3. **Phase**: Current build phase and its deliverable `[identity: config/project.yaml]`
-4. **Recent Work**: Last session summary `[record: <newest docs/sessions/ file>, <its date>]`
+4. **Recent Work**: Last session summary `[record: <newest docs/sessions/ file by name>, <its date>]`
 5. **Focus**: The campaign's next steps, in order `[intent: docs/tasks.md]`
-6. **Tasks**: Active count, blocked count, top priority items `[intent: docs/tasks.md]`
+6. **Tasks**: Active and blocked counts as the list stands, and the top priority items `[intent: docs/tasks.md]`
 7. **Gaps**: Open gaps and the decision each blocks, from Step 3.7 `[register: docs/gaps.md]`
 8. **Pending**: Key items remaining in current phase `[intent: docs/tasks.md]`
 9. **Test Status**: All passing or failures? `[measured: .venv/bin/pytest]`

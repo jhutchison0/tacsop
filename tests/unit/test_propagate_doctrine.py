@@ -198,10 +198,16 @@ class TestPropagate:
         assert "[dry-run]" in captured.out
         assert "(new)" in captured.out
 
-    def _exclude(self, setup, *paths):
+    def _config(self, setup, text):
         config = setup["doctrine"].parents[1] / "config" / "project.yaml"
         config.parent.mkdir(parents=True)
-        config.write_text("propagation:\n  exclude:\n" + "".join(f"    - {p}\n" for p in paths))
+        config.write_text(text)
+
+    def _exclude(self, setup, *paths):
+        self._config(setup, "propagation:\n  exclude:\n" + "".join(f"    - '{p}'\n" for p in paths))
+
+    def _notified(self, repo):
+        return (repo / ".claude" / "upstream-update.md").exists()
 
     def test_an_excluded_repo_gets_no_notification_and_no_mark(self, setup, capsys):
         # A mirror the hub must never write into is still discovered; the run
@@ -226,6 +232,48 @@ class TestPropagate:
         assert "[skip] gitlab/repo_b: excluded by config/project.yaml propagation.exclude" in out
         assert "[dry-run] gitlab/repo_b" not in out
         assert "[dry-run] gitlab/repo_a" in out
+
+    @pytest.mark.parametrize(
+        "config",
+        ["propagation:\n  exclude: gitlab/repo_b\n", "propagation: [unclosed\n", "propagation: gitlab/repo_b\n"],
+        ids=["single value", "does not parse", "not a mapping"],
+    )
+    def test_a_malformed_exclusion_refuses_the_run(self, setup, capsys, config):
+        # A guard against a write fails closed: a list that is present but
+        # unreadable refuses the run rather than sending to every repo.
+        self._config(setup, config)
+
+        assert propagate_doctrine.main([]) == 1
+
+        assert "Refused, nothing written" in capsys.readouterr().out
+        assert not any(self._notified(repo) for repo in setup["repos"])
+
+    @pytest.mark.parametrize("entry", ["gitlab/repo_b/", "./gitlab/repo_b", "gitlab\\repo_b", "gitlab/Repo_B"])
+    def test_an_exclusion_survives_common_slips(self, setup, capsys, entry):
+        self._exclude(setup, entry)
+
+        propagate_doctrine.propagate(dry_run=False)
+
+        assert not self._notified(setup["repos"][1])
+        assert "[skip] gitlab/repo_b: excluded by config/project.yaml propagation.exclude" in capsys.readouterr().out
+
+    def test_a_repo_under_an_excluded_path_is_skipped(self, setup):
+        self._exclude(setup, "gitlab")
+
+        propagate_doctrine.propagate(dry_run=False)
+
+        assert not any(self._notified(repo) for repo in setup["repos"])
+
+    def test_an_exclusion_that_matches_no_repo_warns_and_the_run_goes_on(self, setup, capsys):
+        # On a machine without the mirror cloned the entry is legitimately
+        # unmatched, so it warns; a typo looks the same, so it must be seen.
+        self._exclude(setup, "github/absent")
+
+        propagate_doctrine.propagate(dry_run=False)
+
+        out = capsys.readouterr().out
+        assert "[warn] github/absent: in propagation.exclude, but no discovered repo is at or under it" in out
+        assert all(self._notified(repo) for repo in setup["repos"])
 
     def test_no_doctrine_file(self, projects_dir, monkeypatch, capsys):
         utils = _make_repo(projects_dir, "github/utils")
@@ -692,8 +740,5 @@ def test_an_indented_fence_still_hides_its_headings(tmp_path):
 def test_the_hub_never_writes_into_the_assay_mirror():
     # ~/projects/github/assay mirrors a work repository; the user's rule
     # (2026-10-02) is that this hub never writes into it.
-    import yaml
-
-    config = Path(__file__).resolve().parents[2] / "config" / "project.yaml"
-    exclude = yaml.safe_load(config.read_text(encoding="utf-8"))["propagation"]["exclude"]
-    assert "github/assay" in exclude
+    # Through the script's own reader, so a single value cannot pass as a list.
+    assert "github/assay" in propagate_doctrine.excluded_repos()

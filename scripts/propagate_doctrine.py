@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Propagate doctrine updates to sibling repos.
 
-Sends each sibling repo that has a .claude/commands/ directory every entry in
+Sends each sibling repo that has a .claude/commands/ directory, except those
+config/project.yaml lists under propagation.exclude, every entry in
 docs/doctrine-updates.md it has not been offered, appended to its notification
 file (.claude/upstream-update.md), oldest first. A delivery mark
 (.claude/doctrine-delivered) lists, one per line, the entry headings the hub
@@ -61,12 +62,42 @@ def excluded_repos() -> set[str]:
 
     Listed in config/project.yaml under propagation.exclude. Discovery still
     finds them, so its universe is unchanged; the run names each one it skips.
+    No list means no exclusions. A list that is present but unreadable raises
+    ValueError, which refuses the run: this guards a write, so it fails closed.
     """
     config = TACSOP_ROOT / "config" / "project.yaml"
     if not config.exists():
         return set()
-    data = yaml.safe_load(config.read_text(encoding="utf-8")) or {}
-    return set((data.get("propagation") or {}).get("exclude") or [])
+    try:
+        data = yaml.safe_load(config.read_text(encoding="utf-8")) or {}
+    except yaml.YAMLError as err:
+        raise ValueError(f"config/project.yaml does not parse: {err}") from err
+    section = data.get("propagation") if isinstance(data, dict) else None
+    if section is None:
+        return set()
+    if not isinstance(section, dict):
+        raise ValueError("propagation in config/project.yaml must be a mapping")
+    entries = section.get("exclude") or []
+    if not isinstance(entries, list) or not all(isinstance(e, str) for e in entries):
+        raise ValueError("propagation.exclude in config/project.yaml must be a list of paths")
+    return {_normal(e) for e in entries}
+
+
+def _normal(path: str) -> str:
+    """One form for a repo path: forward slashes, no ./ or trailing /, case folded.
+
+    A slip in the config then excludes more, never less.
+    """
+    path = path.strip().replace("\\", "/")
+    while path.startswith("./"):
+        path = path[2:]
+    return path.rstrip("/").casefold()
+
+
+def _is_excluded(rel: str, excluded: set[str]) -> bool:
+    """True when rel is an excluded path or sits under one."""
+    rel = _normal(rel)
+    return any(rel == entry or rel.startswith(entry + "/") for entry in excluded)
 
 
 ENTRY_HEADING = re.compile(r"^## (\d{4}-\d{2}-\d{2}):", re.MULTILINE)
@@ -209,10 +240,13 @@ def propagate(dry_run: bool = False, since: str | None = None) -> int:
 
     offered = {_heading(e) for e in entries}
     excluded = excluded_repos()
+    rels = [repo.relative_to(PROJECTS_DIR).as_posix() for repo in repos]
+    for entry in sorted(excluded):
+        if not any(_is_excluded(rel, {entry}) for rel in rels):
+            print(f"[warn] {entry}: in propagation.exclude, but no discovered repo is at or under it")
     failures = 0
-    for repo in repos:
-        rel = repo.relative_to(PROJECTS_DIR)
-        if rel.as_posix() in excluded:
+    for repo, rel in zip(repos, rels):
+        if _is_excluded(rel, excluded):
             print(f"[skip] {rel}: excluded by config/project.yaml propagation.exclude")
             continue
         target = repo / NOTIFICATION_FILENAME

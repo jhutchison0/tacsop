@@ -1,5 +1,15 @@
 # Task Tracker
 
+## Focus
+
+The order of the campaign, as intent. A line here says what comes next, never what is true now; `/session-end` rewrites this section when the order changes.
+
+1. 2026-10-04, on Nidhogg: slice 2 of the hub's common operating picture (this section is part of it), then the `assay` exclusion (P1 below), which gates every propagation run from any box.
+2. 2026-10-05: `assay` adopts the picture in its own session; this hub writes nothing there. The hub then reads its lessons back (P3 below) and revises the unsent 2026-10-04 doctrine entries where they apply.
+3. Then propagate the picture entries in one cycle, after reading the dry run for `assay`. The OVERWATCH entries stay held.
+4. On the work terminal: OVERWATCH Wave 0 (0b to 0d), task 1e, task 2d. 2d decides Wave 2 and lifts the OVERWATCH hold; then that release in one cycle from `docs/plans/20261002_overwatch_release_entries_draft.md`, and the three held `verifying-claims` traps.
+5. Slice 3 of the picture, the first rendered picture (P1 below), once 1 to 3 are done.
+
 ## Active
 
 

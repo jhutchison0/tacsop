@@ -8,8 +8,8 @@ Generate a team-facing status report summarizing what was built, what was found,
 
 Read ALL of these to build the report:
 
-1. `config/project.yaml` — `state.active_work`, `state.last_session`, `lessons_learned`
-2. `docs/tasks.md` — active and pending items, and the defects KNOWN ISSUES reports
+1. `config/project.yaml` — version and phase (identity), and `lessons_learned` if the repo keeps one
+2. `docs/tasks.md` — the `## Focus` section (the campaign's order), active and pending items, and the defects KNOWN ISSUES reports
 3. `docs/gaps.md` — open gaps: what nobody can see yet, and the decision each one blocks
 4. Most recent file in `docs/sessions/` — last session details
 5. `git log --oneline -10` — recent commit messages

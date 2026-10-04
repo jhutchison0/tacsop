@@ -142,7 +142,7 @@ These skills are portable to any software project. They contain no project names
 
 **Focus**: Maintain CONTEXT.md at the repo root capturing project identity, mission, current state, and constraints.
 
-**Key concepts**: project identity vs config state, narrative-not-machine-readable, distinguishes from LANGUAGE.md (terms) and project.yaml (machine-readable state).
+**Key concepts**: narrative-not-machine-readable; Current State names where state lives, never a snapshot; distinguishes from LANGUAGE.md (terms) and project.yaml (machine-readable identity).
 
 **Use when**: Significant new work starts; mission or scope changes; an agent needs project context quickly; downstream relationships change.
 

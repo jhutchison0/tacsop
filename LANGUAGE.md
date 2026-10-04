@@ -48,7 +48,7 @@ When a term is missing or contested, invoke the `maintaining-ubiquitous-language
 
 **Team**: A pre-composed agent roster for a class of work, defined in `.claude/teams/<name>.md`. Templates only; teams are instantiated at deployment time. _Avoid:_ squad, group.
 
-**Roster**: The set of agents currently defined in `.claude/agents/`. The live list is whatever is in that directory; CONTEXT.md tracks the current count and names.
+**Roster**: The set of agents currently defined in `.claude/agents/`. The live list is whatever is in that directory; CONTEXT.md names them.
 
 **Subagent Type**: The named template a teammate is spawned from. Drives tool access and default model. _Avoid:_ agent role.
 
@@ -80,7 +80,7 @@ When a term is missing or contested, invoke the `maintaining-ubiquitous-language
 
 **Propagation**: The process of pushing a doctrine update from this repo to downstream consumer repos via `scripts/propagate_doctrine.py`. See `docs/propagation-protocol.md`.
 
-**Downstream Repo**: A consumer of this template that has adopted some or all of its conventions and is auto-discovered by the propagation script at each cycle. The most recent cycle (2026-04-21) reached 11 repos; the current discoverable roster is larger and listed in `docs/propagation-protocol.md`.
+**Downstream Repo**: A consumer of this template that has adopted some or all of its conventions and is auto-discovered by the propagation script at each cycle. Discovery is per machine: `scripts/propagate_doctrine.py --dry-run` lists the consumers this machine can see, and no command lists the whole fleet (`docs/gaps.md`, G3).
 
 **Upstream Update**: A pending doctrine notification waiting for review in a downstream repo, surfaced as `.claude/upstream-update.md` at session start.
 

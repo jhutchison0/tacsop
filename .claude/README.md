@@ -131,7 +131,7 @@ Involve the user when:
 
 Work is tracked at two levels:
 
-- **Strategic**: `config/project.yaml` → `state.active_work` (campaign focus, blockers, priorities)
+- **Strategic**: the `## Focus` section at the head of `docs/tasks.md` (the campaign's order, as intent); what nobody can see yet is in `docs/gaps.md`
 - **Tactical**: `docs/tasks.md` (individual items with owners, priorities, status)
 
 The `/task` command manages the tactical layer and includes an escalation ladder for promoting complex work into planning documents in `docs/plans/`:

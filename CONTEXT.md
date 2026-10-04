@@ -1,6 +1,6 @@
 # CONTEXT.md — What This Project Is
 
-A one-page narrative of the project's identity, mission, current state, and key constraints. Uses terms defined in [LANGUAGE.md](LANGUAGE.md). For machine-readable state, see [config/project.yaml](config/project.yaml).
+A one-page narrative of the project's identity, mission, current state, and key constraints. Uses terms defined in [LANGUAGE.md](LANGUAGE.md). For machine-readable identity, see [config/project.yaml](config/project.yaml); for where current state is measured, see Current State below.
 
 Maintained via the `maintaining-project-context` skill. Update when the project's mission, scope, or downstream relationships materially change, not for routine task progress.
 
@@ -26,13 +26,15 @@ This project is not a research artifact, not a product, and not a one-off tool. 
 
 ## Current State
 
-See [config/project.yaml](config/project.yaml) for canonical values. Snapshot at last update of this file:
+This section names where each part of the current state lives; it holds no snapshot. Until 2026-10-04 a snapshot here still named the 2026-04-21 propagation as the latest, after cycles on 2026-07-20, 2026-08-03 and 2026-10-02 (the `maintaining-the-common-operating-picture` skill).
 
-- **Version**: 0.1.0
-- **Active phase**: Phase 1 (Foundation) complete; Phase 2 deliberately undefined, to be set by the current sprint.
-- **Active work**: Agent output standardization, doctrine artifact build-out (LANGUAGE.md, CONTEXT.md, ADRs), TDD discipline upgrade.
-- **Downstream consumers**: discovered automatically by `scripts/propagate_doctrine.py` at each cycle; the most recent cycle (2026-04-21) reached 11 repos; the current discoverable roster is larger (see [docs/propagation-protocol.md](docs/propagation-protocol.md) for the snapshot).
-- **Most recent doctrine propagation**: 5th cycle (2026-04-21); 11 repos adopted the `docs/reviews/` convention.
+- **Version and phase**: [config/project.yaml](config/project.yaml), `project.version` and `build_phases`. Identity; it changes only when someone edits it.
+- **Campaign focus**: the `## Focus` section at the head of [docs/tasks.md](docs/tasks.md). Intent, not state.
+- **Known unknowns**: [docs/gaps.md](docs/gaps.md), each with the decision it blocks.
+- **Last session**: the newest file in [docs/sessions/](docs/sessions/). A record, true as of its date.
+- **Downstream consumers on this machine**: `.venv/bin/python scripts/propagate_doctrine.py --dry-run`, which writes nothing. Discovery is per machine; no command lists the whole fleet (gap G3).
+- **Doctrine history**: [docs/doctrine-updates.md](docs/doctrine-updates.md) holds every entry; the session doc for each propagation cycle records what it reached.
+- **Suite, branch, and tools**: measured by command at `/session-start`, never written down.
 
 ---
 
@@ -64,7 +66,7 @@ The hard rules. Violating these requires explicit user override per change.
 
 ## Key Relationships
 
-**Downstream consumers**: auto-discovered by the propagation script (presence of `.claude/commands/` directory under `~/projects/`) rather than maintained as an explicit registry. The most recent cycle (2026-04-21) reached 11 repos. See [docs/propagation-protocol.md](docs/propagation-protocol.md) for the full process and the current discoverable roster.
+**Downstream consumers**: auto-discovered by the propagation script (presence of `.claude/commands/` directory under `~/projects/`) rather than maintained as an explicit registry. Discovery is per machine; the dry run under Current State lists what this machine can see. See [docs/propagation-protocol.md](docs/propagation-protocol.md) for the full process.
 
 **Agent roster** (current, in `.claude/agents/`):
 - `proposer` — analyzes problems and proposes bold approaches; debates with code-reviewer.
@@ -86,7 +88,7 @@ When an agent or human is introduced to this project, point them at these files 
 1. **This file** (`CONTEXT.md`) — what the project is.
 2. [LANGUAGE.md](LANGUAGE.md) — how we name things.
 3. [CLAUDE.md](CLAUDE.md) — workflow conventions and quick commands.
-4. [config/project.yaml](config/project.yaml) — current machine-readable state.
+4. [config/project.yaml](config/project.yaml) — machine-readable identity: version, phases, machines, paths.
 5. [.claude/README.md](.claude/README.md) — agent roster, scope matrix, team templates.
 6. [docs/propagation-protocol.md](docs/propagation-protocol.md) — required reading if touching anything that propagates downstream.
 7. [docs/adr/](docs/adr/) — accepted architecture decisions; check before reopening any decision they cover.
@@ -101,7 +103,9 @@ When an agent or human is introduced to this project, point them at these files 
 |---|---|
 | `CONTEXT.md` (this file) | *What is this project and what does it care about?* |
 | [LANGUAGE.md](LANGUAGE.md) | *What do specific terms mean in this project?* |
-| [config/project.yaml](config/project.yaml) | *What is the machine-readable current state?* |
+| [config/project.yaml](config/project.yaml) | *What is the project's machine-readable identity: version, phases, machines, paths?* |
+| [docs/tasks.md](docs/tasks.md) | *What comes next, and in what order?* |
+| [docs/gaps.md](docs/gaps.md) | *What can nobody see yet, and what does that block?* |
 | [CLAUDE.md](CLAUDE.md) | *What conventions and commands does the agent need at hand?* |
 | [docs/sessions/](docs/sessions/) | *What was just worked on?* |
 | [docs/plans/](docs/plans/) | *What is planned next?* |
@@ -110,5 +114,5 @@ Do not duplicate content across these files. When tempted, ask: "Which one of th
 
 ---
 
-**Last Updated**: 2026-05-19
+**Last Updated**: 2026-10-04
 **Maintained by**: The `maintaining-project-context` skill, with human review.

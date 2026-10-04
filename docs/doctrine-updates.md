@@ -4,6 +4,76 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
+## 2026-10-04: The Common Operating Picture (`maintaining-the-common-operating-picture` 0.1.0)
+
+A new Level 0 skill for how a repo knows its own state. A statement about a host, a
+count, a schedule or a coverage figure goes stale the moment it is written, and a stale
+sentence reads exactly like a fresh one. Two sessions in `assay` lost a day each to that:
+one argued a wave gate already satisfied, off a plan line that stated a measurement; one
+built on a config sentence about which checkout a timer ran, which was false on the box
+it was read on. The repo's sole-source-of-truth config had grown to 61.5 KB, 57 KB of it
+hand-written state.
+
+The skill is two ideas and eight rules. Mark every line as a measurement (value, time,
+collector, subject, universe, shape) or an estimate (a range, a basis, the observation
+that would prove it wrong). Place every line by how it moves: measurements in a generated
+report outside every checkout, estimates and gaps in a tracked register pinned by tests,
+intent in plans, history in records. The vocabulary is defined once with its ADP 5-0 and
+ADP 6-0 sources, so `assessment` is the process and never a line, and a periodic report
+is a measurement at its stamp and an estimate thereafter.
+
+It was drafted after a three-agent pre-draft review (proposer, code-reviewer,
+decision-scientist) of an earlier eight-rule draft; the review's findings are in the
+skill's `EXAMPLES.md` and in the `assay` session record of 2026-10-04. The success
+criterion is open and takes the five-session shape when the first repo renders a picture.
+
+Audience: every repo. A repo with one box and no shared store adopts the same skill; the
+degenerate cases are stated in `ADOPTION.md`.
+
+Reversible: delete the directory and the CLAUDE.md section. Nothing else in the hub reads
+them yet.
+
+### Detect
+
+```bash
+# A config file carrying state prose, the rule 1 smell:
+grep -c -E '^\s+(active_work|known_issues|last_session):' config/project.yaml
+# A plan gate that states a measurement instead of naming a command, the rule 7 smell:
+grep -n -i -E 'still (unswept|pending|open)|suite green at [0-9]+' docs/plans/*.md
+```
+
+Any hit is a line the skill moves.
+
+### Adoption-Mode Table
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 1 | `.claude/skills/maintaining-the-common-operating-picture/` | **TEMPLATE-COPY** | Level 0: `adopt_doctrine.py` copies it. Four files. |
+| 2 | `CLAUDE.md` Picture Style section | **PATCH** | The ambient kernel, beside Prose, Figure and Claim Style. Copy the section verbatim. |
+| 3 | A gap register under `docs/` plus its test | **CUSTOMIZE** | The first slice (`ADOPTION.md`). The hub ships no template register because the gaps are yours. |
+| 4 | `config/project.yaml` `state:` block | **CONDITIONAL** | Only where it carries measurements. Zoom out per `ADOPTION.md`; do it after slice 2, not before. |
+| 5 | `/session-start`, `/session-end`, `/sitrep`, `/task brief` | **DEFER** | Rewrites land in the hub once the first repo has rendered a picture; until then the commands are unchanged and the kernel governs what they may say. |
+
+### Action required
+
+1. Re-run `scripts/adopt_doctrine.py` from your repo root, or copy the directory:
+
+```bash
+cp -r ~/projects/github/tacsop/.claude/skills/maintaining-the-common-operating-picture .claude/skills/
+diff -r ~/projects/github/tacsop/.claude/skills/maintaining-the-common-operating-picture .claude/skills/maintaining-the-common-operating-picture && echo identical
+```
+
+2. Add the Picture Style section to `CLAUDE.md` after Claim Style.
+3. Write the first slice: one gap, two fields, one test. Record a `COP:` line in the
+   session doc when the picture is first rendered, which opens the success window.
+
+### Rollback
+
+Delete the directory, remove the CLAUDE.md section and the `adopt_doctrine.py` line.
+Nothing else depends on them.
+
+---
+
 ## 2026-09-18: CI Fix: `uv venv --clear` After `setup-uv` (`shift-left-testing` 2.1.1)
 
 The workflow example in `shift-left-testing/CI.md` fails on current uv, and every

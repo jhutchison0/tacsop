@@ -15,7 +15,7 @@
 **Open items**:
 
 1. The WHETSTONE `KB-graph:` capture point (2026-10-01, `85342b4`) rides in the same two files entry B ships, `.claude/commands/session-end.md` and `docs/session-doc-format.md`. Rule 2 says a maintainer must be able to take B and skip it. Either a one-paragraph WHETSTONE entry of its own, or a row in B's table that names the line and says it is WHETSTONE's. Decision needed.
-2. Entry F was implemented on 2026-10-02 after the drafts were begun. Its gate review is `docs/reviews/20261002_private_terms_gate.md` (round 1: GO-WITH-FIXES, fixes applied). Confirm the final verdict before release.
+2. Entry F was implemented on 2026-10-02 after the drafts were begun. Its gate review is `docs/reviews/20261002_private_terms_gate.md` (round 1: GO-WITH-FIXES, fixes applied). Confirm the final verdict before release. Closed 2026-10-05: round 3 returned "Verdict: GO" (the review's Round 3 section).
 3. Task 1c is split here into A1 (the pytest line, breaking) and A2 (the tool checks, additive), because protocol Rule 4 keeps a breaking change apart from additive ones. The 2026-10-01 decision read "1c alone as breaking" as one entry; the split needs the user's yes.
 
 ---

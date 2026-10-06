@@ -78,7 +78,7 @@ The picture there: `src/ops/gaps.py` and `machine.py` (a new package, `parents[2
 | No held OVERWATCH content reached agent-eval | observed | the gate's grep and version checks: `shift-left-testing` 2.1.1, no `ISOLATION.md`; the one `verifying-claims` mention is the picture skill's own Level 0 text |
 | Argo is unreachable from this machine | observed | `curl -s -m 5 -o /dev/null -w '%{http_code}' https://apps.inside.anl.gov/argoapi/v1/models` → `000` |
 | No private term in the hub's index or unpushed commits, nor in agent-eval's branch | observed, before this doc | check 7's block over both repos → no FAIL line; agent-eval: `0` content-hit paths over 7 unpushed commits |
-| The hub's reference-integrity check is clean | tested | check 5 file pass → no `MISSING`; directory pass → no output |
+| The hub's reference-integrity check is clean | tested | Correction, same session: the run before this doc's commit printed `MISSING: docs/reviews/20261006_doctrine_catchup_gate.md`, a cross-repo citation in `docs/tasks.md` that check 5 resolves against this repo (its blind spot 2); the citation was reworded in the follow-up commit and the re-run printed no `MISSING`; directory pass → no output |
 
 Overclaims the user caught this session: 0
 

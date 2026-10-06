@@ -85,8 +85,8 @@ if [ -z "$test_partners" ]; then
     module_dotted="${module_dotted//\//.}"           # myproject.domain.ledger
     module_parent="${module_dotted%.*}"               # myproject.domain
     module_leaf="${module_dotted##*.}"                # ledger
-    module_re="${module_dotted//./\\.}"                # dots are literal in the ERE below
-    parent_re="${module_parent//./\\.}"
+    module_re="(src\\.)?${module_dotted//./\\.}"        # dots are literal in the ERE below; a test may import with the src. prefix
+    parent_re="(src\\.)?${module_parent//./\\.}"
     test_partners=$(grep -rlE \
         "^(from ${module_re} import|import ${module_re}([^a-zA-Z0-9_]|$)|from ${parent_re} import (.*[^a-zA-Z0-9_])?${module_leaf}([^a-zA-Z0-9_]|$))" \
         "$project_root/tests" --include='test_*.py' 2>/dev/null || true)

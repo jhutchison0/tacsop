@@ -144,3 +144,15 @@ agent-eval, on GitHub: `af81f61` (merge of origin), `f482bb6`, `c4803ee`, `c7157
 3. The two correction entries (register pin; hook prefix) drafted and batched for the next cycle, after the consumption records of this one are read.
 4. On the work terminal: DISPATCH Wave 1 (reconcile the clone, two smoke runs), then the OVERWATCH and G6/G11 items in the Focus's step 3.
 5. agent-eval has a standing `origin/dev` branch; audit it under the topic-branches skill at the next session there.
+
+---
+
+## Addendum, afternoon: the home branch and the first local evaluations
+
+The user asked for a `home` branch on agent-eval like assay's, so today's work survives a work-side push that wipes `main`, and for Aider and OpenCode installed here so an evaluation could run today. Both done; the record is agent-eval's session 16 on its `home` branch. In brief: `home` tracks `origin/home` with a one-commit fork (`scope: personal`, a loopback gateway to a local Ollama server, two local models); Aider 0.86.2 via `uv tool`, OpenCode 1.18.34 via npm, a 14B coder model pulled; six crawl-tier runs persisted, Aider 1 of 3 on each of two models, OpenCode 0 of 3 and invalid because it wrote outside its worktree. Two harness defects from the first live Linux runs: the timeout handler killed the runner (fixed on `main`, test-first) and OpenCode's broken isolation (filed, two leads). DISPATCH's A1 holds for both tools with no code, and within-cell spread showed at the crawl tier, so its Status Log carries three entries. The hub's Focus step 2 now says so.
+
+Evidence for the claims a reader would act on: `git -C ~/projects/github/agent-eval branch -vv` → `home` on `origin/home`, `main` on `origin/main`; `.venv/bin/python -m pytest -q` there → `418 passed`; `ls results/*/results.json` there → 3 files.
+
+Overclaims the user caught this addendum: 0
+
+Overclaims a reviewer caught this addendum: 0 (no reviewer ran)

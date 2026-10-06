@@ -6,6 +6,7 @@ the list is never empty. The register is the markdown table in docs/gaps.md.
 """
 
 import re
+from collections import Counter
 from pathlib import Path
 
 REGISTER = Path(__file__).resolve().parents[3] / "docs" / "gaps.md"
@@ -16,7 +17,7 @@ SEPARATOR = re.compile(r"^\|[\s:|-]+\|$")
 
 # A cell that fills a field without naming anything, once punctuation and markup
 # are stripped. A cell of punctuation alone strips to nothing.
-FILLERS = {"tbd", "none", "none exists", "n/a", "unknown", "nothing"}
+FILLERS = {"tbd", "none", "none exists", "n/a", "unknown", "nothing", "nothing exists"}
 
 # The two fields rule 5 requires of every open gap, by header key.
 REQUIRED = {
@@ -42,6 +43,12 @@ def problems(text: str) -> list[str]:
         if len(cells) != len(keys)
     ]
     rows = [dict(zip(keys, cells)) for cells in data if len(cells) == len(keys)]
+    # A pointer names an id; two rows under one id make every pointer at it ambiguous.
+    found += [
+        f"{id_}: appears {n} times; a pointer at it is ambiguous"
+        for id_, n in Counter(row["id"] for row in rows).items()
+        if n > 1
+    ]
     found += [f"{row['id']}: {BAD_STATUS}" for row in rows if not STATUS.match(row["status"])]
     live = [row for row in rows if row["status"] == "open"]
     if not live:

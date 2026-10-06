@@ -110,3 +110,19 @@ def test_a_row_whose_cells_do_not_match_the_header_is_a_problem(row, cells):
     assert gaps.problems(register(row, other)) == [
         f"G1: has {cells} cells where the header has 6 (a | inside a cell?)"
     ]
+
+
+def test_a_two_word_filler_still_names_nothing():
+    # assay's reviewer defeated the check with "Nothing exists." on the first try
+    # (2026-10-05): one word off the documented filler.
+    row = OPEN.replace("| a fleet ledger |", "| Nothing exists. |")
+    assert gaps.problems(register(row)) == ["G1: names no collector that would close it"]
+
+
+def test_two_rows_sharing_an_id_is_a_problem():
+    # A supersession pointer names an id; two rows under one id make every
+    # pointer at it ambiguous (assay, 2026-10-05).
+    other = OPEN.replace("Fleet membership", "Fleet membership, restated")
+    assert gaps.problems(register(OPEN, other)) == [
+        "G1: appears 2 times; a pointer at it is ambiguous"
+    ]

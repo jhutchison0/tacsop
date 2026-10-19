@@ -58,15 +58,18 @@ git status --short
 # Path-shaped references in orientation surfaces must resolve.
 # Catches drift like the March-2026 case: tasks.md carrying paths to files
 # that do not exist. Allowlist covers runtime artifacts that are
-# legitimately absent (upstream-update.md, gitignored audit logs).
+# legitimately absent (the two upstream notification files, gitignored audit logs).
+# Extension bound is {2,8}, not {2,4}: a 4-cap truncates .geojson/.service/.shtml
+# and then reports the truncated path as MISSING (found by the launch-control
+# canary 2026-08-17, where it produced 3 false positives against real files).
+# The task list is scanned from its first line, so the ## Focus section above
+# ## Active is covered; ## Completed and below are records and are not.
 { cat CLAUDE.md CONTEXT.md README.md LANGUAGE.md .claude/README.md 2>/dev/null; \
-  sed -n '/^## Active/,/^## Completed/p' docs/tasks.md; } \
-  | grep -oE '(docs|src|tests|config|scripts|\.claude|\.github)/[A-Za-z0-9_./-]+\.[A-Za-z0-9]{2,4}' \
-  | grep -vE '^\.claude/(upstream-update\.md|audits/)' \
-  | grep -vE '^docs/(decision_audit_20260326\.md|plans/decision_science_gaps\.md|review_decision_science_waves_2_3\.md)$' \
+  sed -n '1,/^## Completed/p' docs/tasks.md; } \
+  | grep -oE '(docs|src|tests|config|scripts|\.claude|\.github)/[A-Za-z0-9_./-]+\.[A-Za-z0-9]{2,8}' \
+  | grep -vE '^\.claude/(upstream-update\.md|upstream-lesson\.md|audits/)' \
   | sort -u | while read -r p; do [ -e "$p" ] || echo "MISSING: $p"; done
 ```
-- Second allowlist line: the three known-missing March paths, dispositioned in `docs/tasks.md` P3; remove them from the allowlist when that task closes
 - Expected output: empty. WARN on any MISSING line, and record the run's count in the session doc (it is metric M2 in `.claude/skills/traversing-the-knowledge-base/SKILL.md`; an unrecorded run is indistinguishable from an unrun check)
 - Any MISSING line is caught drift and fires that skill's build trigger
 
@@ -94,6 +97,44 @@ if [ -n "$gates" ] && [ "$(echo "$staged" | grep -c .)" -ne "$(echo "$gates" | g
 fi
 ```
 - WARN only; the fix is two commits, with the gate change isolated and tagged `[gate]`
+
+### 7. Private-Term Check
+```bash
+# Private terms (hostnames, usernames, codenames, sibling repo names) stay out
+# of a public tree. The list lives outside every repo, so this check cannot
+# republish it, and the output carries each hit as a path, withholding any
+# path, file name, or commit message that is itself a hit and reporting those
+# as counts. Two incidents on 2026-10-01, the second found 2026-10-02: agents
+# wrote another repo's names into docs/reviews/, and the record of containing
+# that pasted the five terms into an Evidence line, committed and pushed.
+# Scans what a push would carry: the index, and every commit not on any
+# remote, their file names and messages included. A line printed is the
+# finding; the block itself exits 0.
+terms="${TACSOP_PRIVATE_TERMS:-$HOME/.config/tacsop/private-terms}"
+clean=$(sed -e 's/^[[:space:]]*//;s/[[:space:]]*$//' -e '/^$/d' "$terms" 2>/dev/null)
+if [ -z "$clean" ]; then
+  echo "WARN: no private-term list at $terms; check 7 did not run"
+elif ! git rev-parse --git-dir >/dev/null 2>&1; then
+  echo "WARN: not inside a git repository; check 7 did not run"
+else
+  revs=$(git rev-list HEAD --not --remotes 2>/dev/null)
+  paths=$(for rev in --cached $revs; do
+            git grep -l -i -F -f <(printf '%s\n' "$clean") $rev -- ':/'
+          done | sed -E 's/^[0-9a-f]{40}://' | sort -u)
+  names=$({ git ls-files --cached; for rev in $revs; do git ls-tree -r --name-only "$rev"; done; } | sort -u)
+  msgs=$(for rev in $revs; do git log -1 --format=%B "$rev"; done)
+  held=$(printf '%s\n' "$paths" | sed '/^$/d' | grep -c -i -F -f <(printf '%s\n' "$clean"))
+  if [ "$held" -gt 0 ]; then echo "FAIL private term in $held path name(s) with content hits; paths withheld"; fi
+  printf '%s\n' "$paths" | sed '/^$/d' | grep -v -i -F -f <(printf '%s\n' "$clean") | sed 's/^/FAIL private term in: /'
+  m=$(printf '%s\n' "$names" | sed '/^$/d' | grep -c -i -F -f <(printf '%s\n' "$clean"))
+  if [ "$m" -gt 0 ]; then echo "FAIL private term in $m tracked file name(s); names withheld"; fi
+  k=$(printf '%s\n' "$msgs" | grep -c -i -F -f <(printf '%s\n' "$clean"))
+  if [ "$k" -gt 0 ]; then echo "FAIL private term in $k unpushed commit message line(s); not printed"; fi
+fi
+```
+- Expected output: empty. FAIL on any line. `FAIL private term in: <path>` names a file whose path is clean, in the index or in a commit not on any remote. The other three FAIL lines give counts only, because the path, the name, or the message is itself the hit: find them locally with the same grep, and do not paste what it prints. A hit in an old commit is already public: redact forward first, then decide about history. A repository with no remote scans all of HEAD's history, which is what a first push carries. "Not on any remote" reads the tracking refs, which are a cache: `git fetch` first when another machine may have pushed.
+- WARN means this machine has no list, or this directory is not a git repository. Write the list (one term per line, matched case-insensitively as a fixed string, inside words too, so choose distinctive terms; a false positive is safe) before trusting a clean run. The list is per machine and is never committed anywhere.
+- Never paste a term into this check's output, a commit message, a review, or a session doc. Give the count and, when it is clean, the path.
 
 ## Output Format
 
@@ -131,6 +172,7 @@ PCC Status: NOT READY - 1 failure, resolve before pushing
 | Git state | Clean or intentional | Info only |
 | Reference integrity | Zero MISSING paths in living docs (allowlist current) | Warn only |
 | Gate separation | Gate surfaces staged alone (`[gate]` commit) | Warn only |
+| Private terms | Zero hits for this machine's private-term list over the index and unpushed commits, list present | Block push |
 
 ## Integration
 

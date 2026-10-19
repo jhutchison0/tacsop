@@ -1,23 +1,36 @@
 #!/usr/bin/env python3
 """Propagate doctrine updates to sibling repos.
 
-Reads the latest entry from docs/doctrine-updates.md and drops a notification
-file (.claude/upstream-update.md) into each sibling repo that has a
-.claude/commands/ directory.
+Sends each sibling repo that has a .claude/commands/ directory, except those
+config/project.yaml lists under propagation.exclude, every entry in
+docs/doctrine-updates.md it has not been offered, appended to its notification
+file (.claude/upstream-update.md), oldest first. A delivery mark
+(.claude/doctrine-delivered) lists, one per line, the entry headings the hub
+has offered that repo; each run adds the hub's headings and never removes one.
 
 Usage:
-    python scripts/propagate_doctrine.py [--dry-run]
+    python scripts/propagate_doctrine.py [--dry-run] [--since YYYY-MM-DD]
+
+--since applies to repos with no mark yet: it sends every entry from that date.
+Without it, an unmarked repo gets the newest entry only. A repo that already
+holds entries the run would send needs its mark seeded first; see "Seeding a
+mark by hand" in docs/propagation-protocol.md.
+Exit 1 if any repo failed or the run was refused; 0 otherwise.
 """
 
 import argparse
 import re
 import sys
+from datetime import date
 from pathlib import Path
+
+import yaml
 
 TACSOP_ROOT = Path(__file__).resolve().parent.parent
 PROJECTS_DIR = TACSOP_ROOT.parent.parent  # ~/projects
 DOCTRINE_FILE = TACSOP_ROOT / "docs" / "doctrine-updates.md"
 NOTIFICATION_FILENAME = ".claude/upstream-update.md"
+MARK_FILENAME = ".claude/doctrine-delivered"
 
 
 def find_downstream_repos() -> list[Path]:
@@ -44,26 +57,148 @@ def find_downstream_repos() -> list[Path]:
     return filtered
 
 
-def extract_latest_entry(doctrine_path: Path) -> str | None:
-    """Extract the most recent entry from the doctrine updates file."""
+def excluded_repos() -> set[str]:
+    """Repos this hub never writes into, as paths relative to PROJECTS_DIR.
+
+    Listed in config/project.yaml under propagation.exclude. Discovery still
+    finds them, so its universe is unchanged; the run names each one it skips.
+    No list means no exclusions. A list that is present but unreadable raises
+    ValueError, which refuses the run: this guards a write, so it fails closed.
+    """
+    config = TACSOP_ROOT / "config" / "project.yaml"
+    if not config.exists():
+        return set()
+    try:
+        data = yaml.safe_load(config.read_text(encoding="utf-8")) or {}
+    except yaml.YAMLError as err:
+        raise ValueError(f"config/project.yaml does not parse: {err}") from err
+    section = data.get("propagation") if isinstance(data, dict) else None
+    if section is None:
+        return set()
+    if not isinstance(section, dict):
+        raise ValueError("propagation in config/project.yaml must be a mapping")
+    entries = section.get("exclude") or []
+    if not isinstance(entries, list) or not all(isinstance(e, str) for e in entries):
+        raise ValueError("propagation.exclude in config/project.yaml must be a list of paths")
+    return {_normal(e) for e in entries}
+
+
+def _normal(path: str) -> str:
+    """One form for a repo path: forward slashes, no ./ or trailing /, case folded.
+
+    A slip in the config then excludes more, never less.
+    """
+    path = path.strip().replace("\\", "/")
+    while path.startswith("./"):
+        path = path[2:]
+    return path.rstrip("/").casefold()
+
+
+def _is_excluded(rel: str, excluded: set[str]) -> bool:
+    """True when rel is an excluded path or sits under one."""
+    rel = _normal(rel)
+    return any(rel == entry or rel.startswith(entry + "/") for entry in excluded)
+
+
+ENTRY_HEADING = re.compile(r"^## (\d{4}-\d{2}-\d{2}):", re.MULTILINE)
+
+
+def _with_fences(text: str, first_line: int = 1):
+    """Yield (line, inside_a_code_fence) for each line; fence markers count as inside.
+
+    A fence closes only on the character that opened it, at least as long
+    (CommonMark), so a ~~~ line inside a ``` block stays inside. A fence still
+    open at the end raises ValueError: it would swallow everything after it.
+    """
+    opener = ""
+    for number, line in enumerate(text.splitlines(), first_line):
+        run = re.match(r"\s*(`{3,}|~{3,})", line)
+        if run and not opener:
+            opener, opened_at = run.group(1), number
+            yield line, True
+        elif run and run.group(1)[0] == opener[0] and len(run.group(1)) >= len(opener):
+            opener = ""
+            yield line, True
+        else:
+            yield line, bool(opener)
+    if opener:
+        raise ValueError(f"unclosed code fence opened at line {opened_at}")
+
+
+def extract_entries(doctrine_path: Path) -> list[tuple[str, str]]:
+    """Every dated entry in the doctrine file as (date, text), in file order.
+
+    A `## ` heading starts an entry only outside a code fence. One that is not
+    dated (`## YYYY-MM-DD: Subject`) raises ValueError naming it: an entry with
+    a typo in its heading would otherwise never ship.
+    """
     if not doctrine_path.exists():
-        return None
-
-    content = doctrine_path.read_text()
-
-    # Split on horizontal rules (---) to separate header from entries
-    parts = re.split(r"\n---\n", content, maxsplit=1)
+        return []
+    # The header ends at the first horizontal rule; entries follow, newest first.
+    parts = re.split(r"\n---\n", doctrine_path.read_text(encoding="utf-8"), maxsplit=1)
     if len(parts) < 2:
+        return []
+    entries: list[list] = []
+    seen: set[str] = set()
+    # The entries begin after the header's lines and its `---` separator.
+    for line, fenced in _with_fences(parts[1], first_line=parts[0].count("\n") + 3):
+        if line.startswith("## ") and not fenced:
+            line = line.rstrip()
+            heading = ENTRY_HEADING.match(line)
+            if not heading:
+                raise ValueError(f"doctrine heading is not dated (## YYYY-MM-DD: Subject): {line!r}")
+            if line in seen:
+                # A heading is an entry's identity; a repeat would never ship.
+                raise ValueError(f"doctrine heading appears twice: {line!r}")
+            seen.add(line)
+            entries.append([heading.group(1), [line]])
+        elif entries:
+            entries[-1][1].append(line)
+    return [(day, re.sub(r"\n+---\s*$", "", "\n".join(lines).strip())) for day, lines in entries]
+
+
+def _heading(entry: tuple[str, str]) -> str:
+    return entry[1].splitlines()[0]
+
+
+def _headings(text: str) -> set[str]:
+    """The dated entry headings in a notification, outside code fences."""
+    return {line.rstrip() for line, fenced in _with_fences(text) if not fenced and ENTRY_HEADING.match(line)}
+
+
+def read_mark(mark_file: Path) -> set[str] | None:
+    """The entry headings a repo has been offered; None if it has no mark.
+
+    Raises ValueError for a mark that is not all dated headings (garbage, a
+    BOM, git conflict markers, an empty file), so it is reported, not trusted.
+    """
+    if not mark_file.exists():
         return None
+    lines = [line.rstrip() for line in mark_file.read_text(encoding="utf-8").splitlines() if line.strip()]
+    bad = [line for line in lines if not ENTRY_HEADING.match(line)]
+    if bad or not lines:
+        raise ValueError(f"malformed delivery mark: {bad[0] if bad else 'empty'!r}")
+    return set(lines)
 
-    entries_text = parts[1].strip()
 
-    # Split on ## headings to get individual entries
-    entries = re.split(r"\n(?=## \d{4}-\d{2}-\d{2}:)", entries_text)
-    if not entries:
-        return None
+def entries_to_deliver(
+    entries: list[tuple[str, str]], held: set[str] | None, since: str | None, existing: str
+) -> list[tuple[str, str]]:
+    """The entries one repo still needs, oldest first.
 
-    return entries[0].strip()
+    A mark wins: every entry whose heading it does not hold goes, whatever its
+    date. With no mark, everything from `since` goes, or, with no `since`, the
+    newest entry alone. An entry already unread in the repo's notification is
+    never sent twice.
+    """
+    if held is not None:
+        wanted = [e for e in entries if _heading(e) not in held]
+    elif since:
+        wanted = [e for e in entries if e[0] >= since]
+    else:
+        wanted = entries[:1]
+    unread = _headings(existing)
+    return [e for e in reversed(wanted) if _heading(e) not in unread]
 
 
 def build_notification(latest_entry: str) -> str:
@@ -80,45 +215,102 @@ def build_notification(latest_entry: str) -> str:
 """
 
 
-def propagate(dry_run: bool = False) -> None:
-    """Main propagation logic."""
-    latest = extract_latest_entry(DOCTRINE_FILE)
-    if not latest:
+def propagate(dry_run: bool = False, since: str | None = None) -> int:
+    """Send each repo every entry it has not been offered; return the failure count.
+
+    The mark (`.claude/doctrine-delivered`) is the set of entry headings the
+    hub has offered that repo, one per line. Each run adds the hub's current
+    headings and never removes one, so an entry skipped because it was
+    already unread, or a run from an older hub checkout, never causes a
+    re-send. One repo's failure is reported and the run moves on.
+    """
+    entries = extract_entries(DOCTRINE_FILE)
+    if not entries:
         print("No doctrine updates found.")
-        return
+        return 0
+    newest = max(day for day, _ in entries)
+    if since and since > newest:
+        # A typo here would otherwise mark every repo delivered and send nothing.
+        raise ValueError(f"--since {since} is after the newest entry ({newest}); it would send nothing")
 
     repos = find_downstream_repos()
     if not repos:
         print("No downstream repos with .claude/commands/ found.")
-        return
+        return 0
 
-    notification = build_notification(latest)
-
-    for repo in repos:
+    offered = {_heading(e) for e in entries}
+    excluded = excluded_repos()
+    rels = [repo.relative_to(PROJECTS_DIR).as_posix() for repo in repos]
+    for entry in sorted(excluded):
+        if not any(_is_excluded(rel, {entry}) for rel in rels):
+            print(f"[warn] {entry}: in propagation.exclude, but no discovered repo is at or under it")
+    failures = 0
+    for repo, rel in zip(repos, rels):
+        if _is_excluded(rel, excluded):
+            print(f"[skip] {rel}: excluded by config/project.yaml propagation.exclude")
+            continue
         target = repo / NOTIFICATION_FILENAME
-        if dry_run:
-            existing = " (append)" if target.exists() else " (new)"
-            print(f"[dry-run] Would write: {target}{existing}")
-        else:
-            rel = repo.relative_to(PROJECTS_DIR)
-            if target.exists():
-                existing = target.read_text()
-                target.write_text(existing.rstrip() + "\n\n---\n\n" + latest)
-                print(f"Appended: {rel}")
+        mark_file = repo / MARK_FILENAME
+        try:
+            held = read_mark(mark_file)
+            existing = target.read_text(encoding="utf-8") if target.exists() else ""
+            due = entries_to_deliver(entries, held, since, existing)
+            new_mark = (held or set()) | offered
+            dates = ", ".join(day for day, _ in due)
+            noun = "entry" if len(due) == 1 else "entries"
+            if dry_run:
+                mode = "append" if existing else "new"
+                change = f"mark {len(held) if held is not None else 'none'} -> {len(new_mark)} headings"
+                sent = f"{len(due)} {noun} ({dates}) ({mode})" if due else "nothing"
+                print(f"[dry-run] {rel}: would send {sent}; {change}")
+                continue
+            body = "\n\n---\n\n".join(text for _, text in due)
+            if not due:
+                print(f"Up to date: {rel}")
+            elif existing:
+                target.write_text(existing.rstrip() + "\n\n---\n\n" + body + "\n", encoding="utf-8")
+                print(f"Appended {len(due)} {noun} ({dates}): {rel}")
             else:
-                target.write_text(notification)
-                print(f"Notified: {rel}")
+                target.write_text(build_notification(body), encoding="utf-8")
+                print(f"Notified {len(due)} {noun} ({dates}): {rel}")
+            if new_mark != held:
+                mark_file.write_text("\n".join(sorted(new_mark, reverse=True)) + "\n", encoding="utf-8")
+        except (OSError, UnicodeDecodeError, ValueError) as err:
+            failures += 1
+            print(f"FAILED {rel}: {err}")
+    return failures
 
-    if dry_run:
-        print(f"\nNotification content:\n{'=' * 40}\n{notification}")
+
+def _entry_date(value: str) -> str:
+    """argparse type: a real YYYY-MM-DD date, returned as given."""
+    try:
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+            raise ValueError
+        date.fromisoformat(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"not a YYYY-MM-DD date: {value!r}") from None
+    return value
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=__doc__)
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Show what would be done without writing files",
+        help="Show what each repo would be sent, without writing files",
     )
-    args = parser.parse_args()
-    propagate(dry_run=args.dry_run)
+    parser.add_argument(
+        "--since",
+        type=_entry_date,
+        help="For repos with no delivery mark: send every entry from this date",
+    )
+    args = parser.parse_args(argv)
+    try:
+        return 1 if propagate(dry_run=args.dry_run, since=args.since) else 0
+    except ValueError as err:
+        print(f"Refused, nothing written: {err}")
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

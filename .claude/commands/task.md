@@ -78,11 +78,13 @@ TCS is also the **universal task specification unit**: every task within a CONOP
 
 **Format**: Add TCS table to the task entry:
 ```
-| Task | Condition | Standard |
-|------|-----------|----------|
-| Add new util | Given valid input | Returns expected output, type-hinted, docstring |
-| Handle errors | Given invalid input | Raises appropriate exception, logs warning |
+| Task | Purpose | Condition | Standard |
+|------|---------|-----------|----------|
+| Add new util | Pipeline lead, deciding whether a run's inputs are usable | Given valid input | Returns expected output, type-hinted, docstring |
+| Handle errors | Same lead, deciding whether to rerun or discard | Given invalid input | Raises appropriate exception, logs warning |
 ```
+
+**Purpose** names who gets the output and what decision it informs. Fill it before planning the work; if you cannot, ask. The task spec is where wrong-question work costs least to catch: a walkthrough built when the need was a calibration cost a session, and Condition and Standard never ask what the output is for.
 
 ### Level 3: CONOP — Concept of Operations
 **When**: Multi-wave plan with design decisions or multiple agent teams.

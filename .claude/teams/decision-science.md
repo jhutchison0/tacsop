@@ -8,8 +8,8 @@
 
 | Teammate | Role | Responsibility |
 |----------|------|----------------|
-| `proposer` | Analyst | Frame the decision problem, propose model structure and value function choices, write proposal to `docs/plans/` |
-| `decision-scientist` | Domain reviewer | Audit model structure for MAUT correctness — weights, value functions, sensitivity coverage; write findings to `docs/reviews/` |
+| `proposer` | Analyst | Frame the decision problem, propose model structure and value function choices, write proposal to `docs/plans/` of the owning repository (Scope Matrix note) |
+| `decision-scientist` | Domain reviewer | Audit model structure for MAUT correctness — weights, value functions, sensitivity coverage; write findings to `docs/reviews/` of the owning repository (Scope Matrix note) |
 | `python-prototyper` | Implementer | Implement the approved model alongside its tests |
 | `test-runner` | Validator | Run tests after each implementation step, report coverage gaps |
 | `code-reviewer` | Quality gate | Review code against design pillars; does not evaluate domain correctness (that is `decision-scientist`'s role) |
@@ -17,7 +17,7 @@
 ## Workflow
 
 1. Lead assigns the task with scope and acceptance criteria
-2. `proposer` reads the codebase and decision problem, proposes model structure (criteria, value function choices, weight elicitation method) to `docs/plans/`
+2. `proposer` reads the codebase and decision problem, proposes model structure (criteria, value function choices, weight elicitation method) to `docs/plans/` of the owning repository (Scope Matrix note)
 3. `decision-scientist` audits the proposal — checks that weights are valid, value functions are appropriate for the domain, and sensitivity analysis is planned
 4. `code-reviewer` challenges the proposal — stress-tests assumptions, identifies implementation risks, flags design gaps
 5. Lead decides which approach to proceed with (or asks `proposer` to revise)

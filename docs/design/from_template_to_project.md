@@ -127,7 +127,7 @@ Then clean up template artifacts:
 | Delete `docs/reviews/*.md` | Template Pass-N audit reports, not yours |
 | Delete `docs/plans/*.md` | Template plans (e.g., `decision_science_utility.md`), not yours |
 | Delete `docs/design/from_template_to_project.md` | You've read it — it's template scaffolding |
-| Reset `docs/tasks.md` to empty Active/Blocked/Completed sections | Template tasks, not yours |
+| Reset `docs/tasks.md` to an empty `## Focus` section and empty Active/Blocked/Completed sections | Template tasks, not yours |
 | Reset `CHANGELOG.md` to empty | Template changelog, not yours |
 | Delete `docs/doctrine-updates.md` AND `docs/propagation-protocol.md` | **Unless your project will itself serve as a doctrine source to other repos** (rare), these belong to the hub repo only |
 | Clean `.claude/README.md` of template-specific wording | Update agent roster and scope matrix for your project |
@@ -437,6 +437,10 @@ Aim for 3–5 Pillars. More than 5 means you haven't prioritized. Pillars that s
 Run `/task add <description>` or edit `docs/tasks.md` directly. Structure for the initial list:
 
 ```markdown
+## Focus
+
+1. Write the first design doc, then the CI workflow.
+
 ## Active
 
 - [ ] [P1] Write the first design doc for Feature X — owner: unassigned

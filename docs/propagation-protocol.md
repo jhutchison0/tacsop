@@ -41,11 +41,9 @@ A doctrine update that cannot answer all five is not ready to propagate.
 
 ## Batching Rules
 
-The propagation script extracts **only the most recent entry** in `docs/doctrine-updates.md` (`entries[0]`). This is a hard constraint of the current implementation, and it shapes how changes are batched.
+Until 2026-10-01 the script shipped only the newest entry (`entries[0]`). The entries dated 2026-04-21, 2026-05-29, and both 2026-06-28 never reached a downstream notification file, and 2026-08-21 through 2026-09-18 stacked up behind the newest. It now sends each repo every entry its delivery mark does not hold (see Delivery Mark below). Rules 2 and 4 are unchanged: they are about what a downstream maintainer can accept or refuse, not about the transport.
 
-**Rule 1 — One propagation cycle = one entry.** If you have two unrelated changes, you have two options:
-- Combine into one entry covering both (preferred when changes are coherent or co-dependent).
-- Propagate one, wait for downstream consumption, then add and propagate the next.
+**Rule 1 — Related changes share an entry; unrelated ones get their own.** Combine changes into one entry when they are coherent or co-dependent; otherwise write two. Since the delivery mark, one cycle carries any number of entries; before it, the second waited a full cycle.
 
 **Rule 2 — Never let a doctrine entry mix unrelated changes.** A downstream maintainer who agrees with change A but not change B should be able to apply A and skip B cleanly. Mixing forces all-or-nothing.
 
@@ -61,8 +59,8 @@ A single propagation cycle has six steps:
 
 1. **Draft entry.** Add a `## YYYY-MM-DD: <Subject>` section to the top of `docs/doctrine-updates.md` (most recent first). Include: files changed, files added, change description, scope per audience, **Action Required** checklist.
 2. **Pre-flight review.** Run the change through the Evaluation Gate (five questions above). If any fails, fix or downgrade.
-3. **Dry run.** `python scripts/propagate_doctrine.py --dry-run` — confirm the expected repo list and notification content.
-4. **Propagate.** `python scripts/propagate_doctrine.py` — script writes `.claude/upstream-update.md` in each downstream repo (or appends if a notification already exists).
+3. **Dry run.** `python scripts/propagate_doctrine.py --dry-run` prints, per repo, how many entries it would be sent, their dates, and how its mark would change. Confirm the repo list and that no repo is sent an entry it already holds. Each repo in `propagation.exclude` that is on this machine prints a `[skip]` line; resolve any `[warn]` line (a typo, or a repo not cloned here) before step 4.
+4. **Propagate.** `python scripts/propagate_doctrine.py` writes `.claude/upstream-update.md` in each downstream repo, or appends to an unread one, and then updates that repo's delivery mark. A repo with no mark gets the newest entry only, unless `--since YYYY-MM-DD` names the oldest entry it may lack.
 5. **Log the cycle.** In the next session doc, record: cycle number (continuing from prior count), repo count (new vs appended), and any anomalies (missing repos, append-target mismatches).
 6. **Track unread.** Append mode means notifications accumulate until a downstream maintainer deletes the file. This is intentional — never overwrite — but it means you should check `docs/sessions/` for a doctrine consumption record before propagating again.
 
@@ -75,16 +73,20 @@ The script discovers downstream repos by recursive scan of `~/projects/` for any
 - **The `tacsop` repo itself is excluded.** Hardcoded by path equality.
 - **Nested repos are excluded.** If repo A is inside repo B, only B is notified — A is treated as a submodule or sub-checkout, not an independent consumer.
 
+A third rule applies at the run, not at discovery: a repo at or under a path in `propagation.exclude` is skipped (see the Implications below).
+
 **Implications**:
 
 - No explicit registry. A new downstream repo is auto-discovered the moment it gets a `.claude/commands/` directory.
 - A repo that adopts our template but is in a non-standard parent path (not under `~/projects/`) is invisible. This is acceptable for now but should be revisited if it ever bites.
-- A repo that intentionally opts out cannot. The only workaround is to delete its `.claude/commands/` directory, which defeats the purpose.
+- A repo the hub must not write into is listed in `config/project.yaml` under `propagation.exclude`, as its path relative to `~/projects` (the form a dry run prints). Discovery still finds it; the run prints `[skip] <path>: excluded by config/project.yaml propagation.exclude` and writes neither a notification nor a mark there, nor in any repo under that path. The list is on the hub's side because the decision is the hub's: a marker file inside the repo (`.claude/no-propagate`) would itself be a write into a repo that must not be written to, and a mirror's sync may not keep it.
+  - **Read so a slip excludes more, never less.** Whitespace, a leading `./`, a trailing `/` and Windows separators are dropped and case is folded. A list that is present but unreadable (a single value instead of a list, YAML that does not parse) refuses the run: `Refused, nothing written`. An entry that matches no discovered repo prints `[warn] <entry>: in propagation.exclude, but no discovered repo is at or under it`, and the run goes on, because a machine without that repo cloned is a legitimate case.
+  - **The match is a path, not a repo.** It is exact against the root two levels above the hub checkout. A second clone of the same repository at another path, on this machine or another, is not excluded by it.
 - **A repo that gitignores `.claude/` is undiscoverable on any fresh clone.** Discovery reads the filesystem, not the roster, so an ignored and therefore untracked `.claude/` is absent the moment the repo is cloned somewhere new. Observed 2026-08-22 in `aar_ai_pipeline`: on the roster since before 2026-07-26, ignoring `.claude/` since commit `1020a43`, and undiscoverable in the clone at `~/projects/gitlab/ops_research/`. **Ignoring `.claude/` is often deliberate** — a repo shared with outside collaborators is commonly scoped to the deliverable, with internal workflow tooling versioned elsewhere. Discovery does not distinguish that from a repo that has simply lost its tooling, and it cannot: both look like an absent directory. The consumer-side fix is the private-sidecar mode in the 2026-08-22 amendment to the 2026-08-21 entry, which restores discovery as a side effect, because a sidecar cloned to `.claude/` puts `.claude/commands` back on disk. Until a consumer adopts one of the two modes, **hand-delivery is the only channel into it.**
 
 **Discovery is not a census.** It reports what is on this machine right now. A name absent from a discovery run may be alive on another machine, cloned without its `.claude/`, or genuinely gone, and the run cannot tell you which. Never prune the roster on a single machine's discovery output.
 
-**Open question (track in `docs/tasks.md` if it becomes pressing)**: should the script support an opt-out file (`.claude/no-propagate`)?
+**Opt-out, settled 2026-10-04**: the hub-side list above, not an opt-out file. The first entry is `github/assay`, a GitHub mirror of a work repository that this hub never writes into. Every exclusion for a repo on this machine prints a `[skip]` line in the dry run (Cycle Anatomy, step 3); a `[warn]` line is read before the live run.
 
 ---
 
@@ -92,7 +94,7 @@ The script discovers downstream repos by recursive scan of `~/projects/` for any
 
 Adopted 2026-03-30. Default and only mode.
 
-**Behavior**: if `.claude/upstream-update.md` already exists in the target repo, the script appends the new entry below the existing content, separated by `\n\n---\n\n`. If absent, it writes a fresh notification with the standard header.
+**Behavior**: if `.claude/upstream-update.md` already exists in the target repo, the script appends every entry due below the existing content, separated by `\n\n---\n\n`. If absent, it writes a fresh notification with the standard header.
 
 **Why**: a downstream maintainer might not have consumed the prior notification yet. Overwriting would silently drop unread updates. Append preserves the full history of pending notifications.
 
@@ -100,11 +102,36 @@ Adopted 2026-03-30. Default and only mode.
 
 ---
 
+## Delivery Mark
+
+Adopted 2026-10-01 (CONOP OVERWATCH, transport fix).
+
+**Behavior**: `.claude/doctrine-delivered` lists, one per line, the heading of every entry the hub has offered that repo. A run sends each entry whose heading the mark does not hold, oldest first, and skips any entry already sitting in the repo's unread notification. After writing the notification, the script adds every current hub heading to the mark and never removes one. So an entry skipped because it was already unread is not sent again after the maintainer reviews it, and a run from an older hub checkout cannot shrink the mark. Dates play no part once a mark exists: an entry written the same day as a delivered one, or merged below the top later, still ships.
+
+**No mark yet**: the repo gets the newest entry only, and its mark then holds every current heading. A repo bootstrapped from the template after the newest entry already holds that entry too, and receives it again unless its mark is seeded first. For an older repo that missed cycles, run once with `--since YYYY-MM-DD`, naming the oldest entry it may lack. A mark, once written, wins over `--since`, and a `--since` after the newest entry refuses the run: it would mark every repo delivered and send nothing.
+
+**Seeding a mark by hand**: one `--since` covers every unmarked repo, and some repos already hold entries it would send: a repo bootstrapped after those entries, or one that adopted them by hand. Before that repo's first run, write every hub heading into its mark except the headings of the entries it lacks. A heading missing from a mark is sent, whatever its date, so a mark listing only the recent entries a repo holds sends it the whole older history. For a repo that lacks only the 2026-09-18 entry:
+
+```bash
+.venv/bin/python -c 'import sys; sys.path.insert(0, "scripts"); import propagate_doctrine as p; print("\n".join(t.splitlines()[0] for _, t in p.extract_entries(p.DOCTRINE_FILE)))' \
+  | grep -v '^## 2026-09-18:' > <repo>/.claude/doctrine-delivered
+```
+
+Then run `--dry-run` and confirm that repo is sent exactly the entries it lacks.
+
+**Recovery**: deleting one line from a repo's mark re-sends that one entry on the next run. Deleting the mark lets the next `--since` run backfill the repo, and dedupe still skips anything unread.
+
+**What it records**: delivery, not review. The unread notification file still holds whatever the maintainer has not reviewed; append mode keeps it. Consumers should commit the mark, so a clone on another machine knows what this repo has been sent.
+
+**Limits**: a mark matches headings exactly, so retitling an entry after delivery sends it again under the new heading; write a correction as a new entry instead. A mark that is not all dated headings (garbage, a byte-order mark, git conflict markers, an empty file) is reported as `FAILED` and left untouched, the run moves on to the next repo, and the script exits 1. Fix a conflicted mark by keeping the union of both sides' lines. A `## ` heading that is not dated, outside a code fence, refuses the whole run and names the line, so a typo cannot drop an entry silently.
+
+---
+
 ## Version Coordination
 
 The template's `version` in `config/project.yaml` is currently `0.1.0` and does not formally constrain downstream repos. Downstream repos are not expected to track our version explicitly.
 
-**However**: a doctrine entry that depends on a specific template version (e.g., "requires `propagate_doctrine.py` v2 with the new opt-out flag") should say so at the top of the entry. Do not assume downstream repos pull our latest template before applying our doctrine.
+**However**: a doctrine entry that depends on a specific template version (e.g., "requires the `propagate_doctrine.py` that reads delivery marks") should say so at the top of the entry. Do not assume downstream repos pull our latest template before applying our doctrine.
 
 If a doctrine change ever becomes version-gated, this protocol gets an ADR.
 
@@ -116,7 +143,7 @@ If a propagated change turns out to be wrong:
 
 1. **Author a corrective doctrine entry.** Title it `## YYYY-MM-DD: REVERT — <original subject>`. Spell out what to undo and how. Include before/after snippets in the reverse direction.
 2. **Propagate the correction.** Use the same script. Append mode means it lands cleanly even if downstream has not consumed the original yet.
-3. **Update `docs/doctrine-updates.md`** to mark the original entry with `(REVERTED YYYY-MM-DD)` after its date header. Do not delete the original; keep the history visible.
+3. **Update `docs/doctrine-updates.md`** to mark the original entry with `(REVERTED YYYY-MM-DD)` at the end of its heading: `## 2026-08-30: Subject (REVERTED 2026-10-05)`. Placed between the date and the colon, it breaks the dated-heading pattern and refuses the run. The changed heading sends the entry again, which tells downstream it was reverted. Retitle only after the REVERT entry has propagated; in the same cycle, the full original arrives first and the REVERT after it. Do not delete the original; keep the history visible.
 
 **Do not**: rewrite history by editing or removing past entries in `docs/doctrine-updates.md`. Future readers need to see what we asked downstream to do, even when we changed our minds.
 

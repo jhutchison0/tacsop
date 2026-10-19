@@ -107,7 +107,7 @@ may not exist and buys a slow SMB timeout in place of a clear message. This
 is the lake's own rule in home clothes: a bare invocation is an error, not
 production.
 
-## Six rules that were paid for
+## Seven rules that were paid for
 
 1. **Never run an embedded database against a network share.** SQLite,
    DuckDB, Kuzu, on-disk vector stores: file locking over SMB corrupts.
@@ -129,6 +129,17 @@ production.
 6. **Bulk data lives on the device; compute and working copies stay local.**
    New bulk data goes to home storage, the workstation processes it, and
    nothing gates on a working copy another machine cannot see.
+7. **A many-read compute path never runs against the mount.** SMB charges
+   per round trip, not per byte: a store scan that costs milliseconds
+   locally costs seconds over the share, and a pipeline that re-scans per
+   signal multiplies it. Paid for 2026-09-04 (propter Wave 3): a report
+   render making ~200 scans of a store under 1GB ran two hours against the
+   mount and died once besides; the same render took 41-44 seconds against
+   a local copy that itself took under a minute to make. The pattern is
+   rule 6 applied to reads: sync the store down once, compute against the
+   copy, write back only the artifact. Batch the reads before a path runs
+   on a schedule; "correct, not fast" is an acceptable trade only until
+   wall-clock becomes the operational constraint.
 
 ## Companion files, lighter
 

@@ -112,7 +112,7 @@ These skills are portable to any software project. They contain no project names
 
 ### shift-left-testing (directory form)
 
-**Path**: `.claude/skills/shift-left-testing/SKILL.md` + 7 sidecars (`TIERS.md`, `PATTERNS.md`, `MOCKS.md`, `FIXTURES.md`, `VERTICAL-SLICING.md`, `CI.md`, `ANTIPATTERNS.md`).
+**Path**: `.claude/skills/shift-left-testing/SKILL.md` + 13 sidecars (`TIERS.md`, `PATTERNS.md`, `MOCKS.md`, `FIXTURES.md`, `VERTICAL-SLICING.md`, `PROPERTY-BASED.md`, `NUMERIC.md`, `REGRESSION.md`, `SCRIPTS.md`, `ISOLATION.md`, `ENFORCEMENT.md`, `CI.md`, `ANTIPATTERNS.md`).
 
 **Focus**: Multi-tier testing strategy with vertical-slicing (tracer-bullet) TDD, mocks, fixtures, simulation, CI integration, and explicit anti-patterns.
 
@@ -142,7 +142,7 @@ These skills are portable to any software project. They contain no project names
 
 **Focus**: Maintain CONTEXT.md at the repo root capturing project identity, mission, current state, and constraints.
 
-**Key concepts**: project identity vs config state, narrative-not-machine-readable, distinguishes from LANGUAGE.md (terms) and project.yaml (machine-readable state).
+**Key concepts**: narrative-not-machine-readable; Current State names where state lives, never a snapshot; distinguishes from LANGUAGE.md (terms) and project.yaml (machine-readable identity).
 
 **Use when**: Significant new work starts; mission or scope changes; an agent needs project context quickly; downstream relationships change.
 
@@ -207,6 +207,26 @@ These skills are portable to any software project. They contain no project names
 **Audience**: work-remote repos that touch the lake, and personal repos that write bulk data to home storage. The lake authority is the `dis-lakehouse` repo, not this skill; home storage has no authoritative repo and says so.
 
 **Use when**: Adding or reviewing lake or home-storage writes, choosing a format for a stored artifact, planning a dev-to-production promotion, or preparing a machine to do storage work.
+
+### verifying-claims (directory form)
+
+**Path**: `.claude/skills/verifying-claims/SKILL.md` + 1 sidecar (`EXAMPLES.md`).
+
+**Focus**: House rule for success claims: six kernel rules, four claim states, one probe per claim type, and seven before/after pairs. The testing skill governs how code gets tested; this one governs what a report may say about the result.
+
+**Key concepts**: claim no higher than the state the evidence reaches (written, tested, deployed, observed), an absence is a claim too, evidence from this turn and after the last change to the thing claimed, check the outcome the claim names with a check that can fail, an `Evidence:` line or `UNVERIFIED: <blocker>` under each claim a reader will act on, a skipped check is not a blocker, a checkout a timer or service runs from is deployed only when clean, probes read and never write; the `## Claims` table at `/session-end`.
+
+**Use when**: Reporting that something passed, landed, synced, exists, or is absent; repeating a number measured earlier; writing or reviewing a session's Claims table.
+
+### maintaining-the-common-operating-picture (directory form)
+
+**Path**: `.claude/skills/maintaining-the-common-operating-picture/SKILL.md` + 3 sidecars (`DOCTRINE.md`, `EXAMPLES.md`, `ADOPTION.md`).
+
+**Focus**: How a repo knows its own state. Two ideas and eight kernel rules: mark every line as a measurement or an estimate, and place every line by how it moves. The vocabulary (assessment, measurement, estimate, projection, horizon, surprise, gap, collector, universe, picture) is defined once, with its ADP 5-0 and 6-0 sources. `verifying-claims` governs a claim about what this turn changed; this skill governs standing facts this turn did not touch, and where they live.
+
+**Key concepts**: the rendered picture is generated and never hand-edited while its registers are authored; a measurement carries value, time, collector, subject identity, universe and shape (exact, bound, interval); an estimate carries a range and the observation that would prove it wrong; every quantity declares its motion (constant, drifting, scheduled), its horizon per decision, and its surprise condition; supersede in place; gaps name their collector and the decision they block and the list is never empty; read the picture before you measure; one horizon per line (current operations, running estimate, plans) with records keeping all three; never report clean (checked with fields, or unchecked with a reason). Success criterion open, in the five-session shape.
+
+**Use when**: Writing or reading any statement about what is true now; before measuring something that may already be measured; designing a probe, a status document or the session-start summary; deciding where a fact lives; reviewing a plan whose gate states a measurement.
 
 ### task management (command: `/task`)
 
@@ -366,6 +386,7 @@ This is why `session-end`, `pcc`, `pci`, `sitrep`, `session-start`, and `task` r
 │   ├── NUMERIC.md
 │   ├── REGRESSION.md
 │   ├── SCRIPTS.md
+│   ├── ISOLATION.md
 │   ├── ENFORCEMENT.md
 │   ├── CI.md
 │   └── ANTIPATTERNS.md
@@ -409,6 +430,10 @@ This is why `session-end`, `pcc`, `pci`, `sitrep`, `session-start`, and `task` r
 │   ├── PREFLIGHT.md
 │   ├── ADOPTION.md
 │   └── HOME-STORAGE.md
+│
+├── verifying-claims/
+│   ├── SKILL.md
+│   └── EXAMPLES.md
 │
 └── # Level 1 — Project-Specific
     (none — this is a template; downstream repos add as needed)

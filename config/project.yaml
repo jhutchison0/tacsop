@@ -52,6 +52,13 @@ paths:
   plans: "docs/plans"
   reviews: "docs/reviews"
 
+# Doctrine propagation: repos that discovery finds under ~/projects and this hub
+# never writes into, as paths relative to ~/projects (the form a dry run prints).
+# The run names each one it skips. Read by scripts/propagate_doctrine.py.
+propagation:
+  exclude:
+    - github/assay  # a mirror of a work repository (the user's rule, 2026-10-02)
+
 # Build phases — update status as work progresses
 # Statuses: not_started, in_progress, complete
 build_phases:
@@ -78,20 +85,13 @@ testing:
     - "tests/unit/test_*.py"
     - "tests/integration/test_*.py"
 
-# Session state
-state:
-  last_session:
-    date: "2026-09-27"
-    file: "docs/sessions/20260927_schelling_point_bootstrap.md"
-    summary: "schelling-point, a game theory curriculum taught by simulation, was bootstrapped from 54a86a0 and a seed plan into an empty WSL repo and reached its Phase 0 gate: 18 commits, 23 tests, nothing pushed. The feature-development team ran propose, challenge, build, and audit; execution found an import cycle, a torch-laden axelrod release, a setup-uv tag that does not exist, and ruff rewriting Markdown fences. Roster gains propter and schelling-point; six findings filed as tasks, among them the hook import scan missing src.-prefixed imports."
-  active_work: "Harvest launch-control's upstream-lesson file from its origin/main, not its checkout, which sits 102 commits behind (P1). Fix the confirmed audit-hook glob defect and pin it with a nested-path test (P1). Settle the contested WHETSTONE Wave 1 session count, which this session adds another candidate to (P1). Decide whether the hub blesses a config profile mechanism for dev/prod, as an ADR, since launch-control's shipped code and its own anti-rule contradict each other (P2). Reconcile the configuration-management skill with the fact that nothing implements it (P3). Add the remaining machines to the roster on the next visit to each box (P3). Still open from before: make the notification carry the unacknowledged set, decide what the fleet ledger is, harvest veil-engine's six lessons, route delta lessons 34 to 41, uv migration and P1 rename on work/home/laptop, Day-1 playbook rewrite, the five March docs, 0.2.0 cut."
-  known_issues:
-    - "Audit hook is soft-deterministic (logs, never blocks); cannot enforce temporal vertical-slicing (all tests then all impl)"
-    - "exponential() raises ZeroDivisionError for nonzero |rate| < ~2.2e-16 (Active task; repro in docs/tasks.md)"
-    - "propagate_doctrine.py emits only the most recent doctrine entry; a consumer that misses a cycle stays missed and the hub reads the same either way (P1; found downstream in ffskg 2026-08-13, reached the hub 2026-08-28)"
-    - "No participant can observe the whole fleet: discovery is per-machine and the two boxes' scans disagree 9 against 16 (P1)"
-    - "Audit-hook glob is one level deep, so it never fires on a module inside a subpackage; every consumer with subpackages has an inert hook (P1; found in launch-control May 2026, its ADR 0002, CONFIRMED at the hub 2026-08-29)"
-    - "No git identity configured on this box; commits require GIT_AUTHOR_* passed explicitly"
+# No state block. This file is identity, the slowest-moving facts; a sentence of
+# state kept here reads as current long after it stops being true. Instead:
+#   last session      the newest file in docs/sessions/ by name (date-first)
+#   campaign focus    the ## Focus section at the head of docs/tasks.md (intent)
+#   known unknowns    docs/gaps.md, the gap register
+#   suite, git, tools measured by command at /session-start, never written down
+# See .claude/skills/maintaining-the-common-operating-picture/ADOPTION.md.
 
 # Slash commands reference
 commands:

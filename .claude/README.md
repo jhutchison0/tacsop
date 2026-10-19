@@ -38,7 +38,7 @@ This directory contains agent definitions, team templates, slash commands, and s
     │
     └── # All Level 0 skills now use directory form (Anthropic Dec 18 open standard)
         ├── configuration-management/SKILL.md + 5 sidecars
-        ├── shift-left-testing/SKILL.md + 7 sidecars
+        ├── shift-left-testing/SKILL.md + 13 sidecars
         ├── python-venv-management/SKILL.md + 2 sidecars
         ├── maintaining-ubiquitous-language/SKILL.md
         ├── maintaining-project-context/SKILL.md
@@ -47,7 +47,9 @@ This directory contains agent definitions, team templates, slash commands, and s
         ├── writing-simple-and-direct/SKILL.md + 4 sidecars
         ├── designing-clear-data-displays/SKILL.md + 4 sidecars
         ├── traversing-the-knowledge-base/SKILL.md
-        └── lake-conventions/SKILL.md + 3 sidecars
+        ├── lake-conventions/SKILL.md + 3 sidecars
+        ├── verifying-claims/SKILL.md + 1 sidecar
+        └── maintaining-the-common-operating-picture/SKILL.md + 3 sidecars
 ```
 
 > Note: legacy single-file skills `configuration-management.md`, `shift-left-testing.md`, `python-venv-management.md`, and `session-end.md` were retired 2026-05-19. The first three migrated to directory form with sidecar progressive disclosure; `session-end.md` reference content moved to `docs/session-doc-format.md`. The `/session-end` workflow remains in `.claude/commands/session-end.md`. See [SKILLS_FRAMEWORK.md](skills/SKILLS_FRAMEWORK.md) for the full inventory.
@@ -83,6 +85,8 @@ This directory contains agent definitions, team templates, slash commands, and s
 
 **Bold** = primary owner. Regular "Write" = secondary (for tests alongside their code). Dash = no access needed.
 
+The matrix names paths, not repositories. An agent's output goes to the repository that owns the sensitivity of its input: a report, proposal, or audit on another repository's material is written there, or to the scratchpad, never into this repo's `docs/`, whatever directory the agent runs in. This repo is public. Found 2026-10-01, when three agents reviewing another project's plan wrote its internal names into `docs/reviews/` here; `/pcc` check 7 is the deterministic backstop. The test an agent can run: if the material's path is outside this repository's working tree (not under `git rev-parse --show-toplevel`) or it was handed over from outside, write to the scratchpad and name the owning repository in the final message, or describe it when its name is itself private.
+
 ## Team Templates
 
 Team compositions live in `.claude/teams/`. Use `/task promote` or `/task plan` to get recommendations on which team to assemble.
@@ -107,10 +111,10 @@ Team compositions live in `.claude/teams/`. Use `/task promote` or `/task plan` 
 
 Agents communicate through shared artifacts; no direct messaging is required for most workflows:
 
-- **Config files** — `config/project.yaml` is the shared schema contract and project state
+- **Config files** — `config/project.yaml` is the shared schema contract and the project's identity
 - **Test results** — `pytest` output validates changes and is the evidence standard for all agents
 - **Task list** — `docs/tasks.md` tracks ownership and status across agent turns
-- **Review reports** — `code-reviewer` and `decision-scientist` write findings to `docs/reviews/` for async review
+- **Review reports** — `code-reviewer` and `decision-scientist` write findings to `docs/reviews/` of the owning repository (Scope Matrix note) for async review
 
 ## Escalation Paths
 
@@ -127,7 +131,7 @@ Involve the user when:
 
 Work is tracked at two levels:
 
-- **Strategic**: `config/project.yaml` → `state.active_work` (campaign focus, blockers, priorities)
+- **Strategic**: the `## Focus` section at the head of `docs/tasks.md` (the campaign's order, as intent); what nobody can see yet is in `docs/gaps.md`
 - **Tactical**: `docs/tasks.md` (individual items with owners, priorities, status)
 
 The `/task` command manages the tactical layer and includes an escalation ladder for promoting complex work into planning documents in `docs/plans/`:

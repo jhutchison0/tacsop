@@ -58,6 +58,37 @@ Schemas and a repo's UX rules define what a display must contain; this defines h
 Before the eight: could a table or a sentence carry these numbers? Under about twenty, a table usually does (VDQI p. 56).
 A UX rule that asks for a less dense display wins; state the override.
 
+## Claim Style
+
+Every claim a reader will act on (that something works, landed, synced, exists, or is absent) follows the verifying-claims skill. The kernel:
+
+1. Name the state: written, tested, deployed, or observed. Claim no higher than your evidence reaches. An absence is a claim too.
+2. Evidence comes from this turn, after the last change to the thing claimed. Earlier output is stale: re-run the check, re-measure the number.
+3. Check the outcome the claim names, with a check that can fail. A launcher's exit 0 is not the outcome; no error is not evidence.
+4. Under each claim a reader will act on, put an `Evidence:` line with the command and its output, or `UNVERIFIED: <blocker>`. A skipped check is not a blocker; run it.
+5. A checkout a timer or service runs from is deployed only when clean: `git status --porcelain` prints nothing.
+6. Probes read; they never write to the system they check.
+
+A plan, an opinion, or an explanation of code is not a claim. The belief a plan rests on is one: check it before you act.
+A diff shown in the same message is its own evidence. Say what you did not do; that needs no `Evidence:` line.
+`/session-end` gathers the session's claims into a `## Claims` table.
+
+## Picture Style
+
+Every statement about what is true now (a host, a count, a schedule, a coverage figure, a version) follows the maintaining-the-common-operating-picture skill. The kernel:
+
+1. The rendered picture is never hand-edited; its inputs may be.
+2. Every line is a measurement or an estimate, and an input or an outcome, and says which. A measurement carries value, time, collector, subject, universe and shape; an estimate carries a range, its basis, and the observation that would prove it wrong.
+3. Every quantity declares how it moves (constant, drifting, scheduled) and what would be a surprise; the picture shows the last measurement, its age, and the projection, and flags the surprise.
+4. Supersede in place, never overwrite; tests count unmarked lines only.
+5. Gaps are listed, each naming its collector and the decision it blocks, and the list is never empty.
+6. Read the picture before you measure or assert state; re-measure for a named cause, never for comfort.
+7. One horizon per line, not per document: current operations measured by command, the running estimate maintained, plans as intent with gates that name their command. Records keep every horizon and are never rewritten.
+8. Never report clean: checked with its fields, or unchecked with a reason and no value.
+
+A claim about what this turn changed follows Claim Style; a standing fact this turn did not touch follows this.
+`assessment` is the process, never a line. A periodic report is a measurement at its stamp and an estimate thereafter.
+
 ## Environment Setup
 
 This project uses **uv** (Astral) for interpreters, environments, and packages. **All commands must run inside the venv.**
@@ -67,7 +98,7 @@ This project uses **uv** (Astral) for interpreters, environments, and packages. 
 curl -LsSf https://astral.sh/uv/install.sh | sh   # If uv is not installed
 uv python install 3.12             # uv-managed interpreter (no system coupling)
 uv venv --managed-python           # Create .venv on the managed interpreter
-uv pip install -e ".[dev]"
+uv pip install --python .venv -e ".[dev]"
 cp .env.example .env               # Add your API keys
 ```
 
@@ -78,7 +109,7 @@ source .venv/bin/activate           # Activate before working
 .venv/bin/pytest                    # Run tests without activating
 ```
 
-uv venvs do not bundle pip. Run all package operations through `uv pip ...` from the project root; never `sudo pip`, never system pip.
+uv venvs do not bundle pip. Run every package operation from the project root as `uv pip <command> --python .venv ...`; never `sudo pip`, never system pip. Name the target every time: a `VIRTUAL_ENV` inherited from another repo's shell outranks the project's `.venv`, and a bare `uv pip install` lands there.
 
 ## Quick Commands
 
@@ -90,10 +121,10 @@ pytest -x                          # Stop on first failure
 pytest --pdb                       # Debug on failure
 
 # Install optional dependencies
-uv pip install -e ".[excel]"       # Excel utilities (pandas, openpyxl, xlsxwriter)
-uv pip install -e ".[slack]"       # Slack integration
-uv pip install -e ".[database]"    # PostgreSQL
-uv pip install -e ".[all]"         # Everything
+uv pip install --python .venv -e ".[excel]"       # Excel utilities (pandas, openpyxl, xlsxwriter)
+uv pip install --python .venv -e ".[slack]"       # Slack integration
+uv pip install --python .venv -e ".[database]"    # PostgreSQL
+uv pip install --python .venv -e ".[all]"         # Everything
 ```
 
 ## Project Overview
@@ -160,7 +191,7 @@ tacsop/
 Work scales through four levels. Use `/task promote` or `/task plan` to evaluate:
 
 1. **Task** — One person, one session, clear action (`docs/tasks.md`)
-2. **TCS** — Multi-step with pass/fail criteria (Task, Condition, Standard); also the universal task detail unit within all plan types
+2. **TCS** — Multi-step with pass/fail criteria (Task, Condition, Standard, plus a Purpose column); also the universal task detail unit within all plan types
 3. **CONOP** — Multi-wave with design decisions and parallel tracks (`docs/plans/`)
 4. **OPORD** — Sequential execution of a decided strategy in waves (`docs/plans/`)
 

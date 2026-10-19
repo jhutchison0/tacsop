@@ -53,6 +53,7 @@ include = ["src*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+addopts = ["-p", "tests.isolation", "-p", "pytester"]  # isolation: .claude/skills/shift-left-testing/ISOLATION.md
 
 [tool.coverage.run]
 source = ["src/myproject"]

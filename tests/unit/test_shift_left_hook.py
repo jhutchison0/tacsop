@@ -44,6 +44,11 @@ def _run_hook(repo: Path, edited: Path) -> str:
         "import myproject.widgets\n",
         "from myproject import widgets\n",
         "from myproject import thing, widgets\n",
+        # Tests in a repo laid out like the template import with the src. prefix
+        # (agent-eval, 2026-10-06: 53 such imports, 0 bare, so the fallback never fired).
+        "from src.myproject.widgets import thing\n",
+        "import src.myproject.widgets\n",
+        "from src.myproject import widgets\n",
     ],
 )
 def test_feature_named_test_that_imports_the_module_counts_as_partner(tmp_path, line):

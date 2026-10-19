@@ -11,11 +11,11 @@ project:
   name: "myproject"
 
 machines:
-  titanx:
+  workbox:
     role: workstation
     scope: [work, personal]
     references:
-      lakehouse: ~/projects/gitlab/dis-data/dis-lakehouse
+      lakehouse: ~/projects/example/reference-sop
   unknown:
     role: unspecified
     scope: [personal]
@@ -41,11 +41,11 @@ def _at_host(monkeypatch, hostname):
 
 class TestResolveMachine:
     def test_known_hostname_resolves_to_its_roster_entry(self, roster, monkeypatch):
-        _at_host(monkeypatch, "titanx")
+        _at_host(monkeypatch, "workbox")
 
         result = machine.resolve_machine()
 
-        assert result.name == "titanx"
+        assert result.name == "workbox"
         assert result.role == "workstation"
         assert result.scope == ("work", "personal")
         assert result.known is True
@@ -61,7 +61,7 @@ class TestResolveMachine:
         assert result.scope == ("personal",)
 
     def test_reference_paths_expand_to_absolute(self, roster, monkeypatch, tmp_path):
-        _at_host(monkeypatch, "titanx")
+        _at_host(monkeypatch, "workbox")
         # expanduser reads HOME on POSIX and USERPROFILE on Windows; set both
         # so the test controls expansion on either platform.
         fake_home = tmp_path / "home" / "someone"
@@ -73,7 +73,7 @@ class TestResolveMachine:
         lakehouse = result.references["lakehouse"]
         assert lakehouse.is_absolute()
         assert "~" not in str(lakehouse)
-        assert lakehouse == fake_home / "projects/gitlab/dis-data/dis-lakehouse"
+        assert lakehouse == fake_home / "projects/example/reference-sop"
 
     def test_machine_without_references_gets_empty_mapping(self, roster, monkeypatch):
         _at_host(monkeypatch, "some-new-laptop")
@@ -86,11 +86,11 @@ class TestResolveMachine:
 
 class TestDescribe:
     def test_known_machine_reads_as_one_line(self, roster, monkeypatch):
-        _at_host(monkeypatch, "titanx")
+        _at_host(monkeypatch, "workbox")
 
         line = machine.describe(machine.resolve_machine())
 
-        assert line == "titanx (workstation, work+personal)"
+        assert line == "workbox (workstation, work+personal)"
 
     def test_unknown_machine_says_so_rather_than_guessing(self, roster, monkeypatch):
         _at_host(monkeypatch, "some-new-laptop")

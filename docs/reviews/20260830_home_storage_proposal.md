@@ -170,7 +170,7 @@ downstream repos automatically.
 STORAGE.md's code sample defaults an environment variable to a real network path:
 
 ```python
-MEDIA_ROOT = Path(os.environ.get("MIMIR_MEDIA_ROOT", r"<real UNC path>"))
+MEDIA_ROOT = Path(os.environ.get("<NAS>_MEDIA_ROOT", r"<real UNC path>"))
 ```
 
 Two problems, independent of each other. First, the obvious one: a real address as an
@@ -197,7 +197,7 @@ except KeyError as exc:
 ```
 
 Also worth generalizing: STORAGE.md's variable name bakes in one project's codename
-(`MIMIR_*`). The lakehouse section teaches namespace-generic variable names (`MINIO_*`,
+(`<NAS>_*`). The lakehouse section teaches namespace-generic variable names (`MINIO_*`,
 `S3_*`) that mean the same thing in every adopting repo. `HOME-STORAGE.md` should teach a
 placeholder convention, `<PROJECT>_<DATASET>_ROOT`, and let each adopter fill in its own
 prefix, rather than presenting one deployment's naming as if it were universal.

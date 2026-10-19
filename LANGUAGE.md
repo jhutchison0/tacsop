@@ -48,7 +48,7 @@ When a term is missing or contested, invoke the `maintaining-ubiquitous-language
 
 **Team**: A pre-composed agent roster for a class of work, defined in `.claude/teams/<name>.md`. Templates only; teams are instantiated at deployment time. _Avoid:_ squad, group.
 
-**Roster**: The set of agents currently defined in `.claude/agents/`. The live list is whatever is in that directory; CONTEXT.md tracks the current count and names.
+**Roster**: The set of agents currently defined in `.claude/agents/`. The live list is whatever is in that directory; CONTEXT.md names them.
 
 **Subagent Type**: The named template a teammate is spawned from. Drives tool access and default model. _Avoid:_ agent role.
 
@@ -58,7 +58,7 @@ When a term is missing or contested, invoke the `maintaining-ubiquitous-language
 
 **Task**: One person, one session, one clear action. The smallest unit in `docs/tasks.md`. Promote upward when the work exceeds one session or requires multi-step coordination.
 
-**TCS** (Task, Condition, Standard): a structured task spec with pass/fail criteria. The universal task-detail unit inside all plan types (CONOP, OPORD). _Avoid:_ ticket, story.
+**TCS** (Task, Condition, Standard): a structured task spec with pass/fail criteria. Its table also carries a Purpose column: who gets the output and what decision it informs. The universal task-detail unit inside all plan types (CONOP, OPORD). _Avoid:_ ticket, story.
 
 **CONOP**: Concept of Operations, a multi-wave plan covering design decisions and parallel tracks. Lives in `docs/plans/`. _Avoid:_ design doc (already taken).
 
@@ -80,13 +80,15 @@ When a term is missing or contested, invoke the `maintaining-ubiquitous-language
 
 **Propagation**: The process of pushing a doctrine update from this repo to downstream consumer repos via `scripts/propagate_doctrine.py`. See `docs/propagation-protocol.md`.
 
-**Downstream Repo**: A consumer of this template that has adopted some or all of its conventions and is auto-discovered by the propagation script at each cycle. The most recent cycle (2026-04-21) reached 11 repos; the current discoverable roster is larger and listed in `docs/propagation-protocol.md`.
+**Downstream Repo**: A consumer of this template that has adopted some or all of its conventions and is auto-discovered by the propagation script at each cycle. Discovery is per machine: `scripts/propagate_doctrine.py --dry-run` lists the consumers this machine can see, and no command lists the whole fleet (`docs/gaps.md`, G3).
 
 **Upstream Update**: A pending doctrine notification waiting for review in a downstream repo, surfaced as `.claude/upstream-update.md` at session start.
 
 **Doctrine Update Entry**: A dated section in `docs/doctrine-updates.md` describing one propagation cycle. Each entry is the unit that the propagation script extracts and distributes.
 
 **Append Mode**: A propagation behavior that preserves unread notifications in downstream repos by appending new updates instead of overwriting. Default since 2026-03-30.
+
+**Propagation Exclusion**: A repo, named by its path under `~/projects`, that this hub never writes into. Listed in `config/project.yaml` under `propagation.exclude`; the run prints `[skip]` for it and writes no notification or mark there. Settled 2026-10-04 with `github/assay`, a mirror of a work repository, as the first entry. _Avoid:_ opt-out (the repo does not choose; the hub does).
 
 ---
 
@@ -105,6 +107,12 @@ When a term is missing or contested, invoke the `maintaining-ubiquitous-language
 **ADR**: Architecture Decision Record, a numbered file in `docs/adr/NNNN-<slug>.md` capturing one decision that satisfies the triple filter: hard to reverse AND surprising without context AND result of a real trade-off. Maintained via the `recording-architecture-decisions` skill. See `docs/adr/ADR-FORMAT.md`.
 
 **Triple Filter**: The gate for whether a decision warrants an ADR. All three required: hard to reverse, surprising without context, real trade-off. Source: Matt Pocock's ADR format.
+
+**Focus**: The `## Focus` section at the head of `docs/tasks.md`: the campaign's next steps, in order, as intent, with absolute dates and no counts or status. Rewritten by `/session-end` Step 4.5 when the order changes. Replaced `state.active_work` in `config/project.yaml` on 2026-10-04.
+
+**Gap Register**: `docs/gaps.md`, the list of what this repo cannot see yet. Each open row names the collector that would close it and the decision it blocks; a row closes or is superseded in place, never deleted; the list is never empty. Pinned by `tests/unit/test_gaps.py`. Replaced `state.known_issues` on 2026-10-04.
+
+**Common Operating Picture**: One rendered display over the data every reader shares, never a maintained paragraph. It and its terms (measurement, estimate, projection, horizon, surprise, gap, collector, universe) are defined once, in the vocabulary table of `.claude/skills/maintaining-the-common-operating-picture/SKILL.md`; this file points there rather than redefining them.
 
 ---
 

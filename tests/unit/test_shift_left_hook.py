@@ -81,6 +81,43 @@ def test_found_partner_prints_nothing(tmp_path):
     assert result.stderr == ""
 
 
+def test_feature_named_partner_prints_nothing(tmp_path):
+    repo = _repo(tmp_path)
+    (repo / "tests" / "unit" / "test_feature.py").write_text("from src.myproject.widgets import thing\n")
+    result = _run_hook_result(repo / "src" / "myproject" / "widgets.py")
+    assert result.returncode == 0
+    assert result.stdout == ""
+    assert result.stderr == ""
+
+
+def test_hostile_path_characters_keep_the_object_parseable(tmp_path):
+    repo = _repo(tmp_path)
+    # A backslash is not in the name: the hook normalizes Windows separators by
+    # turning every backslash into a slash, so a Linux path that carries one is
+    # silently out of scope (known limit, gate review 2026-10-22, S1).
+    odd = repo / "src" / "myproject" / 'q"uote\nline'
+    odd.mkdir()
+    (odd / "thing.py").write_text("x = 1\n")
+    result = _run_hook_result(odd / "thing.py")
+    assert result.returncode == 0
+    out = json.loads(result.stdout)
+    assert str(odd / "thing.py") in out["hookSpecificOutput"]["additionalContext"]
+
+
+def test_without_jq_the_hook_is_silent(tmp_path):
+    repo = _repo(tmp_path)
+    payload = json.dumps({"tool_name": "Edit", "tool_input": {"file_path": str(repo / "src" / "myproject" / "widgets.py")}})
+    empty_path = tmp_path / "no-tools"
+    empty_path.mkdir()
+    result = subprocess.run(
+        [shutil.which("bash"), str(HOOK)],
+        input=payload, text=True, capture_output=True, env={"PATH": str(empty_path)},
+    )
+    assert result.returncode == 0
+    assert result.stdout == ""
+    assert result.stderr == ""
+
+
 @pytest.mark.parametrize(
     "line",
     [

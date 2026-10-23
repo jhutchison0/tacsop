@@ -29,10 +29,10 @@ The PostToolUse hook at `.claude/hooks/post-tool-shift-left-audit.sh` fires afte
 2. Exits silently for paths outside `src/myproject/**/*.py`.
 3. Exits silently for `__init__.py`, `conftest.py`, and any file already matching `test_*.py` / `*_test.py`.
 4. Infers the test partner: `tests/**/test_<basename>.py` via `find`; when that misses, any `tests/**/test_*.py` that imports the module (`from pkg.mod import`, `import pkg.mod`, or `from pkg import mod`) counts, so feature-named suites are partners too.
-5. If the test partner does not exist, appends a `MISSING_TEST` line to `.claude/audits/shift-left-violations.log` and writes a one-line warning to stderr (which the harness surfaces back to the agent in the tool result).
+5. If the test partner does not exist, appends a `MISSING_TEST` line to `.claude/audits/shift-left-violations.log` and prints one JSON object on stdout: `hookSpecificOutput.additionalContext` carries the warning to the agent beside the tool result, and `systemMessage` shows it to the user. Claude never sees stderr from a hook that exits 0 (hooks reference, read 2026-10-22), so the stderr warning the hook wrote from 2026-05-19 to 2026-10-22 reached nobody; every consumer that copied the hook in that window carries the silent form until it adopts this one.
 6. If the test partner exists, appends an `OK_TEST_EXISTS` line for each match.
 
-The hook never blocks. Output is evidence, not friction. The script `set -uo pipefail` (deliberately not `-e`) and always `exit 0` so a transient failure cannot suppress the tool call.
+The hook never blocks. Output is evidence, not friction. The script `set -uo pipefail` (deliberately not `-e`) and always `exit 0`. A PostToolUse hook cannot suppress a tool call that already ran: exit 2 would show the warning to Claude but mark a successful write as a hook error, and any other non-zero exit is a non-blocking error that shows the user one line of stderr. JSON on stdout at exit 0 is the channel that warns without friction.
 
 ## Why Not Hard Blocks (Layer 6)
 

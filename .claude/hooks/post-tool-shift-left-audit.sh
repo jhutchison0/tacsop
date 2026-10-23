@@ -5,9 +5,13 @@
 # Logs evidence of test-partner presence for new production code in src/myproject/.
 # See .claude/skills/shift-left-testing/ENFORCEMENT.md for rationale and gradient.
 #
-# Invariant: this script MUST exit 0 in all paths. A non-zero exit is interpreted
-# by the harness as a hook failure, which can suppress or fail the tool call —
-# the opposite of the soft-deterministic stance we want.
+# Invariant: this script exits 0 on every path. A PostToolUse hook cannot undo
+# the write that already happened: exit 2 would show the warning to Claude but
+# render a successful tool call as a hook error, and any other non-zero exit is
+# a non-blocking error that shows the user one line of stderr. The warning
+# travels instead as one JSON object on stdout (additionalContext for the agent,
+# systemMessage for the user), the one channel an exit-0 hook has to the agent.
+# Claude never sees stderr from a hook that exits 0 (hooks reference, 2026-10-22).
 
 set -uo pipefail  # NOT -e: we never want a transient grep/find failure to exit non-zero.
 
@@ -94,13 +98,18 @@ fi
 
 if [ -z "$test_partners" ]; then
     echo "[$timestamp] MISSING_TEST file=$file_path expected=tests/**/test_${module_basename}.py" >> "$audit_log"
-    cat >&2 <<EOF
-[shift-left-audit] No test partner found for $file_path.
+    # One JSON object on stdout, nothing else: additionalContext reaches the
+    # agent beside the tool result, systemMessage reaches the user. jq builds
+    # it so a path with a quote in it cannot break the object.
+    warning="[shift-left-audit] No test partner found for $file_path.
   Expected: tests/**/test_${module_basename}.py
   Vertical-slice TDD says: write a failing test first, then minimum impl to pass it.
   See .claude/skills/shift-left-testing/VERTICAL-SLICING.md
-  Log: .claude/audits/shift-left-violations.log
-EOF
+  Log: .claude/audits/shift-left-violations.log"
+    jq -n -c --arg ctx "$warning" \
+        --arg msg "[shift-left-audit] No test partner for $basename; expected tests/**/test_${module_basename}.py" \
+        '{systemMessage: $msg, hookSpecificOutput: {hookEventName: "PostToolUse", additionalContext: $ctx}}' \
+        2>/dev/null || true
 else
     while IFS= read -r tp; do
         [ -n "$tp" ] && echo "[$timestamp] OK_TEST_EXISTS file=$file_path partner=$tp" >> "$audit_log"

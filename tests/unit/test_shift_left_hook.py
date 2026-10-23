@@ -29,12 +29,56 @@ def _repo(tmp_path: Path) -> Path:
     return tmp_path
 
 
-def _run_hook(repo: Path, edited: Path) -> str:
+def _run_hook_result(edited: Path) -> subprocess.CompletedProcess:
     payload = json.dumps({"tool_name": "Edit", "tool_input": {"file_path": str(edited)}})
-    result = subprocess.run(["bash", str(HOOK)], input=payload, text=True, capture_output=True)
+    return subprocess.run(["bash", str(HOOK)], input=payload, text=True, capture_output=True)
+
+
+def _run_hook(repo: Path, edited: Path) -> str:
+    result = _run_hook_result(edited)
     assert result.returncode == 0, "the hook must exit 0 on every path"
     log = repo / ".claude" / "audits" / "shift-left-violations.log"
     return log.read_text() if log.exists() else ""
+
+
+# The warning's channel. Claude never sees stderr from a hook that exits 0, and a
+# PostToolUse hook cannot undo a write, so the warning travels as one JSON object
+# on stdout: `hookSpecificOutput.additionalContext` for the agent, `systemMessage`
+# for the user (hooks reference, "Exit code 0" and "PostToolUse decision control",
+# read 2026-10-22). Until then the hook wrote to stderr, which reached nobody.
+
+
+def test_missing_partner_sends_the_warning_as_additional_context(tmp_path):
+    repo = _repo(tmp_path)
+    result = _run_hook_result(repo / "src" / "myproject" / "widgets.py")
+    assert result.returncode == 0
+    out = json.loads(result.stdout)  # one JSON object and nothing else on stdout
+    specific = out["hookSpecificOutput"]
+    assert specific["hookEventName"] == "PostToolUse"
+    assert "No test partner" in specific["additionalContext"]
+    assert "tests/**/test_widgets.py" in specific["additionalContext"]
+
+
+def test_missing_partner_tells_the_user_too(tmp_path):
+    repo = _repo(tmp_path)
+    result = _run_hook_result(repo / "src" / "myproject" / "widgets.py")
+    out = json.loads(result.stdout)
+    assert "widgets.py" in out["systemMessage"]
+
+
+def test_missing_partner_writes_nothing_to_stderr(tmp_path):
+    repo = _repo(tmp_path)
+    result = _run_hook_result(repo / "src" / "myproject" / "widgets.py")
+    assert result.stderr == ""
+
+
+def test_found_partner_prints_nothing(tmp_path):
+    repo = _repo(tmp_path)
+    (repo / "tests" / "unit" / "test_widgets.py").write_text("import pytest\n")
+    result = _run_hook_result(repo / "src" / "myproject" / "widgets.py")
+    assert result.returncode == 0
+    assert result.stdout == ""
+    assert result.stderr == ""
 
 
 @pytest.mark.parametrize(

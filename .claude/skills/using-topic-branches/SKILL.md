@@ -10,11 +10,10 @@ Branch on the **shape of the work**, not on a permanent partition of the codebas
 goal is one logical change per branch (clean diff for review) without the standing cost
 of long-lived branches (drift, resync ceremony, stale tracking remotes).
 
-This replaces the older "one permanent branch per domain" convention. Permanent domain
-branches (`dev-safety`, `dev-ui`, `dev-perception`, …) force constant resyncing against
-`main` for **no review benefit**: the audit gate happens at merge time regardless of how
-long the branch has existed. Short-lived topic branches keep the isolation and drop the
-permanence.
+Permanent domain branches (`dev-safety`, `dev-ui`, `dev-perception`, …) force constant
+resyncing against `main` for no review benefit: the audit gate happens at merge time
+regardless of how long the branch has existed. Short-lived topic branches keep the
+isolation and drop the permanence.
 
 ## The Two Shapes
 
@@ -86,15 +85,9 @@ debt: merge or close them through the forge, don't `git push --delete` them blin
 
 ## Anti-Patterns to Avoid
 
-- **Permanent domain branches** (`dev-<domain>`) — the convention this skill replaces.
+- **Permanent domain branches** (`dev-<domain>`) — resync ceremony with no review gate to justify it.
 - **Deleting a branch because it is `behind`** — behind says nothing about unmerged work;
   only `ahead == 0` proves a branch is safe to drop.
 - **Per-contributor branches within one task** — split by files, not by branches.
 - **Leaving merged topic branches standing** — that is how a clean repo accrues debt.
 - **Branching for lead-only doc/ADR work** — overhead with no gate to justify it.
-
-## Sources
-
-- Distilled from MEGAN's CONOP-002 §4.2 retrospective (2026-05-24), where six permanent
-  `dev-*` branches were retired in favor of this policy after they were found to force
-  resync ceremony for no review benefit.

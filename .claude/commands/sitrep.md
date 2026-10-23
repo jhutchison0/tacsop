@@ -79,5 +79,5 @@ OPEN DECISIONS:
 - **Include function/config specifics** — teammates should be able to find and use what was built
 - **Numbers over adjectives** — "14 tests passing, 2 collection errors from missing deps" not "tests mostly work"
 - **Known issues get the same specificity** — include the specific symptom, not "there's a problem"
-- **Keep it to one screen** — if it scrolls too much, cut the least important items
+- **Written for a reader who skims** — a teammate gets the state of the work from the first line of each section; detail only the author needs stays in the session doc
 - **No internal jargon about the planning framework** — teammates don't need to know about TCS/CONOP/OPORD levels; just tell them what was done and what's next

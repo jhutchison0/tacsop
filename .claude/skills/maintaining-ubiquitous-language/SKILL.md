@@ -44,7 +44,7 @@ Real examples from this project's LANGUAGE.md:
 ```markdown
 **Criterion**: A dimension along which alternatives are compared. _Avoid:_ factor, attribute, measure, metric.
 
-**Wave**: A tactical parallel-execution unit inside a CONOP or OPORD where agent teams deploy. _Avoid:_ sprint, batch.
+**Wave**: A tactical parallel-execution unit inside a CONOP or OPORD where agent teams deploy. Bounded by a shared exit criterion. _Avoid:_ sprint, batch.
 
 **Skill**: A self-loading capability defined in `.claude/skills/<name>/SKILL.md` (directory form, preferred) or `.claude/skills/<name>.md` (single-file, legacy), invoked by name or auto-triggered by Claude when the description matches. _Avoid:_ procedure (too generic), playbook (already taken by team templates).
 ```

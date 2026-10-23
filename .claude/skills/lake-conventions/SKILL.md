@@ -166,24 +166,3 @@ threading before the run rather than after.
 Its documentation lags its deployment. Endpoints named in its top-level docs
 may describe an older host than the one its `docker/` tree now ships. Trust the
 deployment tree over the prose when they disagree.
-
-## Version History
-
-- **1.1.0** (2026-08-30): Home-storage coverage as a new sidecar,
-  `HOME-STORAGE.md`, for personal projects on personal-scoped machines.
-  Harvested from a gitignored local storage doc and generalized: every
-  hostname, share name, pool name, and drive path removed. Keeps the
-  three-address-forms rule, roots-from-environment with a required-variable
-  loud-failure pattern (no address defaults, role-named `HOME_<ROLE>_ROOT`
-  variables), the embedded-database-over-SMB hazard, mirror-is-not-backup,
-  address-by-name, least-privilege credentials, and bulk-data-to-device.
-  `config/project.yaml` gains an optional `project.scope` field (absent
-  means work); the routing paragraph above reads it alongside the machine
-  roster's scope.
-- **1.0.0** (2026-08-29): Initial, in the hub. Harvested from `launch-control`'s
-  local `lake-conventions` 1.0.0 (2026-07-27), which covered format-by-bucket
-  and the `_tmp/` scratch namespace for one repo. Generalized: repo-specific
-  writers, package paths, and maintainer identity removed; bucket tiers, both
-  path grammars, the companion-file contract, client settings, and the dev/prod
-  section added, the last drawn from what launch-control learned by writing to
-  production for five days.

@@ -87,8 +87,3 @@ Loaded on demand when this SKILL.md cites them. Read only the ones relevant to t
 - Edward Tufte's online course (edwardtufte.com/online-course/): fundamental design strategies for all information displays; credibility of a presentation and its presenter; standards of comparison.
 - Distilled here, not transcribed. `RULES.md` lists what each rule rests on and which sources were read.
 - The writing-simple-and-direct skill: the prose-side twin of this skill. Findings about figures are prose and follow its kernel.
-
----
-
-**Maintained by**: Designing Clear Data Displays Skill
-**Version**: 1.1.0, the external feedback round: the pre-question, Named Failures, the window test, the density guardrail (2026-08-27). 1.0.0, first committed version: directory form with four sidecars and the review protocol (2026-08-27)

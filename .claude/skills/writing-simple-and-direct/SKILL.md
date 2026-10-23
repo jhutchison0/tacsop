@@ -72,8 +72,3 @@ Loaded on demand when this SKILL.md cites them. Read only the ones relevant to t
 - Jacques Barzun, *Simple and Direct: A Rhetoric for Writers* (1975; 4th ed. 2001). Six parts (diction, linking, tone, meaning, composition, revision) and twenty numbered principles. Distilled here, not transcribed.
 - LANGUAGE.md: the banned-word mechanism this skill extends.
 - CLAUDE.md "Simplicity First": the code-side twin of this skill.
-
----
-
-**Maintained by**: Writing Simple and Direct Skill
-**Version**: 1.0.1, one scope sentence handing the chart-or-table question to designing-clear-data-displays (2026-08-27). 1.0.0, first committed version: directory form with four sidecars and the review protocol (2026-07-20)

@@ -80,9 +80,3 @@ Loaded on demand when this SKILL.md cites them.
 - [Pydantic](https://docs.pydantic.dev/) — schema validation, used in `VALIDATION.md`.
 - [python-dotenv](https://github.com/theskumar/python-dotenv) — `.env` file loading, used in `LOADER.md`.
 - [YAML Specification](https://yaml.org/spec/) — YAML reference (including anchors used in `TESTING-AND-PATTERNS.md`).
-
----
-
-**Maintained by**: Configuration Management Skill
-**Version**: 2.0.0 restructured to directory form with sidecar progressive disclosure (2026-05-19)
-**Previous version**: 1.0.0 single-file at `.claude/skills/configuration-management.md`, replaced by this directory.

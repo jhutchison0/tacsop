@@ -98,8 +98,3 @@ Make the blocker checkable too: paste its error when there is one, and name the 
 - `.claude/skills/shift-left-testing/ISOLATION.md`: the deterministic twin. A tripwire stops what a test must not do; this skill covers what a report must not say.
 - `docs/session-doc-format.md`: the `## Claims` table.
 - The writing-simple-and-direct skill, rule 6: hedge with numbers or not at all. An `Evidence:` line is that rule applied to success.
-
----
-
-**Maintained by**: Verifying Claims Skill
-**Version**: 1.0.0, first committed version: directory form with one sidecar (2026-10-01)

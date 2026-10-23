@@ -1,6 +1,7 @@
 ---
 name: traversing-the-knowledge-base
 description: Traverse this repo's knowledge base by its existing link graph (typed session-doc headers, markdown links, path mentions) instead of blind keyword search. Use when tracing why an artifact exists, assessing blast radius before editing a living doc, orienting on session lineage, or checking reference integrity.
+version: "1.0.2"
 ---
 
 # Traversing the Knowledge Base
@@ -74,9 +75,3 @@ Outcomes at window close, full matrix, no undefined cells:
 | **M1 < 3/5** | Value shown, uptake weak: one escalation rung (orientation pointer in `/session-start`) | Retire-or-escalate decision per the gradient philosophy in `.claude/skills/shift-left-testing/ENFORCEMENT.md` |
 
 No cell triggers automatically; each outcome is a recorded human decision in `docs/tasks.md`.
-
-## Version History
-
-- **1.0.2** (2026-10-04): Recipe 5 names check 5's task-list scope as everything above Completed, the Focus section included, after `/pcc` check 5 widened to cover it.
-- **1.0.1** (2026-10-01): Recipe 5 no longer mentions three allowlisted March paths; that allowlist line left `/pcc` check 5 when its task closed.
-- **1.0.0** (2026-08-14): Initial. Ships proposal Approach B (`docs/plans/20260813_kb_graph_traversal_proposal.md`) with the adversarial review's corrections: falsifiable five-session criterion, neighbors defined as both directions, integrity check wired into `/pcc`.

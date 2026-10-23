@@ -9,7 +9,7 @@ Guide me through ending this development session properly.
 
 ## Step 2: Pre-Code Check (PCC)
 
-Run the full `/pcc` checklist before committing. The authoritative check list lives in `.claude/commands/pcc.md`; do not re-enumerate it here (an earlier copy of the list drifted from `pcc.md` and was caught 2026-08-14). Two session-end extras `/pcc` does not cover:
+Run the full `/pcc` checklist before committing. The authoritative check list lives in `.claude/commands/pcc.md`; do not re-enumerate it here, because a copy drifts. Two session-end extras `/pcc` does not cover:
 
 1. **Large files** - No model files (.bin, .pkl, .pt, .pth, .h5, .onnx, .safetensors, .parquet) staged
 2. **Config validation** - `config/project.yaml` parses correctly
@@ -73,9 +73,9 @@ The session doc carries a `## Claims` table: one row for each claim a reader wil
 - Below it, write `Overclaims a reviewer caught this session: M`: every other claim a reviewer's re-run refuted. A claim is in N or in M, never both. A claim you retracted yourself, or that a tool refuted before anyone relied on it, is in neither count; its row shows the correction.
 - A session that claimed no outcome writes the two count lines alone.
 
-## Step 6: Evaluate Merge Readiness
-- Is this a major functional milestone?
-- If yes, consider merging to main
-- If no, continue on current branch
+## Step 6: Land the Branch
+- On `main` (lead-only doc, ADR, or small-refactor work): nothing to merge; the push in Step 3 landed it.
+- On a `topic/<scope>-<slug>` branch whose audit gate has passed: merge via merge-commit, push `main`, and delete the branch local and origin in the same step. If the gate has not run, leave the branch and name the gate in the session doc's Next Steps.
+- The rules and the commands live in `.claude/skills/using-topic-branches/SKILL.md`.
 
 Please walk me through each step, showing me the current state before asking what I want to do.

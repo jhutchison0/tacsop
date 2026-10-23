@@ -129,7 +129,7 @@ Then ask: **"What would you like to work on today?"**
 
 ---
 
-## Quick Reference (Don't Read Unless Needed)
+## Quick Reference
 
 These docs exist for deeper dives - reference them when relevant:
 

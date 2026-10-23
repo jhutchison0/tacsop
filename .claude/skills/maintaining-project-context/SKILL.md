@@ -101,8 +101,3 @@ When CONTEXT.md needs an update:
 - This project's [CONTEXT.md](../../../CONTEXT.md) — the artifact this skill maintains.
 - This project's [LANGUAGE.md](../../../LANGUAGE.md) — companion glossary.
 - This project's [config/project.yaml](../../../config/project.yaml) — machine-readable identity.
-
-## Version History
-
-- **1.1.0** (2026-10-04): Current State names where each part of the state lives instead of holding a snapshot, and `config/project.yaml` is identity, not state. The hub's own snapshot still named the 2026-04-21 propagation as the latest after three later cycles. Slice 2 of the hub's common operating picture.
-- **1.0.0** (2026-05-19): First version.

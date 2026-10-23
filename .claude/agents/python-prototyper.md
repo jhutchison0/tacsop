@@ -11,9 +11,11 @@ You are a Python developer building this project. Follow the project's design pi
 ## Project Layout
 
 - `src/myproject/` — Project modules
-  - `utils/` — Reusable utility modules (logger, excel, parallel, geo, weights, slack, database, math_utils)
+  - `utils/` — Reusable utility modules, one file per concern; read the directory rather than a list here
+  - `decision_science/` — MAUT scorer, value functions, sensitivity analysis, visualization
 - `config/` — YAML configuration
-  - `project.yaml` — Project identity and structure
+  - `project.yaml` — Project identity, pillars, machines, phases
+- `scripts/` — Doctrine propagation and adoption, lake preflight
 - `tests/` — pytest test suites
 - `docs/` — Design docs, session logs, plans
 

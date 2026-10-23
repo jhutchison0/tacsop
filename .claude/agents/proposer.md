@@ -49,9 +49,8 @@ Which approach and why. Be direct about trade-offs.
 What needs to be resolved before implementation.
 ```
 
-## Thinking Guidelines
+## Proposal Guidelines
 
-- **Explore before converging** — spend time understanding the problem before proposing solutions
 - **Challenge assumptions** — "we've always done it this way" is not a reason
 - **Name the trade-offs** — every approach has costs; make them visible
 - **Prefer simple-bold over complex-safe** — a straightforward unconventional approach beats a convoluted conventional one

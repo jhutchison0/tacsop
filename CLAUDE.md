@@ -134,43 +134,37 @@ This is a Python project template with reusable utility modules. It provides a s
 ## Tech Stack
 
 - **Language**: Python (3.11+)
-- **Base Dependencies**: pyyaml, python-dotenv
-- **Optional**: pandas, openpyxl, xlsxwriter, slack-sdk, psycopg, numpy
+- **Base Dependencies**: pyyaml, python-dotenv, numpy (and tzdata on Windows)
+- **Optional groups** (`pyproject.toml`): dev, excel, slack, database, weights, decision-science, all
 
 ## Project Structure
 
 ```
 tacsop/
 ├── src/myproject/
-│   ├── __init__.py
-│   └── utils/                    # Reusable utility modules
-│       ├── logger.py             # OOP logging with colors and timezones
-│       ├── excel.py              # DataFrame-to-Excel tables
-│       ├── parallel.py           # Multiprocessing patterns
-│       ├── geo.py                # Haversine distance and bearing
-│       ├── weights.py            # SMARTER/reciprocal/rank-sum weights
-│       ├── slack.py              # Slack webhook posting
-│       ├── database.py           # Async PostgreSQL with JSONB
-│       └── math_utils.py         # Combinatorics (nCr, nCk)
+│   ├── utils/                    # Reusable utility modules, one file per concern
+│   └── decision_science/         # MAUT scorer, value functions, sensitivity, visualization
 ├── config/
-│   └── project.yaml              # Project identity and phases
-├── tests/                        # pytest suites
+│   └── project.yaml              # Project identity, pillars, machines, phases
+├── scripts/                      # Doctrine propagation and adoption, lake preflight
+├── tests/                        # pytest suites: unit/, integration/, fixtures/, isolation.py
 ├── docs/
+│   ├── adr/                      # Architecture decision records
 │   ├── design/                   # Pillars and roadmap
+│   ├── plans/                    # CONOPs, OPORDs, proposals
+│   ├── reviews/                  # Agent review reports
 │   ├── sessions/                 # Session documentation
-│   └── plans/                    # Implementation plans
+│   ├── gaps.md                   # Gap register
+│   └── tasks.md                  # Task list, Focus section at its head
 ├── .claude/
-│   ├── README.md               # Agent roster, teams, scope matrix
-│   ├── agents/                  # Individual agent definitions
-│   │   ├── test-runner.md
-│   │   ├── code-reviewer.md
-│   │   └── python-prototyper.md
-│   ├── teams/                   # Team composition templates
-│   │   ├── feature-development.md
-│   │   ├── bug-fix.md
-│   │   └── code-review.md
-│   ├── commands/                # session-start, session-end, pcc, pci, task
-│   └── skills/                  # Level 0 skills (config, testing, venv, etc.)
+│   ├── README.md                 # Agent roster, teams, scope matrix: the authoritative list
+│   ├── agents/                   # One file per agent
+│   ├── teams/                    # Team composition templates
+│   ├── commands/                 # Slash commands (Workflow Commands below)
+│   ├── hooks/                    # PostToolUse shift-left audit hook
+│   └── skills/                   # Level 0 skills in directory form; SKILLS_FRAMEWORK.md indexes them
+├── CONTEXT.md                    # One-page project narrative
+├── LANGUAGE.md                   # Glossary and the banned-word list
 ├── pyproject.toml
 ├── .env.example
 └── CLAUDE.md
@@ -183,6 +177,7 @@ tacsop/
 | `/session-start` | Load context, check health, review tasks | Start of every session |
 | `/session-end` | Commit, update tasks, write session doc | End of every session |
 | `/task` | Manage task list, escalate work items | Track and plan work |
+| `/sitrep` | Status report for teammates and leadership | When someone outside the session needs the state of the work |
 | `/pcc` | Pre-Code Check — fast pass/fail checklist | Before every push |
 | `/pci` | Pre-Code Inspection — context-aware review | Before merge/PR or when PCC passes but confidence is low |
 
@@ -199,7 +194,7 @@ Work scales through four levels. Use `/task promote` or `/task plan` to evaluate
 
 ## Agents
 
-**IMPORTANT**: Before deploying any agent team, read `.claude/README.md` for the current roster and usage guide.
+Before deploying an agent team, read `.claude/README.md`: it holds the roster, the scope matrix, and the team templates, and the table below is a summary of it.
 
 | Agent | Model | Writes Code? | Primary Domain |
 |---|---|---|---|

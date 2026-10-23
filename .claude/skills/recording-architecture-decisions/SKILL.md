@@ -57,7 +57,7 @@ Briefly: every ADR has Status, Date, the triple-filter check, Context, Decision,
 When a decision lands that you believe is ADR-worthy:
 
 1. **Run the triple filter explicitly.** Out loud or in a comment, state which way each of the three gates falls. If any fails, stop; document the decision elsewhere.
-2. **Find the next ADR number.** `ls docs/adr/ | tail -1` shows the most recent. Increment.
+2. **Find the next ADR number.** `ls docs/adr/ | grep -E '^[0-9]{4}-' | tail -1` shows the most recent; the filter is needed because `ADR-FORMAT.md` sorts after the numbered files. Increment.
 3. **Draft the file** following `docs/adr/ADR-FORMAT.md`. Fill the triple-filter checkboxes at the top. Be specific about the alternatives: naming what was rejected matters as much as naming what was chosen.
 4. **Confirm with the user.** ADRs become permanent project history. Always confirm before committing.
 5. **Cross-link.** If the decision references prior ADRs, link them. If it supersedes a prior decision, mark the prior ADR's status as "Superseded by ADR-NNNN".

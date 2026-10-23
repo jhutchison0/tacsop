@@ -171,16 +171,3 @@ once the window opens. No cell triggers automatically.
 - `ADOPTION.md`: where things live, the degenerate cases (one box, fresh clone, no
   observations), the commands and documents a repo rewrites, the first slice, and the
   measurement requirements for agents.
-
-## Version History
-
-- **0.1.2** (2026-10-04): `ADOPTION.md`'s second slice says most status lines leave the
-  orientation surfaces rather than gain marks, as the hub's slice 2 found: every one it had
-  moved to a command, the task list's Focus section, or the gap register.
-- **0.1.1** (2026-10-04): `ADOPTION.md`'s first slice moves an existing known-issues list
-  into the register in the same slice, so the list has one home. Learned from the hub's own
-  first slice the same day (`docs/gaps.md`), whose gate review also found that a filler
-  such as `None exists.` passed the two-field check until punctuation was stripped.
-- **0.1.0** (2026-10-04): Draft. Kernel, vocabulary and procedure after a three-agent
-  pre-draft review (proposer, code-reviewer, decision-scientist) of an earlier eight-rule
-  draft; the decay model from the owner's convoy example. Success criterion open.

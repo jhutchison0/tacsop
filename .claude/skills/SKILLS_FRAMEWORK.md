@@ -435,6 +435,12 @@ This is why `session-end`, `pcc`, `pci`, `sitrep`, `session-start`, and `task` r
 │   ├── SKILL.md
 │   └── EXAMPLES.md
 │
+├── maintaining-the-common-operating-picture/
+│   ├── SKILL.md
+│   ├── DOCTRINE.md
+│   ├── EXAMPLES.md
+│   └── ADOPTION.md
+│
 └── # Level 1 — Project-Specific
     (none — this is a template; downstream repos add as needed)
 ```

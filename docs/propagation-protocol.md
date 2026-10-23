@@ -196,13 +196,13 @@ Triggers:
 
 ## Roster
 
-Current known downstream consumers (as of 2026-09-27, by name only; discovery is automatic):
+Current known downstream consumers (as of 2026-10-18, by name only; discovery is automatic):
 
-`paperboy`, `fema_cria`, `flood_model`, `rmi-reboot`, `shark`, `agent-eval`, `beesly-equilibrium`, `elephant-graveyard`, `magic-movies`, `project-megan`, `quest-engine`, `tactics-game`, `contract-knowledge-graph`, `velocity-scoring`, `fps/maut_platform`, `aar_ai_pipeline`, `ldrd2025_ai_pipeline`, `tc_hurr_risk_modeling`, `veil-engine` (bootstrapped 2026-07-26 from the template at `5f70a48`; successor to `elephant-graveyard`), `stx-server` (bootstrapped 2026-08-26 from the template at `7074f90`; FLL home practice server), `propter` (bootstrapped 2026-08-30 from the template at `9d43c52`), `schelling-point` (bootstrapped 2026-09-27 from the template at `54a86a0`; game theory curriculum, personal)
+`paperboy`, `fema_cria`, `flood_model`, `rmi-reboot`, `shark`, `agent-eval`, `beesly-equilibrium`, `elephant-graveyard`, `magic-movies`, `project-megan`, `quest-engine`, `tactics-game`, `contract-knowledge-graph`, `velocity-scoring`, `fps/maut_platform`, `aar_ai_pipeline`, `ldrd2025_ai_pipeline`, `tc_hurr_risk_modeling`, `veil-engine` (bootstrapped 2026-07-26 from the template at `5f70a48`; successor to `elephant-graveyard`), `stx-server` (bootstrapped 2026-08-26 from the template at `7074f90`; FLL home practice server), `propter` (bootstrapped 2026-08-30 from the template at `9d43c52`), `schelling-point` (bootstrapped 2026-09-27 from the template at `54a86a0`; game theory curriculum, personal), `hallmark` (bootstrapped 2026-10-13 from the template at `2750d33`; software-disclosure pre-fill tool, rebuilt from a standalone original; its delivery mark was seeded at bootstrap), `urd` (bootstrapped 2026-10-18 from the template at `2750d33` per its CONOP's import manifest, with subtractions: no utility package, no audit hook, no CI; the household photo service; its delivery mark was seeded at bootstrap)
 
 This list is informational. The script does not read it. Actual notification targets are determined by filesystem discovery at propagation time.
 
 ---
 
-**Last Updated**: 2026-08-22 (Downstream Discovery: recorded the gitignored-`.claude/` failure mode and the rule that discovery is not a census, both from the `aar_ai_pipeline` traversal. Roster itself still wrong in both directions and tracked as a P2 in `docs/tasks.md`.)
+**Last Updated**: 2026-10-18 (Roster: `urd` added. 2026-10-13: `hallmark` added. Earlier, 2026-08-22, Downstream Discovery: recorded the gitignored-`.claude/` failure mode and the rule that discovery is not a census, both from the `aar_ai_pipeline` traversal. Roster itself still wrong in both directions and tracked as a P2 in `docs/tasks.md`.)
 **Authoring Skill**: none yet (candidate: future `propagating-doctrine` skill if this protocol gets enough use)

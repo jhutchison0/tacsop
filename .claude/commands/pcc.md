@@ -55,13 +55,12 @@ git status --short
 
 ### 5. Reference Integrity (living docs)
 ```bash
-# Path-shaped references in orientation surfaces must resolve.
-# Catches drift like the March-2026 case: tasks.md carrying paths to files
-# that do not exist. Allowlist covers runtime artifacts that are
-# legitimately absent (the two upstream notification files, gitignored audit logs).
+# Path-shaped references in orientation surfaces must resolve; a task list
+# carrying paths to files that do not exist is the drift this catches.
+# Allowlist covers runtime artifacts that are legitimately absent (the two
+# upstream notification files, gitignored audit logs).
 # Extension bound is {2,8}, not {2,4}: a 4-cap truncates .geojson/.service/.shtml
-# and then reports the truncated path as MISSING (found by the launch-control
-# canary 2026-08-17, where it produced 3 false positives against real files).
+# and then reports the truncated path as MISSING against a file that exists.
 # The task list is scanned from its first line, so the ## Focus section above
 # ## Active is covered; ## Completed and below are records and are not.
 { cat CLAUDE.md CONTEXT.md README.md LANGUAGE.md .claude/README.md 2>/dev/null; \
@@ -73,8 +72,8 @@ git status --short
 - Expected output: empty. WARN on any MISSING line, and record the run's count in the session doc (it is metric M2 in `.claude/skills/traversing-the-knowledge-base/SKILL.md`; an unrecorded run is indistinguishable from an unrun check)
 - Any MISSING line is caught drift and fires that skill's build trigger
 
-**Three known blind spots. A clean run means clean only within them** (found in the field, 2026-08-21 `contract-knowledge-graph` and 2026-08-22 `aar_ai_pipeline`; see the amendments to the 2026-08-21 doctrine entry):
-1. **Directory references are invisible.** The regex requires a file extension, so `.claude/agents/` never matches. In `aar_ai_pipeline` this hid 4 of 5 broken references sitting in the same table as the one that was caught. Run the directory pass below alongside the file pass.
+**Three known blind spots. A clean run means clean only within them:**
+1. **Directory references are invisible.** The regex requires a file extension, so `.claude/agents/` never matches, and a table of broken directory references passes while the one file reference beside them is caught. Run the directory pass below alongside the file pass.
 2. **No notion of a base directory.** Every path resolves against the repo root, so a cross-repo citation and a path inside a documented `cd subdir && ...` command both report MISSING while the file exists. Hand-verify before editing the doc.
 3. **A missing surface costs coverage silently.** `cat` failures are swallowed by `2>/dev/null`; an absent `CONTEXT.md` reads the same as a clean one.
 
@@ -104,9 +103,8 @@ fi
 # of a public tree. The list lives outside every repo, so this check cannot
 # republish it, and the output carries each hit as a path, withholding any
 # path, file name, or commit message that is itself a hit and reporting those
-# as counts. Two incidents on 2026-10-01, the second found 2026-10-02: agents
-# wrote another repo's names into docs/reviews/, and the record of containing
-# that pasted the five terms into an Evidence line, committed and pushed.
+# as counts: a review that names another repo, and the containment record
+# that pastes the terms into an Evidence line, both reach the remote otherwise.
 # Scans what a push would carry: the index, and every commit not on any
 # remote, their file names and messages included. A line printed is the
 # finding; the block itself exits 0.

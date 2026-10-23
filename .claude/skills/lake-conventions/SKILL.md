@@ -1,6 +1,6 @@
 ---
 name: lake-conventions
-description: Conventions for the two storage systems this fleet writes to. For the work lakehouse: bucket tiers, path grammars, file formats, the two companion files every dataset ships, and the dev/prod split. For personal projects on personal-scoped machines, HOME-STORAGE.md covers writing bulk data to home network storage with no address in git. Use when adding or reviewing any code that writes to the lake or to home storage, choosing a format for a stored artifact, planning a dev-to-production promotion, or preparing a machine to do storage work.
+description: "Conventions for the two storage systems this fleet writes to. For the work lakehouse: bucket tiers, path grammars, file formats, the two companion files every dataset ships, and the dev/prod split. For personal projects on personal-scoped machines, HOME-STORAGE.md covers writing bulk data to home network storage with no address in git. Use when adding or reviewing any code that writes to the lake or to home storage, choosing a format for a stored artifact, planning a dev-to-production promotion, or preparing a machine to do storage work."
 version: "1.1.0"
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: recording-architecture-decisions
-description: Record significant architectural decisions in docs/adr/NNNN-slug.md only after a decision satisfies all three of Pocock's triple-filter gates: hard to reverse, surprising without context, and the result of a real trade-off between genuine alternatives. If any one filter fails, do not write an ADR.
+description: "Record significant architectural decisions in docs/adr/NNNN-slug.md only after a decision satisfies all three of Pocock's triple-filter gates: hard to reverse, surprising without context, and the result of a real trade-off between genuine alternatives. If any one filter fails, do not write an ADR."
 version: "1.0.0"
 ---
 

@@ -60,7 +60,10 @@ case "$basename" in
     test_*.py|*_test.py) exit 0 ;;
 esac
 
-# Resolve project root from the edited file's directory.
+# Resolve project root from the edited file's directory. Git exports GIT_DIR and
+# its kin to a hook that runs in a linked worktree; inherited, they would name
+# that repository as the root and the log would land there (found 2026-11-15).
+unset $(git rev-parse --local-env-vars 2>/dev/null) 2>/dev/null
 project_root=$(cd "$(dirname "$file_path")" 2>/dev/null && git rev-parse --show-toplevel 2>/dev/null)
 if [ -z "${project_root:-}" ]; then
     exit 0

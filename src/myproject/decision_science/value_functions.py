@@ -35,7 +35,8 @@ def exponential(x: float, low: float, high: float, rate: float = 1.0) -> float:
         x: Raw input value.
         low: Raw value mapped to utility 0.
         high: Raw value mapped to utility 1.
-        rate: Shape parameter; nonzero. Defaults to 1.0.
+        rate: Shape parameter; nonzero. Defaults to 1.0. Below 1e-8 in magnitude the
+            result is linear.
 
     Returns:
         Utility in [0, 1].
@@ -49,6 +50,10 @@ def exponential(x: float, low: float, high: float, rate: float = 1.0) -> float:
         raise ValueError("rate must be nonzero; use linear() for rate=0 behavior")
 
     t = max(0.0, min(1.0, (x - low) / (high - low)))
+    # Below this the denominator loses its digits to cancellation and then rounds to 0.0;
+    # the limit as rate -> 0 is linear, and the two differ by less than rate / 8.
+    if abs(rate) < 1e-8:
+        return t
     # Clamp exponents to avoid OverflowError for extreme rate values.
     exp_t = 0.0 if -rate * t < -700 else (1e308 if -rate * t > 700 else math.exp(-rate * t))
     exp_1 = 0.0 if -rate < -700 else (1e308 if -rate > 700 else math.exp(-rate))

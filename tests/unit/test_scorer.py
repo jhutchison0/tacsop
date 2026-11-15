@@ -373,7 +373,7 @@ class TestFromWeights:
             return real_import(name, *args, **kwargs)
 
         with patch("builtins.__import__", side_effect=raiser):
-            with pytest.raises(ImportError, match="uv pip install"):
+            with pytest.raises(ImportError, match=r"uv pip install --python \.venv"):
                 MAUTScorer.from_weights(object(), {"x": linear})
 
 

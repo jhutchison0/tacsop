@@ -79,6 +79,12 @@ class TestExponential:
         with pytest.raises(ValueError):
             exponential(0.5, low=0.0, high=1.0, rate=0.0)
 
+    @pytest.mark.parametrize("rate", [1e-17, -1e-17, 5e-324, 1e-12, -1e-12])
+    def test_tiny_nonzero_rate_approaches_linear(self, rate):
+        # 1 - e^(-rate) rounds to 0.0 below about 2.2e-16; the limit as rate -> 0 is linear.
+        assert exponential(50.0, low=0.0, high=100.0, rate=rate) == pytest.approx(0.5, abs=1e-8)
+        assert exponential(25.0, low=0.0, high=100.0, rate=rate) == pytest.approx(0.25, abs=1e-8)
+
     def test_equal_low_high_raises(self):
         with pytest.raises(ValueError):
             exponential(0.5, low=2.0, high=2.0)

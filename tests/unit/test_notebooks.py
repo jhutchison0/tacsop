@@ -92,9 +92,17 @@ def test_the_own_data_cell_is_committed_switched_off(path):
             continue  # the run test reports a cell that is not plain Python
         for node in ast.walk(tree):
             if isinstance(node, ast.Assign):
-                for target in node.targets:
-                    if isinstance(target, ast.Name) and target.id in OWN_DATA_GUARDS:
-                        values.setdefault(target.id, []).append(node.value)
+                pairs = [(target, node.value) for target in node.targets]
+            elif isinstance(node, (ast.AnnAssign, ast.NamedExpr, ast.AugAssign)) and node.value is not None:
+                pairs = [(node.target, node if isinstance(node, ast.AugAssign) else node.value)]
+            else:
+                continue
+            for target, value in pairs:
+                if isinstance(target, ast.Name) and target.id in OWN_DATA_GUARDS:
+                    values.setdefault(target.id, []).append(value)
+                for name in ast.walk(target):  # a guard set inside a tuple or list target is never plainly None
+                    if name is not target and isinstance(name, ast.Name) and name.id in OWN_DATA_GUARDS:
+                        values.setdefault(name.id, []).append(node)
     for name in OWN_DATA_GUARDS:
         assert name in values, f"{path.name} never sets {name}: name the own-data guards in OWN_DATA_GUARDS"
         for value in values[name]:

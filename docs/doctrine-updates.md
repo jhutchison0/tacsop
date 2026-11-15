@@ -4,6 +4,90 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
+## 2026-11-14: A Notebook Tour, Held by the Suite
+
+A working repo should carry one notebook that walks its main path, from a raw input to a
+result a person can see, over small committed fixtures. The test suite runs every cell of
+that notebook wherever its dependencies are installed, so a broken cell fails the suite,
+and refuses a notebook committed with outputs, so a reader's own data is not published
+by accident.
+
+The practice came from `assay` on 2026-11-14 and was repeated at the hub the same day
+(`a7ab4ca`, test module hardened in `8c3b69a`): `notebooks/tour_from_a_model_to_a_ranking.ipynb` walks the decision science
+package from a YAML model to a ranking and three figures. Building it found a crash and a
+silent wrong answer in `exponential()` and a figure whose description was wrong. Four
+mutants of the notebook (a saved output, a false assertion, a `matplotlib` import, a cell
+that raises) each failed the module; a review then found eleven cheaper evasions, which
+the module at `8c3b69a` also refuses. The full case, with suggestions by repo shape,
+is `docs/plans/20261114_notebook_tour_proposal.md` in the hub.
+
+This entry is additive and optional. The evidence is two repos and one author.
+
+Audience: every Python repo a newcomer would have to be shown. A repo with no importable
+Python package (documents, CAD, another language) has nothing to tour by this entry.
+
+The hub's lead may build a first tour in your repo on a branch named
+`topic/notebook-tour`, unpushed and unmerged. If that branch exists, review it before
+doing the steps below by hand; merge it, change it, or delete it.
+
+### The rules
+
+| # | Rule | Held by |
+|---|---|---|
+| 1 | The suite runs every code cell, in order, in one namespace, with the working directory at `notebooks/`. No kernel. | the test module |
+| 1a | The cells read only committed fixtures. No network, no secrets. | review (and the isolation tripwire, in a repo that has `tests/isolation.py`) |
+| 2 | The notebook is committed with no outputs, no attachments, and no widget state. | the test module |
+| 3 | The notebook imports the repo's package and imports no charting library. A figure comes from a function in the package; a table or a printed line is also a result. | the test module for imports; review for a cell that draws on a figure the package returned |
+| 4 | Each code cell asserts what the text above it claims. | review |
+| 5 | The tour ends hands-on: a cell to change, a cell that fails on purpose and prints the real error, and a cell for the reader's own data behind a guard that is off by default. | review |
+| 6 | Fixtures are invented or public, small, committed, and say which in a comment. | review |
+| 7 | The kernel is its own extra, `notebook`, holding `ipykernel` alone, and is left out of `all`. | review |
+
+### Detect
+
+```bash
+# Every tracked notebook, then the test module that holds notebooks/ (no second line: nothing holds them):
+git ls-files '*.ipynb'; git ls-files '*test_notebooks.py'
+# Tracked notebooks with saved outputs or execution counts (prints each):
+git ls-files -z '*.ipynb' | python3 -c "
+import json, sys
+for f in filter(None, sys.stdin.read().split('\0')):
+    nb = json.load(open(f, encoding='utf-8'))
+    if any(c.get('outputs') or c.get('execution_count') for c in nb.get('cells', []) if c['cell_type'] == 'code'): print(f)"
+# A first tour already built for you (prints the branch if it exists):
+git branch --list topic/notebook-tour
+```
+
+A repo with no notebook has nothing to fix; it has a tour to gain.
+
+### Adoption-Mode Table
+
+| # | Artifact | Mode | Notes |
+|---|---|---|---|
+| 1 | `tests/unit/test_notebooks.py` | **CUSTOMIZE** | Copy it from the hub at `8c3b69a`: `git -C <hub checkout> show 8c3b69a:tests/unit/test_notebooks.py > tests/unit/test_notebooks.py` (on a machine with no hub checkout, fetch the same path at that commit from the hub's remote once the commit is pushed). Set `DISPLAY_HOME` to the dotted name as the notebook imports it: `pkg` or `pkg.report` in a src layout, `src.pkg` only where the import really is `src.pkg`. Set `DISPLAY_NEEDS` to the optional dependency its figures need. Most repos draw nothing: then delete the `pytest.importorskip(DISPLAY_NEEDS)` line, the `MPLBACKEND` line, and the constant, and the run test can never skip. If your tests live elsewhere, fix `NOTEBOOK_DIR`'s count of `.parent`. |
+| 2 | `notebooks/tour_from_<input>_to_<result>.ipynb` | **WRITE** | Your own. The hub's notebook is a model of the shape, not content to copy: an opening cell that names the fixtures and puts the package's parent directory on `sys.path` (the repo root at the hub, where the import is `src.myproject`; `ROOT / "src"` in a src layout), numbered sections that each end in asserts, the hands-on sections, and a "Where next" list. Cells must be plain Python: no `%` magics, no `!` commands, no top-level `await`, no `display()`; use `print`. A function that returns a figure never calls `show()`. |
+| 3 | Fixtures under your tests' fixture directory | **WRITE** | Invented or public, small, with a comment saying which. |
+| 4 | `pyproject.toml` | **PATCH** | Add `notebook = ["ipykernel>=6.0"]` under `[project.optional-dependencies]`. Do not add it to `all`, if you have one. |
+| 5 | `README.md` | **PATCH** | One short section: what the tour shows, the install line (`uv pip install --python .venv -e ".[notebook]"` plus any extra the figures need), and that the suite runs it. |
+| 6 | Existing notebooks | **CUSTOMIZE** | Coupled to row 1: the test module holds every `.ipynb` under `notebooks/`, subfolders included. Clear their outputs and make them run over fixtures as plain Python, or move the ones that cannot (exploration, one-off analysis) out of `notebooks/` and say where they went. A notebook moved out keeps its outputs in git: clear them, or keep the file untracked. Commit row 6 on its own, so it can be reverted alone. Do not clear the outputs of a notebook that git does not track until you have a copy; the outputs may be the only record of the run. To clear: `python3 -c "import json,sys; f=sys.argv[1]; nb=json.load(open(f,encoding='utf-8')); [c.update(outputs=[],execution_count=None) for c in nb['cells'] if c['cell_type']=='code']; json.dump(nb,open(f,'w',encoding='utf-8'),indent=1)" notebooks/<name>.ipynb` |
+
+### Action required
+
+1. Write the test first: copy the test module (row 1), set its constants, and run it. With no notebook yet, see `test_there_is_a_notebook_to_hold` fail and three tests skip. With existing notebooks, see them fail and do row 6 first.
+2. Build the fixture for your repo's main path under your tests' fixture directory (row 3).
+3. Write `notebooks/tour_from_<input>_to_<result>.ipynb` until the module reports `4 passed` and no `skipped`. A skip means no cell ran: install the `DISPLAY_NEEDS` dependency in the environment the suite runs in (your `dev` extra or your CI install line). Clear all outputs.
+4. Stage the notebook (`git add notebooks/<tour>.ipynb`). Break the working copy three times, one at a time: save an output, falsify one assert, add `import matplotlib`. Confirm each fails, and run `git restore notebooks/<tour>.ipynb` after each. Finish with `git diff --quiet notebooks/` and a passing run.
+5. Add the `notebook` extra and the README section.
+
+### Rollback
+
+Delete the tour notebook (`notebooks/tour_*.ipynb`), the test module you copied, and the
+tour's fixtures; remove the `notebook` extra and the README section. Delete `notebooks/`
+only if the tour created it. If you did row 6, revert that commit (`git revert <commit>`)
+to bring back the outputs and the old paths. Nothing else depends on these files.
+
+---
+
 ## 2026-10-04: The State Block Leaves the Config (picture slice 2; `maintaining-project-context` 1.1.0)
 
 The second slice of the common operating picture, after the gap register in the 2026-10-04

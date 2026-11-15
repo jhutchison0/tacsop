@@ -26,6 +26,7 @@ NOTEBOOKS = sorted(p for p in NOTEBOOK_DIR.rglob("*.ipynb") if ".ipynb_checkpoin
 DRAWING_LIBRARIES = ("matplotlib", "pylab", "plotly", "seaborn", "altair", "bokeh", "plotnine", "holoviews", "hvplot", "pygal")
 DISPLAY_HOME = "src.myproject.decision_science"  # the one package a notebook's figures come from
 DISPLAY_NEEDS = "matplotlib"  # the optional dependency the display home draws with
+OWN_DATA_GUARDS = ("MY_MODEL", "MY_ALTERNATIVES")  # the names the own-data cell sets, each committed as None
 
 
 def cells(path: Path, kind: str) -> list[dict]:
@@ -78,6 +79,26 @@ def test_it_draws_nothing_of_its_own_and_shows_a_display_from_the_display_home(p
     assert any(name == DISPLAY_HOME or name.startswith(DISPLAY_HOME + ".") for name in names), (
         f"{path.name} imports nothing from {DISPLAY_HOME}"
     )
+
+
+@pytest.mark.parametrize("path", NOTEBOOKS, ids=lambda p: p.name)
+def test_the_own_data_cell_is_committed_switched_off(path):
+    """A guard committed with a path makes the suite read the reader's data on every run."""
+    values: dict[str, list[ast.expr]] = {}
+    for cell in cells(path, "code"):
+        try:
+            tree = ast.parse(source(cell))
+        except SyntaxError:
+            continue  # the run test reports a cell that is not plain Python
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Assign):
+                for target in node.targets:
+                    if isinstance(target, ast.Name) and target.id in OWN_DATA_GUARDS:
+                        values.setdefault(target.id, []).append(node.value)
+    for name in OWN_DATA_GUARDS:
+        assert name in values, f"{path.name} never sets {name}: name the own-data guards in OWN_DATA_GUARDS"
+        for value in values[name]:
+            assert isinstance(value, ast.Constant) and value.value is None, f"{path.name} commits {name} switched on"
 
 
 @pytest.mark.parametrize("path", NOTEBOOKS, ids=lambda p: p.name)

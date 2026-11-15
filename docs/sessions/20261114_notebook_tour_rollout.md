@@ -141,3 +141,22 @@ All local. The hub is not pushed; the user did not ask for a push.
 4. The user decides about the seven packages in the hub venv, and pushes the hub.
 5. Open one tour in a notebook front end (gap G14) before merging any.
 6. The four decisions in the proposal are still open.
+
+---
+
+## Addendum, 2026-11-15: Critical repairs, the hook fix, and the merges
+
+The user asked for the reviews' Critical findings to be repaired under the lead's review, then for the duckdb pin to be lifted, the hook flaw fixed, and the branches merged.
+
+- **Seven Criticals, five repos.** The lead re-checked each at its branch head with a probe that could fail; all seven were closed. Two had been contained in the tour while the cause stayed in the repo's code, so a `python-prototyper` repaired each cause in one commit: `hallmark`'s git calls and test fixtures no longer follow an inherited `GIT_DIR`, and `propter`'s store runs under DuckDB 2. The lead re-ran both whole suites, the second under both DuckDB versions, and then lifted the pin.
+- **The hook flaw, found by that review.** With `GIT_DIR` inherited, the shift-left audit hook resolved another repository as the project root and wrote its log there, and the hook's tests built their throwaway repos in the wrong place. A test written first failed (`1 failed, 19 passed`); the hook now unsets git's own list of local variables before `git rev-parse` (`c5f1c96`, a `[gate]` commit alone; the test is `1c3212d`). Consumers still carry the old hook: the fix is not propagated.
+- **Thirteen merges.** Each tour branch was merged with a merge commit into the branch it was cut from, and its branch and worktree deleted. `urd` was left unmerged. Nothing was pushed, here or in any consumer.
+
+| Claim | State | Evidence |
+|---|---|---|
+| The hub suite passes with the hook fix | tested | `.venv/bin/pytest -q` → `577 passed, 1 warning` |
+| The hook tests hold under an inherited `GIT_DIR` | tested | `GIT_DIR=<scratch>/.git GIT_WORK_TREE=<scratch> .venv/bin/pytest -q tests/unit/test_shift_left_hook.py` → `20 passed`; the scratch folder held `.git` alone afterwards |
+| Each merged tree is the tree that was tested | observed | per repo, `git diff --quiet HEAD topic/notebook-tour` exited 0 after the merge; the notebook tests printed `5 passed` on each branch head before it |
+| Thirteen topic branches are gone | observed | `git branch --list topic/notebook-tour` printed nothing in each of the thirteen |
+| The hook fix reached any consumer | not done | no entry was written or sent |
+| Any tour opens correctly in a notebook front end | UNVERIFIED | still gap G14 |

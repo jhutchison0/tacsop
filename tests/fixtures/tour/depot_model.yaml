@@ -1,0 +1,20 @@
+# A decision model for the notebook tour: where to put a regional supply depot.
+# Invented numbers. Each criterion names a value function that turns a raw
+# measurement into a utility between 0 and 1, and a weight; weights sum to 1.
+criteria:
+  - name: annual_cost            # thousand dollars a year; less is better
+    weight: 0.30
+    value_fn: linear
+    params: {low: 900, high: 300}    # low maps to utility 0, high to 1: swapped, so cheaper scores higher
+  - name: drive_minutes          # median drive to the people served; less is better
+    weight: 0.30
+    value_fn: exponential
+    params: {low: 90, high: 10, rate: 2.0}   # the first minutes saved count most
+  - name: storage_pallets        # more is better, with diminishing returns
+    weight: 0.20
+    value_fn: logarithmic
+    params: {low: 500, high: 5000}
+  - name: flood_free_years       # of the last 30 with no flood at the site
+    weight: 0.20
+    value_fn: logistic
+    params: {midpoint: 24, steepness: 0.5}

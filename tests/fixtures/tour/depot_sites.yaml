@@ -1,0 +1,23 @@
+# Four candidate sites for the notebook tour, as raw measurements in the
+# units depot_model.yaml names. Invented numbers.
+alternatives:
+  Rail Yard:
+    annual_cost: 780
+    drive_minutes: 22
+    storage_pallets: 4200
+    flood_free_years: 27
+  Airport Road:
+    annual_cost: 560
+    drive_minutes: 35
+    storage_pallets: 2600
+    flood_free_years: 30
+  River Bend:
+    annual_cost: 340
+    drive_minutes: 18
+    storage_pallets: 1800
+    flood_free_years: 19
+  Old Mill:
+    annual_cost: 620
+    drive_minutes: 48
+    storage_pallets: 2200
+    flood_free_years: 26

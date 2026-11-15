@@ -79,6 +79,7 @@ tacsop/
 │       ├── value_functions.py
 │       ├── sensitivity.py
 │       └── visualization.py
+├── notebooks/              # Tours: a walk through the code over committed fixtures
 ├── .claude/                # Agent definitions, teams, commands, skills
 ├── scripts/                # Doctrine propagation tooling
 ├── config/project.yaml     # Project identity, phases, machines
@@ -90,6 +91,16 @@ tacsop/
 │   └── doctrine-updates.md # Changelog for downstream propagation
 └── pyproject.toml          # Packaging, deps, coverage config
 ```
+
+## Take the Tour
+
+`notebooks/tour_from_a_model_to_a_ranking.ipynb` walks the decision science package from a YAML model to a ranking and three figures, over invented data in `tests/fixtures/tour/`. It ends with a cell to change, a cell that breaks on purpose, and a cell for your own model.
+
+```bash
+uv pip install --python .venv -e ".[decision-science,notebook]"
+```
+
+Then open the notebook and pick `.venv` as the kernel. The test suite runs every cell (`tests/unit/test_notebooks.py`) and refuses a notebook committed with outputs.
 
 ## Quick Start (Development)
 

@@ -42,6 +42,11 @@ weights = [
 decision-science = [
     "matplotlib>=3.5",
 ]
+# The kernel a person needs to open notebooks/. Left out of `all`: the suite runs
+# the notebooks as plain Python (tests/unit/test_notebooks.py) and needs no kernel.
+notebook = [
+    "ipykernel>=6.0",
+]
 all = [
     "myproject[dev,excel,slack,database,weights,decision-science]",
 ]

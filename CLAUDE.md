@@ -135,7 +135,7 @@ This is a Python project template with reusable utility modules. It provides a s
 
 - **Language**: Python (3.11+)
 - **Base Dependencies**: pyyaml, python-dotenv, numpy (and tzdata on Windows)
-- **Optional groups** (`pyproject.toml`): dev, excel, slack, database, weights, decision-science, all
+- **Optional groups** (`pyproject.toml`): dev, excel, slack, database, weights, decision-science, notebook, all
 
 ## Project Structure
 

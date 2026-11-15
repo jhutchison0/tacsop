@@ -7,6 +7,7 @@ throwaway git repo because the hook resolves the project root with
 """
 
 import json
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -21,8 +22,20 @@ pytestmark = pytest.mark.skipif(
 )
 
 
+def _own_git_env() -> dict[str, str]:
+    """The environment without the variables that point git at another repository.
+
+    Git exports GIT_DIR to a hook that runs in a linked worktree. A suite run from
+    such a hook must still build its throwaway repos where it says it does.
+    """
+    locators = subprocess.run(
+        ["git", "rev-parse", "--local-env-vars"], capture_output=True, text=True
+    ).stdout.split()
+    return {k: v for k, v in os.environ.items() if k not in locators}
+
+
 def _repo(tmp_path: Path) -> Path:
-    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True, env=_own_git_env())
     (tmp_path / "src" / "myproject").mkdir(parents=True)
     (tmp_path / "src" / "myproject" / "widgets.py").write_text("def thing():\n    return 1\n")
     (tmp_path / "tests" / "unit").mkdir(parents=True)
@@ -164,3 +177,18 @@ def test_name_matched_partner_still_wins(tmp_path):
     log = _run_hook(repo, repo / "src" / "myproject" / "widgets.py")
     assert "OK_TEST_EXISTS" in log
     assert "test_widgets.py" in log
+
+
+def test_an_inherited_git_dir_does_not_move_the_audit_log(tmp_path, monkeypatch):
+    # Found 2026-11-15: with GIT_DIR and GIT_WORK_TREE inherited, `git rev-parse
+    # --show-toplevel` named the other repository and the hook wrote its log there.
+    other = tmp_path / "other"
+    other.mkdir()
+    subprocess.run(["git", "init", "-q", str(other)], check=True, env=_own_git_env())
+    (tmp_path / "mine").mkdir()
+    repo = _repo(tmp_path / "mine")
+    monkeypatch.setenv("GIT_DIR", str(other / ".git"))
+    monkeypatch.setenv("GIT_WORK_TREE", str(other))
+    log = _run_hook(repo, repo / "src" / "myproject" / "widgets.py")
+    assert "MISSING_TEST" in log
+    assert not (other / ".claude").exists()

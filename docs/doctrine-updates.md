@@ -4,6 +4,67 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
+## 2026-11-16: Notebook Tour Module: a Guard Failure Prints No Value
+
+The notebook test module's guard test leaked the value it caught. When a tour is
+committed with its own-data guard switched on, `test_the_own_data_cell_is_committed_switched_off`
+fails, as it should, but pytest's assert introspection printed the guard's value twice in
+the failure output. That value is the reader's own data or path; in a work repo it can be
+sensitive, and a CI log keeps it. A reviewer of a first tour in a work repo found it on
+2026-11-16. The hub fixed it in `4cf6a36`; copy the module at `4cf6a36`, or make the one
+change below in your copy. This applies to every copy taken at `8c3b69a`, `b3890e2`,
+`97b3c42` or `2ce95e6`.
+
+Audience: every repo that copied `tests/unit/test_notebooks.py` from the hub.
+
+### Detect
+
+```bash
+# Prints the line if your copy still asserts on the value directly:
+grep -n 'assert isinstance(value, ast.Constant) and value.value is None' tests/unit/test_notebooks.py
+```
+
+### The change
+
+In `test_the_own_data_cell_is_committed_switched_off`, replace
+
+```python
+            assert isinstance(value, ast.Constant) and value.value is None, f"{path.name} commits {name} switched on"
+```
+
+with
+
+```python
+            switched_off = isinstance(value, ast.Constant) and value.value is None  # outside the assert: a failure must not print the value
+            assert switched_off, f"{path.name} commits {name} switched on"
+```
+
+Where your formatter wraps the line, put the comment on its own line above. Change
+nothing else. The hub drove the change with a test that commits a guard with a marker
+value: before it, the marker appeared in pytest's output; after it, it does not.
+
+### A rule for the own-data cell (rule 5)
+
+The module cannot hold the cell's own errors. When a guard is committed on, the run test
+also executes the own-data cell and prints any exception it raises, message included. So
+the own-data cell never puts the reader's value in an error message: say which guard is
+wrong, not what it holds.
+
+### Action required
+
+1. Run Detect. If it prints a line, make the change.
+2. Check: set one own-data guard to a marker string, run
+   `pytest tests/unit/test_notebooks.py -k switched_off`, confirm one failure and that the
+   marker does not appear in the output, then `git restore` the notebook.
+3. Read the own-data cell's `raise` lines for any that format the reader's value into the
+   message.
+
+### Rollback
+
+Restore the single `assert` line. Nothing else depends on it.
+
+---
+
 ## 2026-11-16: Notebook Tour Correction: the Module to Copy, and Rules From Thirteen Reviews
 
 This corrects the entry "2026-11-14: A Notebook Tour, Held by the Suite". That entry told

@@ -58,6 +58,7 @@ paths:
 propagation:
   exclude:
     - github/assay  # a mirror of a work repository (the user's rule, 2026-10-02)
+    - gitlab/ops_research/assay  # the work clone on titanx; the origin of the notebook tour (gap G6, the user 2026-11-16)
 
 # Build phases — update status as work progresses
 # Statuses: not_started, in_progress, complete

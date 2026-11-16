@@ -7,10 +7,10 @@ directory at `notebooks/` as a kernel would have it. Jupyter is not needed for t
 checks. A saved output fails here because the last section of a tour can point at the
 reader's own data, and an output committed from it would publish that data.
 
-To carry this module to another repo, change the two constants below DRAWING_LIBRARIES,
+To carry this module to another repo, set the three constants below DRAWING_LIBRARIES,
 and NOTEBOOK_DIR's count of `.parent` if this file does not sit two folders below the root.
-A repo whose tour draws nothing deletes DISPLAY_NEEDS and its importorskip line, so the
-run test can never skip.
+Delete nothing. A repo whose tour draws nothing sets DISPLAY_NEEDS = None, and then the
+module never skips the run test; a cell that calls pytest.skip or pytest.xfail fails it.
 """
 
 import ast
@@ -24,8 +24,8 @@ import pytest
 NOTEBOOK_DIR = Path(__file__).resolve().parent.parent.parent / "notebooks"
 NOTEBOOKS = sorted(p for p in NOTEBOOK_DIR.rglob("*.ipynb") if ".ipynb_checkpoints" not in p.parts)
 DRAWING_LIBRARIES = ("matplotlib", "pylab", "plotly", "seaborn", "altair", "bokeh", "plotnine", "holoviews", "hvplot", "pygal")
-DISPLAY_HOME = "src.myproject.decision_science"  # the one package a notebook's figures come from
-DISPLAY_NEEDS = "matplotlib"  # the optional dependency the display home draws with
+PACKAGE = "src.myproject.decision_science"  # the package the tour walks, as its cells import it; any figure comes from it
+DISPLAY_NEEDS = "matplotlib"  # the optional dependency PACKAGE draws with; None where the tour draws nothing
 OWN_DATA_GUARDS = ("MY_MODEL", "MY_ALTERNATIVES")  # the names the own-data cell sets, each committed as None
 
 
@@ -72,13 +72,17 @@ def test_it_is_committed_without_outputs(path):
 
 
 @pytest.mark.parametrize("path", NOTEBOOKS, ids=lambda p: p.name)
-def test_it_draws_nothing_of_its_own_and_shows_a_display_from_the_display_home(path):
+def test_it_imports_the_package(path):
     names = imported(path)
-    drawing = sorted(name for name in names if name.split(".")[0] in DRAWING_LIBRARIES)
-    assert not drawing, f"{path.name} imports {drawing}: a figure comes from {DISPLAY_HOME}"
-    assert any(name == DISPLAY_HOME or name.startswith(DISPLAY_HOME + ".") for name in names), (
-        f"{path.name} imports nothing from {DISPLAY_HOME}"
+    assert any(name == PACKAGE or name.startswith(PACKAGE + ".") for name in names), (
+        f"{path.name} imports nothing from {PACKAGE}"
     )
+
+
+@pytest.mark.parametrize("path", NOTEBOOKS, ids=lambda p: p.name)
+def test_it_imports_no_charting_library(path):
+    drawing = sorted(name for name in imported(path) if name.split(".")[0] in DRAWING_LIBRARIES)
+    assert not drawing, f"{path.name} imports {drawing}: the notebook draws nothing itself; any figure comes from {PACKAGE}"
 
 
 @pytest.mark.parametrize("path", NOTEBOOKS, ids=lambda p: p.name)
@@ -111,8 +115,9 @@ def test_the_own_data_cell_is_committed_switched_off(path):
 
 @pytest.mark.parametrize("path", NOTEBOOKS, ids=lambda p: p.name)
 def test_every_code_cell_runs_in_order_over_the_committed_fixtures(path, monkeypatch):
-    pytest.importorskip(DISPLAY_NEEDS)  # a skip here means no cell ran: keep it installed where the suite runs
-    monkeypatch.setenv("MPLBACKEND", "Agg")  # no window, if a cell is the first to import matplotlib
+    if DISPLAY_NEEDS:
+        pytest.importorskip(DISPLAY_NEEDS)  # a skip here means no cell ran: keep it installed where the suite runs
+        monkeypatch.setenv("MPLBACKEND", "Agg")  # no window, if a cell is the first to import matplotlib
     monkeypatch.chdir(NOTEBOOK_DIR)
     monkeypatch.syspath_prepend(str(NOTEBOOK_DIR))  # restores sys.path after the cells insert the repo root
     namespace: dict = {"__name__": "__main__"}
@@ -120,7 +125,7 @@ def test_every_code_cell_runs_in_order_over_the_committed_fixtures(path, monkeyp
         for number, cell in enumerate(cells(path, "code")):
             try:
                 exec(compile(source(cell), f"{path.name}[cell {number}]", "exec"), namespace)
-            except Exception as error:
+            except (Exception, pytest.skip.Exception, pytest.xfail.Exception) as error:  # a cell may not skip itself
                 pytest.fail(f"{path.name} code cell {number} raised {type(error).__name__}: {error}")
         held = {v.__name__.split(".")[0] for v in namespace.values() if isinstance(v, types.ModuleType)}
         assert not held & set(DRAWING_LIBRARIES), f"{path.name} holds {sorted(held & set(DRAWING_LIBRARIES))} by a dynamic import"

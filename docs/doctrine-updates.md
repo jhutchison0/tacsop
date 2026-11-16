@@ -4,27 +4,35 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
-## 2026-11-16: Notebook Tour Module: a Guard Failure Prints No Value
+## 2026-11-16: Notebook Tour Module: a Reader's Value Never Reaches Test Output
 
-The notebook test module's guard test leaked the value it caught. When a tour is
-committed with its own-data guard switched on, `test_the_own_data_cell_is_committed_switched_off`
-fails, as it should, but pytest's assert introspection printed the guard's value twice in
-the failure output. That value is the reader's own data or path; in a work repo it can be
-sensitive, and a CI log keeps it. A reviewer of a first tour in a work repo found it on
-2026-11-16. The hub fixed it in `4cf6a36`; copy the module at `4cf6a36`, or make the one
-change below in your copy. This applies to every copy taken at `8c3b69a`, `b3890e2`,
-`97b3c42` or `2ce95e6`.
+The notebook test module leaked the reader's own data into pytest's output when a tour
+was committed with an own-data guard switched on, through two channels. That value is a
+reader's path or data; in a work repo it can be sensitive, and a CI log keeps it. Both
+were found on 2026-11-16 by reviews of first tours in work repos, and the hub fixed both:
+copy the module at `cb7617d`, or make the two changes below in your copy. This applies to
+every copy taken at `8c3b69a`, `b3890e2`, `97b3c42` or `2ce95e6`.
+
+1. **The guard test** (`4cf6a36`). It failed, as it should, but pytest's assert
+   introspection printed the guard's value.
+2. **The run test** (`cb7617d`). It executes the own-data cell too, and printed a failing
+   cell's error text, and pytest printed the chained exception and frames. An own-data
+   cell's error often carries the path: a probe found the value in the output of three of
+   four first tours, for shapes such as an unreadable file, an unsearchable directory, an
+   over-long name and `~unknownuser`. Now, with any own-data guard set, the run test
+   fails with the cell number and error type only.
 
 Audience: every repo that copied `tests/unit/test_notebooks.py` from the hub.
 
 ### Detect
 
 ```bash
-# Prints the line if your copy still asserts on the value directly:
+# Each prints a line if your copy lacks that fix:
 grep -n 'assert isinstance(value, ast.Constant) and value.value is None' tests/unit/test_notebooks.py
+grep -c 'withheld' tests/unit/test_notebooks.py | grep -x 0
 ```
 
-### The change
+### The changes
 
 In `test_the_own_data_cell_is_committed_switched_off`, replace
 
@@ -39,29 +47,59 @@ with
             assert switched_off, f"{path.name} commits {name} switched on"
 ```
 
-Where your formatter wraps the line, put the comment on its own line above. Change
-nothing else. The hub drove the change with a test that commits a guard with a marker
-value: before it, the marker appeared in pytest's output; after it, it does not.
+In `test_every_code_cell_runs_in_order_over_the_committed_fixtures`, replace the cell loop
+
+```python
+        for number, cell in enumerate(cells(path, "code")):
+            try:
+                exec(compile(source(cell), f"{path.name}[cell {number}]", "exec"), namespace)
+            except (Exception, pytest.skip.Exception, pytest.xfail.Exception) as error:  # a cell may not skip itself
+                pytest.fail(f"{path.name} code cell {number} raised {type(error).__name__}: {error}")
+```
+
+with
+
+```python
+        for number, cell in enumerate(cells(path, "code")):
+            withheld = None
+            try:
+                exec(compile(source(cell), f"{path.name}[cell {number}]", "exec"), namespace)
+            except (Exception, pytest.skip.Exception, pytest.xfail.Exception) as error:  # a cell may not skip itself
+                if not any(namespace.get(guard) is not None for guard in OWN_DATA_GUARDS):
+                    pytest.fail(f"{path.name} code cell {number} raised {type(error).__name__}: {error}")
+                withheld = type(error).__name__  # with a guard set, the error may carry the reader's value
+            if withheld:  # raised outside the except block, so no chained error is printed
+                pytest.fail(f"{path.name} code cell {number} raised {withheld} with an own-data guard set; message withheld", pytrace=False)
+```
+
+The second `pytest.fail` must stay outside the `except` block: inside it, pytest prints
+the chained error even with `pytrace=False`. Where your formatter wraps lines, put the
+comments on their own lines. Change nothing else. With every guard `None`, failures print
+in full, as before. The hub drove each change with a test that commits a marker value and
+fails while the marker reaches pytest's output.
 
 ### A rule for the own-data cell (rule 5)
 
-The module cannot hold the cell's own errors. When a guard is committed on, the run test
-also executes the own-data cell and prints any exception it raises, message included. So
-the own-data cell never puts the reader's value in an error message: say which guard is
-wrong, not what it holds.
+The module now withholds a failing cell's error while a guard is set, and the cell still
+never puts the reader's value in an error message or a printed line: say which guard is
+wrong, not what it holds, and raise `from None`. `--showlocals` (`-l`) prints every
+local, guard values included; it is pytest's opt-in, and no CI line should use it.
 
 ### Action required
 
-1. Run Detect. If it prints a line, make the change.
-2. Check: set one own-data guard to a marker string, run
-   `pytest tests/unit/test_notebooks.py -k switched_off`, confirm one failure and that the
-   marker does not appear in the output, then `git restore` the notebook.
-3. Read the own-data cell's `raise` lines for any that format the reader's value into the
-   message.
+1. Run Detect. Make each change it calls for.
+2. Check with a marker string, not only a bare one: set each own-data guard, alone and
+   all together, to a value carrying a marker in each of these shapes (a bare string, a
+   missing file, a directory, an unreadable file, a file in an unsearchable directory, a
+   name too long for the file system, `~unknownuser/...`, a non-UTF-8 file, a URL). Run
+   the **whole** module under `--tb=auto` and `--tb=long`, confirm the marker never
+   appears, and `git restore` the notebook after each.
+3. Read the own-data cell's `raise` and `print` lines for any that carry the reader's
+   value.
 
 ### Rollback
 
-Restore the single `assert` line. Nothing else depends on it.
+Restore the single `assert` line and the five-line loop. Nothing else depends on them.
 
 ---
 

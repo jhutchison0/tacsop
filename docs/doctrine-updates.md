@@ -4,6 +4,193 @@ Changes to shared workflow commands and planning framework. Downstream repos are
 
 ---
 
+## 2026-11-16: Notebook Tour Correction: the Module to Copy, and Rules From Thirteen Reviews
+
+This corrects the entry "2026-11-14: A Notebook Tour, Held by the Suite". That entry told
+you to copy the test module at `8c3b69a`; copy it at `2ce95e6` instead. The newer
+module refuses a tour committed with its own-data guard switched on, which `8c3b69a`
+passed, and a repo whose tour draws nothing sets three constants and deletes nothing.
+The rules added below come from thirteen first tours built on 2026-11-14 and 2026-11-15,
+each reviewed by `code-reviewer`. Every review found a fault the 2026-11-14 rules did not
+name, and the same faults recurred across repos.
+
+Nothing breaks in a repo that already adopted the 2026-11-14 entry: your copy of the module
+stands alone and keeps working. Re-copy it to gain the guard test ("If you already adopted
+it", below).
+
+Audience: as the 2026-11-14 entry, every Python repo a newcomer would have to be shown.
+Read that entry first; this one changes its row 1 and its step counts and adds rules.
+
+### What changed in the module
+
+| Hub commit | Change |
+|---|---|
+| `b3890e2` | A new test: each own-data guard is committed as `None`. A tour committed with its guard on passed `8c3b69a`, so the suite would read the reader's data on every run. |
+| `97b3c42` | The guard test reads annotated, walrus, augmented and tuple assignments. A later review evaded the plain-assignment check with each. |
+| `2ce95e6` | `DISPLAY_HOME` is renamed `PACKAGE`: twelve of thirteen tours draw nothing, and the old name described a figure source they do not have. `DISPLAY_NEEDS = None` means the tour draws nothing, and the run test then never skips. The import test is split into `test_it_imports_the_package` and `test_it_imports_no_charting_library`, so each fails for one reason. A cell that calls `pytest.skip()` or `pytest.xfail()` now fails the run test; before, the run ended as skipped and pytest exited 0. |
+
+Two forms still evade the guard test and are left to review: `globals()["MY_X"] = path`
+and a `for` target. Three module changes the reviews proposed are not in this commit:
+formatting at 88 columns, failing a tour that leaves `os.environ` changed, and an
+override for `NOTEBOOK_DIR`. The module's lines run past 100 columns; if your CI formats
+`tests/`, let it reformat your copy.
+
+### If you have not adopted the 2026-11-14 entry yet
+
+Follow its steps, with these replacements.
+
+- **Row 1**: `git -C <hub checkout> show 2ce95e6:tests/unit/test_notebooks.py > tests/unit/test_notebooks.py`,
+  or the same path at that commit from the hub's remote. Set three constants and delete
+  nothing:
+  - `PACKAGE`: the dotted name as the notebook imports it. `pkg` or `pkg.report` in a src
+    layout; `src.pkg` only where the import really is `src.pkg`.
+  - `DISPLAY_NEEDS`: the optional dependency the package draws with, or `None` if the tour
+    draws nothing.
+  - `OWN_DATA_GUARDS`: the names the own-data cell sets, each committed as `None`.
+
+  If your tests live elsewhere, fix `NOTEBOOK_DIR`'s count of `.parent`.
+- **Step 1**: with no notebook yet, expect `1 failed, 5 skipped`.
+- **Step 3**: write the tour until the module reports `6 passed` and no `skipped`.
+- **Step 4**: run each mutant without `-x` and compare its count with the table, then
+  negate each assert in turn and report any survivor (rule 4 below).
+
+| Mutant (one at a time, restored after) | Expect | The test that fails |
+|---|---|---|
+| A saved output in a code cell | 1 failed | `test_it_is_committed_without_outputs` |
+| One assert negated | 1 failed | the run test |
+| A cell that raises | 1 failed | the run test |
+| A cell that calls `pytest.skip()` | 1 failed | the run test |
+| `import matplotlib` in a cell | 2 failed | `test_it_imports_no_charting_library` and the run test |
+| An own-data guard switched on | 1 failed, or 2 where the own-data cell then reads a file that is not there | `test_the_own_data_cell_is_committed_switched_off`, and then the run test |
+
+The run test is `test_every_code_cell_runs_in_order_over_the_committed_fixtures`. Counts
+measured on the hub's tour at `2ce95e6`.
+
+### If you already adopted it
+
+Your copy keeps working. To take the new module, copy it at `2ce95e6` and set the
+three constants: `PACKAGE` takes your `DISPLAY_HOME` value; `DISPLAY_NEEDS` takes your
+value, or `None` if you deleted it; `OWN_DATA_GUARDS` names your guards. Carry over any
+local edit you made and say upstream why you made it. The module should report `6 passed`.
+If you keep your copy instead, check that it has
+`test_the_own_data_cell_is_committed_switched_off`: without it, nothing stops a tour
+committed with its guard on.
+
+### Rules added
+
+Each line is a fault at least one review found in a built tour.
+
+**Rule 1a: hermetic, not only offline.**
+
+- A cell that runs `git` or another program drops inherited `GIT_*` variables and closes
+  global and system config. One tour committed into an outer repository through an
+  inherited `GIT_DIR`.
+- Point per-user caches, config files and installed-package metadata at an empty temporary
+  location. One tour's results differed by machine while making no network call.
+- Blocking `socket.connect` does not block a name lookup or a lazy first-use download.
+  Block `socket.getaddrinfo` and stub the loader.
+- A committed config file the package hardcodes may be read once a reviewer has screened
+  it. `os.chdir` in `try/finally` inside one cell is the accepted workaround.
+- In a repo whose suite makes live requests or runs device tests, run named test paths,
+  never the whole suite.
+
+**Rule 4: asserts.**
+
+- Negate every assert, one at a time, and report survivors. This is the only mechanical
+  check that reaches rule 4.
+- Negation cannot see a true assert under a false sentence. For each section, ask: would
+  this assert fail if the sentence above it were false? Check that the product calls each
+  method a section rests on; three tours were built on a function nothing calls.
+- Check an assert on a reduced value (a time of day, a rounded number, a prefix, a subset)
+  against what the reduction drops. One such assert hid a wrong date.
+- Where the package turns an exception into a warning, assert the warnings are clean.
+- Assert a claim that something does not exist yet (`find_spec(...) is None`), so the tour
+  fails when that changes.
+
+**Rule 5: hands-on.**
+
+- The change-it cell's asserts hold for every value its text suggests. Four tours failed
+  on their own suggested values.
+- The own-data cell reads data and never executes a string the reader supplies.
+- Where a result depends on a reference fitted from the fixtures (a baseline, a
+  calibration), the reader's data scored against it is wrong in a known direction. The
+  cell takes the reader's own reference or stops before the score.
+- The own-data cell takes its dates and clock from the reader's data, refuses a URL, and
+  suggests no file name inside the repo unless an ignore line covers it.
+- A safeguard on the main path (a machine gate, an arming flag) may be stood in for over
+  invented fixtures, inside one cell, and never in the own-data cell. The tour states each
+  such flag's default and tells the reader not to change it.
+
+**Rule 6: fixtures and output.**
+
+- Where a file mixes public and invented data, label each table. Where the format has no
+  comment syntax, label it in the opening cell and in the test docstring.
+- A generated fixture ships its generator.
+- No printed line carries an absolute path. Where results would be sensitive, the printed
+  output says "invented", not only the fixture.
+
+**New rules.**
+
+- Every cell is safe to run twice, and a patch starts and stops inside one cell. A patch
+  closed in a later cell leaked into the rest of the suite when a cell between them failed.
+- A defect the tour finds is stated in its cell, pinned by an assert marked as a known
+  defect, and filed as a task. Fixing the defect then fails the tour until its text is
+  updated.
+- The opening cell says what the tour does not show. Where the repo is mid-build, it names
+  the full path and the part that runs today.
+
+### Steps added
+
+- **Detect**: look for anything that enumerates top-level tracked paths. One repo copies
+  its tree into agent worktrees, and a new `notebooks/` folder carried a task's answer
+  there until its tripwire test failed. In such a repo the 2026-11-14 Rollback's "nothing
+  else depends on these files" is false.
+- **Row 2**: split the model's first cell in two, path setup then imports, so ruff's
+  per-cell E402 needs no suppression. Put a working-directory assert, with a message,
+  above the first fixture read.
+- **Row 4**: a repo with no `pyproject.toml` puts `ipykernel>=6.0` in
+  `requirements-notebook.txt`.
+- **Row 5**: run the README's install line in a venv built from nothing. A hand-patched
+  build venv hid a broken dependency spec from every test. Name the front end (below).
+- **Row 6**: where a repo already has teaching notebooks, ask whether the tour gives away
+  what they ask the learner to predict.
+- **New row**: a repo that ignores `*.ipynb` adds `!notebooks/tour_*.ipynb`.
+- **New row**: where ruff lints notebooks, run `ruff check .`. If an ignore is needed, it
+  is E402 only, for `notebooks/**/*.ipynb`.
+- **Subject-matter repos**: a tour that explains a method (game theory, stylometry, a
+  scoring model) needs a reader who knows the subject, or the repo's oracle tests as the
+  reference. An assert can be true and match its sentence while the sentence teaches the
+  wrong concept.
+
+### Front ends
+
+The hub's tour ran top to bottom in VS Code on 2026-11-16, with the Jupyter extension and
+the kernel set to the repo's `.venv`, holding the `notebook` extra and no notebook server.
+Closing without saving left the file unchanged. Saving after a run writes the outputs into
+the file, and rule 2 then fails the suite: clear all outputs before saving, or
+`git restore` the notebook. A browser front end needs `jupyterlab` or `notebook`, which
+the extra does not hold. The README says which front end the tour expects and that a run
+is closed without saving.
+
+### For whoever briefs agents to build a tour
+
+- Pass `--python` an absolute path or one starting with `./`. uv reads a bare name as a
+  version request; one reviewer's install landed in the hub's own venv that way.
+- Build in a worktree outside the tree that propagation discovery scans, on a topic
+  branch, unpushed.
+- Forbid outside lookups. Where the repo has device or network tests, name the tests a
+  reviewer may run. Require every probe and scratch directory to be removed.
+- The reviewer re-runs the builder's "whole suite passed" after the last commit. One was
+  wrong: the builder ran the suite before staging, so a test that reads tracked files
+  never saw the new folder.
+
+### Rollback
+
+Copy back the module you had and reset its constants. The rules and steps added here are
+review guidance; nothing depends on them.
+
+---
+
 ## 2026-11-14: A Notebook Tour, Held by the Suite
 
 A working repo should carry one notebook that walks its main path, from a raw input to a

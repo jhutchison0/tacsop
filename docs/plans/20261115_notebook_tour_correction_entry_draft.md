@@ -1,7 +1,7 @@
 # Draft: Correction Entry for the Notebook Tour
 
 **Date**: 2026-11-15
-**Status**: Draft, unsent. It lives here, outside `docs/doctrine-updates.md`, so `scripts/propagate_doctrine.py` cannot send it before the user rules.
+**Status**: Superseded 2026-11-16 by the entry "2026-11-16: Notebook Tour Correction" in `docs/doctrine-updates.md`. The user ruled: a correction entry, not a skill, and the narrow module change (rename to `PACKAGE`, `DISPLAY_NEEDS = None`, the split test, plus a cell that skips now fails the run test). This draft's counts ("five tests", "one failure and four skips") predate that change; the entry's are measured.
 **Corrects**: the entry "2026-11-14: A Notebook Tour, Held by the Suite", delivered to 23 repos on 2026-11-14.
 **Basis**: thirteen first tours built on 2026-11-14 and 2026-11-15, each reviewed by `code-reviewer`. The reviews' "For the hub" sections are in each repo's `docs/reviews/20261115_notebook_tour_review.md` on its `topic/notebook-tour` branch.
 

@@ -124,10 +124,15 @@ def test_every_code_cell_runs_in_order_over_the_committed_fixtures(path, monkeyp
     namespace: dict = {"__name__": "__main__"}
     try:
         for number, cell in enumerate(cells(path, "code")):
+            withheld = None
             try:
                 exec(compile(source(cell), f"{path.name}[cell {number}]", "exec"), namespace)
             except (Exception, pytest.skip.Exception, pytest.xfail.Exception) as error:  # a cell may not skip itself
-                pytest.fail(f"{path.name} code cell {number} raised {type(error).__name__}: {error}")
+                if not any(namespace.get(guard) is not None for guard in OWN_DATA_GUARDS):
+                    pytest.fail(f"{path.name} code cell {number} raised {type(error).__name__}: {error}")
+                withheld = type(error).__name__  # with a guard set, the error may carry the reader's value
+            if withheld:  # raised outside the except block, so no chained error is printed
+                pytest.fail(f"{path.name} code cell {number} raised {withheld} with an own-data guard set; message withheld", pytrace=False)
         held = {v.__name__.split(".")[0] for v in namespace.values() if isinstance(v, types.ModuleType)}
         assert not held & set(DRAWING_LIBRARIES), f"{path.name} holds {sorted(held & set(DRAWING_LIBRARIES))} by a dynamic import"
     finally:

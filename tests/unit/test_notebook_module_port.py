@@ -74,6 +74,16 @@ def test_a_guard_committed_on_fails_without_printing_its_value(pytester):
     assert marker not in result.stdout.str() + result.stderr.str()
 
 
+def test_a_cell_that_fails_on_the_guarded_value_does_not_print_it(pytester):
+    # The run test prints a failing cell's error; an own-data cell's error often carries the reader's path.
+    marker = "READER-DATA-9c1e"
+    own_data = f'MY_DATA = "/no/such/{marker}/plan.txt"\nif MY_DATA is not None:\n    open(MY_DATA).read()'
+    result = run_in_a_repo_that_draws_nothing(pytester, *TOUR[:2], own_data)
+
+    assert failed(result) == ["test_the_own_data_cell_is_committed_switched_off", RUN_TEST], result.stdout.str()
+    assert marker not in result.stdout.str() + result.stderr.str()
+
+
 def test_a_charting_import_fails_the_charting_test_and_the_run_test(pytester):
     result = run_in_a_repo_that_draws_nothing(pytester, TOUR[0], "import matplotlib.pyplot as plt", *TOUR[1:])
 

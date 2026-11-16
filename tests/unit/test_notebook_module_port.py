@@ -65,6 +65,15 @@ def test_a_cell_that_tries_to_skip_fails_the_run_test(pytester, escape):
     assert failed(result) == [RUN_TEST], result.stdout.str()
 
 
+def test_a_guard_committed_on_fails_without_printing_its_value(pytester):
+    # The value is the reader's own data or path; a CI log must not carry it.
+    marker = "READER-DATA-7f3a"
+    result = run_in_a_repo_that_draws_nothing(pytester, *TOUR[:2], f'MY_DATA = "{marker}"')
+
+    assert failed(result) == ["test_the_own_data_cell_is_committed_switched_off"], result.stdout.str()
+    assert marker not in result.stdout.str() + result.stderr.str()
+
+
 def test_a_charting_import_fails_the_charting_test_and_the_run_test(pytester):
     result = run_in_a_repo_that_draws_nothing(pytester, TOUR[0], "import matplotlib.pyplot as plt", *TOUR[1:])
 

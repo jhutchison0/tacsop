@@ -110,7 +110,8 @@ def test_the_own_data_cell_is_committed_switched_off(path):
     for name in OWN_DATA_GUARDS:
         assert name in values, f"{path.name} never sets {name}: name the own-data guards in OWN_DATA_GUARDS"
         for value in values[name]:
-            assert isinstance(value, ast.Constant) and value.value is None, f"{path.name} commits {name} switched on"
+            switched_off = isinstance(value, ast.Constant) and value.value is None  # outside the assert: a failure must not print the value
+            assert switched_off, f"{path.name} commits {name} switched on"
 
 
 @pytest.mark.parametrize("path", NOTEBOOKS, ids=lambda p: p.name)

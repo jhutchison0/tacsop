@@ -1,9 +1,11 @@
 """Visualization helpers for MAUT decision results.
 
-Three plot functions covering the most common decision science charts:
+Five plot functions:
 - radar_chart: spider/radar comparing alternatives across criteria
 - tornado_plot: horizontal bars showing weight sensitivity range
 - rank_stability_heatmap: annotated heatmap of Monte Carlo rank frequencies
+- passage_chart: every alternative from raw measurement to utility to total
+- slope_chart: the same items under two conditions, one panel per rule
 
 matplotlib is an optional dependency. Each function guard-imports it and raises
 a clear ImportError if it is not installed.
@@ -11,7 +13,7 @@ a clear ImportError if it is not installed.
 
 import math
 
-from src.myproject.decision_science.scorer import DecisionResult
+from src.myproject.decision_science.scorer import DecisionResult, MAUTScorer
 
 
 def _require_matplotlib():
@@ -248,4 +250,233 @@ def rank_stability_heatmap(
 
     fig.colorbar(im, ax=ax, label="Frequency")
     fig.tight_layout()
+    return fig
+
+
+_INK = "#333333"  # marks and labels
+_QUIET = "#9a9a9a"  # curves, frames, and items the reader is not asked to follow
+_NOTE = "#666666"  # units, sources, column heads
+
+
+def _spread(values: list[float], gap: float, low: float, high: float) -> list[float]:
+    """Move label positions apart until each is `gap` from the next, kept inside [low, high].
+
+    Labels that would collide form a group, and the group is centred on the mean of the
+    values it names, so no label drifts further from its mark than the crowd requires.
+    Returns the positions in the order given. Labels move; the marks they name do not.
+    """
+    order = sorted(range(len(values)), key=lambda i: values[i])
+    groups: list[list[float]] = []  # each: [sum of values, count]
+    for i in order:
+        groups.append([values[i], 1])
+        while len(groups) > 1:
+            (below_sum, below_n), (above_sum, above_n) = groups[-2], groups[-1]
+            top_of_below = below_sum / below_n + (below_n - 1) * gap / 2
+            bottom_of_above = above_sum / above_n - (above_n - 1) * gap / 2
+            if bottom_of_above - top_of_below >= gap:
+                break
+            groups[-2:] = [[below_sum + above_sum, below_n + above_n]]
+    placed: list[float] = []
+    for total, count in groups:
+        span = (count - 1) * gap
+        start = min(max(total / count - span / 2, low), max(low, high - span))
+        placed.extend(start + n * gap for n in range(count))
+    out = [0.0] * len(values)
+    for position, i in zip(placed, order):
+        out[i] = position
+    return out
+
+
+def passage_chart(
+    scorer: MAUTScorer,
+    alternatives: dict[str, dict[str, float]],
+    title: str = "From a raw measurement to a utility to a total",
+    source: str | None = None,
+    highlight: list[str] | None = None,
+):
+    """The passage of every alternative through the model: raw value, utility, total.
+
+    One panel per criterion, in the model's order. The horizontal axis is the raw
+    measurement in its own unit; the curve is the criterion's value function; each
+    alternative is a point on it. Every panel shares the vertical scale, utility from
+    0 to 1, and a panel's width is its weight, so the last panel (the total, the sum
+    of weight times utility) can be read against the panels that feed it. An axis
+    whose value function falls is drawn reversed, so better is up and to the right
+    in every panel.
+
+    Args:
+        scorer: The model.
+        alternatives: Mapping of alternative name to its raw scores.
+        title: Figure title.
+        source: Where the numbers come from, printed under the figure.
+        highlight: Alternatives to draw in full ink; the rest go quiet. None draws all in full.
+
+    Returns:
+        matplotlib.figure.Figure with len(scorer.criteria) + 1 axes.
+
+    Raises:
+        ValueError: If alternatives is empty, or the scorer refuses them.
+    """
+    _require_matplotlib()
+    import matplotlib.pyplot as plt
+
+    results = scorer.rank(alternatives)
+    criteria = scorer.criteria
+    loud = set(highlight) if highlight else {r.alternative for r in results}
+
+    fig = plt.figure(figsize=(11.5, 4.0))
+    grid = fig.add_gridspec(
+        1, len(criteria) + 1, width_ratios=[c.weight for c in criteria] + [0.14],
+        left=0.05, right=0.88, top=0.74, bottom=0.17, wspace=0.16,
+    )
+    gap = 0.06  # utility units between two label baselines at this figure height
+
+    for column, criterion in enumerate(criteria):
+        ax = fig.add_subplot(grid[0, column])
+        raws = [alternatives[r.alternative][criterion.name] for r in results]
+        low, high = min(raws), max(raws)
+        pad = (high - low) * 0.12 or 1.0
+        xs = [low - pad + (high - low + 2 * pad) * step / 100 for step in range(101)]
+        curve = [min(1.0, max(0.0, criterion.value_fn(x))) for x in xs]
+        ax.plot(xs, curve, color=_QUIET, linewidth=0.9, zorder=1)
+        falls = curve[0] > curve[-1]
+        ax.set_xlim((xs[-1], xs[0]) if falls else (xs[0], xs[-1]))
+
+        spans = xs[-1] - xs[0]
+        on_the_right = [((x - xs[0]) / spans > 0.5) != falls for x in raws]  # where the point sits in the panel
+        utilities = [r.raw_utilities[criterion.name] for r in results]
+        heights = _spread(utilities, gap, 0.0, 1.0)
+        for result, x, y, height, right in zip(results, raws, utilities, heights, on_the_right):
+            ink = _INK if result.alternative in loud else _QUIET
+            ax.plot([x], [y], marker="o", markersize=4.2, linestyle="none", color=ink, zorder=3)
+            ax.annotate(
+                result.alternative, (x, height), xytext=(-6 if right else 6, 0), textcoords="offset points",
+                ha="right" if right else "left", va="center", fontsize=7, color=ink, zorder=4,
+            )
+
+        ax.set_ylim(-0.04, 1.04)
+        ax.set_xticks([low, high])
+        ax.set_xticklabels([f"{low:,g}", f"{high:,g}"], fontsize=7, color=_NOTE)
+        ax.tick_params(axis="x", length=2, color=_QUIET)
+        for side in ("top", "right"):
+            ax.spines[side].set_visible(False)
+        ax.spines["bottom"].set_bounds(low, high)  # the frame spans the data and no further
+        ax.spines["bottom"].set_color(_QUIET)
+        if column == 0:
+            ax.set_yticks([0, 0.5, 1])
+            ax.set_yticklabels(["0", "0.5", "1"], fontsize=7, color=_NOTE)
+            ax.set_ylabel("utility", fontsize=7, color=_NOTE)
+            ax.spines["left"].set_bounds(0, 1)
+            ax.spines["left"].set_color(_QUIET)
+            ax.tick_params(axis="y", length=2, color=_QUIET)
+        else:
+            ax.set_yticks([])
+            ax.spines["left"].set_visible(False)
+        ax.set_title(f"{criterion.name}\nweight {criterion.weight:.2f}", fontsize=8, loc="left", color=_INK)
+
+    ax = fig.add_subplot(grid[0, -1])
+    totals = [r.utility for r in results]
+    for result, y, height in zip(results, totals, _spread(totals, gap, 0.0, 1.0)):
+        ink = _INK if result.alternative in loud else _QUIET
+        ax.plot([0], [y], marker="o", markersize=4.2, linestyle="none", color=ink, zorder=3)
+        ax.annotate(
+            f"{result.alternative}  {y:.3f}", (0, height), xytext=(7, 0), textcoords="offset points",
+            ha="left", va="center", fontsize=7.5, color=ink,
+        )
+    ax.set_ylim(-0.04, 1.04)
+    ax.set_xlim(-0.5, 0.5)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    ax.set_title("total\nsum of weight × utility", fontsize=8, loc="left", color=_INK)
+
+    fig.suptitle(title, x=0.05, y=0.97, ha="left", fontsize=11, color=_INK)
+    fig.text(
+        0.05, 0.035,
+        "Each panel: raw measurement across, utility up, one point per alternative on the criterion's value function. "
+        "Panel width is the weight." + (f"  Source: {source}" if source else ""),
+        fontsize=7, color=_NOTE, ha="left",
+    )
+    return fig
+
+
+def slope_chart(
+    panels: dict[str, dict[str, dict[str, float]]],
+    title: str = "",
+    source: str | None = None,
+    highlight: list[str] | None = None,
+    value_format: str = "{:.3f}",
+):
+    """The same items under two conditions, one panel per rule, every panel on one scale.
+
+    Each panel is a slopegraph: a column per condition, a point per item at its value, a
+    line joining an item's points, and the item's name and value written at both ends.
+    An item present in one column only is a point with no line. There is no axis, no
+    grid and no legend: the labels are the scale.
+
+    Args:
+        panels: {panel title: {column label: {item: value}}}. Panels are drawn left to
+            right and columns in the order given.
+        title: Figure title.
+        source: Where the numbers come from and their unit, printed under the figure.
+        highlight: Items to draw in full ink; the rest go quiet. None draws all in full.
+        value_format: Format string for a value in a label.
+
+    Returns:
+        matplotlib.figure.Figure with one axes per panel.
+
+    Raises:
+        ValueError: If panels is empty.
+    """
+    _require_matplotlib()
+    import matplotlib.pyplot as plt
+
+    if not panels:
+        raise ValueError("panels must not be empty")
+
+    values = [v for columns in panels.values() for column in columns.values() for v in column.values()]
+    low, high = min(values), max(values)
+    margin = (high - low) * 0.08 or 0.5
+    height_in = 4.4
+    fig, axes = plt.subplots(1, len(panels), sharey=True, figsize=(5.2 * len(panels), height_in), squeeze=False)
+    fig.subplots_adjust(left=0.02, right=0.98, top=0.78, bottom=0.10, wspace=0.05)
+    gap = (high - low + 2 * margin) * (8 * 1.45 / 72) / (height_in * 0.68)  # one label line, in data units
+
+    for ax, (panel, columns) in zip(axes[0], panels.items()):
+        heads = list(columns)
+        items = list(dict.fromkeys(item for column in columns.values() for item in column))
+        for item in items:
+            points = [(x, columns[head][item]) for x, head in enumerate(heads) if item in columns[head]]
+            loud = highlight is None or item in highlight
+            ax.plot(
+                [x for x, _ in points], [y for _, y in points], label=item, marker="o", markersize=3.6,
+                linewidth=1.5 if loud and highlight else 1.0, color=_INK if loud else _QUIET,
+                zorder=3 if loud else 2,
+            )
+        for x, ha, template in ((0, "right", "{name}  {value}"), (len(heads) - 1, "left", "{value}  {name}")):
+            column = columns[heads[x]]
+            names = list(column)
+            for name, y in zip(names, _spread([column[n] for n in names], gap, low - margin, high + margin)):
+                ax.text(
+                    x + (-0.07 if ha == "right" else 0.07), y,
+                    template.format(name=name, value=value_format.format(column[name])),
+                    ha=ha, va="center", fontsize=8, color=_INK if highlight is None or name in highlight else _QUIET,
+                )
+            if len(heads) == 1:
+                break
+        for x, head in enumerate(heads):
+            ax.text(x, high + margin * 2.2, head, ha="center", va="bottom", fontsize=8, color=_NOTE)
+        ax.set_xlim(-1.25, len(heads) - 1 + 1.25)
+        ax.set_ylim(low - margin, high + margin * 3.4)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+        ax.set_title(panel, fontsize=9.5, loc="center", color=_INK, pad=10)
+
+    if title:
+        fig.suptitle(title, x=0.03, y=0.97, ha="left", fontsize=11, color=_INK)
+    if source:
+        fig.text(0.03, 0.03, source, fontsize=7, color=_NOTE, ha="left")
     return fig

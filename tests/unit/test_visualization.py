@@ -1,5 +1,6 @@
 """Tests for decision_science.visualization."""
 
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -7,10 +8,13 @@ import pytest
 matplotlib = pytest.importorskip("matplotlib")
 import matplotlib.pyplot as plt  # noqa: E402
 
-from src.myproject.decision_science.scorer import DecisionResult
+from src.myproject.decision_science.scorer import DecisionResult, MAUTScorer
 from src.myproject.decision_science.visualization import (
+    _spread,
+    passage_chart,
     radar_chart,
     rank_stability_heatmap,
+    slope_chart,
     tornado_plot,
 )
 
@@ -273,3 +277,165 @@ class TestImportErrorGuard:
         with patch("builtins.__import__", side_effect=self._builtins_import_raiser):
             with pytest.raises(ImportError, match=r"uv pip install --python \.venv"):
                 rank_stability_heatmap(_MC_RESULT)
+
+
+# ---------------------------------------------------------------------------
+# passage_chart: raw measurement -> utility -> total, one panel per criterion
+# ---------------------------------------------------------------------------
+
+_PASSAGE_MODEL = Path(__file__).resolve().parents[1] / "fixtures" / "tour" / "depot_model.yaml"
+_PASSAGE_SITES = {
+    "Rail Yard": {"annual_cost": 780, "drive_minutes": 22, "storage_pallets": 4200, "flood_free_years": 27},
+    "River Bend": {"annual_cost": 340, "drive_minutes": 18, "storage_pallets": 1800, "flood_free_years": 19},
+}
+
+
+def _texts(fig) -> str:
+    return "\n".join(t.get_text() for t in fig.findobj(matplotlib.text.Text))
+
+
+@pytest.mark.filterwarnings("ignore:Criterion .* has utility range")
+class TestPassageChart:
+    def _chart(self, **kwargs):
+        scorer = MAUTScorer.from_yaml(_PASSAGE_MODEL)
+        return scorer, passage_chart(scorer, _PASSAGE_SITES, **kwargs)
+
+    def test_one_panel_per_criterion_and_one_for_the_total(self):
+        scorer, fig = self._chart()
+        assert len(fig.axes) == len(scorer.criteria) + 1
+
+    def test_panel_width_is_the_weight(self):
+        scorer, fig = self._chart()
+        widths = [ax.get_position().width for ax in fig.axes[:-1]]
+        weights = [c.weight for c in scorer.criteria]
+        for width, weight in zip(widths, weights):
+            assert width / widths[0] == pytest.approx(weight / weights[0], rel=0.02)
+
+    def test_every_panel_shares_the_utility_scale(self):
+        _, fig = self._chart()
+        assert {ax.get_ylim() for ax in fig.axes} == {(-0.04, 1.04)}
+
+    def test_each_site_is_marked_at_its_utility_in_each_panel(self):
+        scorer, fig = self._chart()
+        results = {r.alternative: r for r in scorer.rank(_PASSAGE_SITES)}
+        for ax, criterion in zip(fig.axes, scorer.criteria):
+            marked = sorted(float(y) for line in ax.lines if line.get_marker() == "o" for y in line.get_ydata())
+            assert marked == pytest.approx(sorted(r.raw_utilities[criterion.name] for r in results.values()))
+        totals = sorted(float(y) for line in fig.axes[-1].lines if line.get_marker() == "o" for y in line.get_ydata())
+        assert totals == pytest.approx(sorted(r.utility for r in results.values()))
+
+    def test_sites_are_labelled_on_the_figure_and_there_is_no_legend(self):
+        _, fig = self._chart()
+        assert all(ax.get_legend() is None for ax in fig.axes)
+        assert "Rail Yard" in _texts(fig) and "River Bend" in _texts(fig)
+
+    def test_title_units_and_source_are_on_the_figure(self):
+        _, fig = self._chart(title="Two sites", source="depot_model.yaml, invented")
+        text = _texts(fig)
+        assert "Two sites" in text and "depot_model.yaml, invented" in text
+        assert "weight 0.30" in text and "annual_cost" in text
+
+    def test_no_alternatives_is_refused(self):
+        with pytest.raises(ValueError, match="No alternatives"):
+            passage_chart(MAUTScorer.from_yaml(_PASSAGE_MODEL), {})
+
+
+# ---------------------------------------------------------------------------
+# slope_chart: the same items under two or more conditions, panel beside panel
+# ---------------------------------------------------------------------------
+
+_SLOPE_PANELS = {
+    "scaled to the sites present": {
+        "four sites": {"Rail Yard": 0.605, "River Bend": 0.600, "Airport Road": 0.547, "Old Mill": 0.270},
+        "Old Mill withdrawn": {"River Bend": 0.600, "Rail Yard": 0.575, "Airport Road": 0.417},
+    },
+    "scaled by the model": {
+        "four sites": {"Airport Road": 0.763, "River Bend": 0.696, "Rail Yard": 0.692, "Old Mill": 0.640},
+        "Old Mill withdrawn": {"Airport Road": 0.763, "River Bend": 0.696, "Rail Yard": 0.692},
+    },
+}
+
+
+class TestSlopeChart:
+    def test_one_panel_per_condition_on_one_scale(self):
+        fig = slope_chart(_SLOPE_PANELS)
+        assert len(fig.axes) == 2
+        assert len({ax.get_ylim() for ax in fig.axes}) == 1
+
+    def test_an_item_in_both_columns_gets_a_line_and_an_item_in_one_gets_a_point(self):
+        fig = slope_chart(_SLOPE_PANELS)
+        for ax in fig.axes:
+            lengths = sorted(len(line.get_xdata()) for line in ax.lines)
+            assert lengths == [1, 2, 2, 2]
+
+    def test_every_item_is_labelled_with_its_value_at_both_ends(self):
+        text = _texts(slope_chart(_SLOPE_PANELS))
+        assert text.count("Rail Yard") == 4 and text.count("Old Mill") >= 2
+        assert "0.605" in text and "0.575" in text and "0.763" in text
+
+    def test_labels_in_one_column_never_overlap(self):
+        fig = slope_chart(_SLOPE_PANELS)
+        fig.canvas.draw()
+        renderer = fig.canvas.get_renderer()
+        for ax in fig.axes:
+            by_side: dict[str, list] = {}
+            for label in ax.texts:
+                by_side.setdefault(label.get_ha(), []).append(label.get_window_extent(renderer))
+            for boxes in by_side.values():
+                for i, a in enumerate(boxes):
+                    for b in boxes[i + 1:]:
+                        assert not a.overlaps(b), "two labels in one column overlap"
+
+    def test_no_axis_ink_and_no_legend(self):
+        fig = slope_chart(_SLOPE_PANELS)
+        for ax in fig.axes:
+            assert ax.get_legend() is None
+            assert not any(spine.get_visible() for spine in ax.spines.values())
+            assert len(ax.get_yticks()) == 0
+
+    def test_title_and_source_are_on_the_figure(self):
+        text = _texts(slope_chart(_SLOPE_PANELS, title="A withdrawal", source="depot fixtures, invented"))
+        assert "A withdrawal" in text and "depot fixtures, invented" in text
+        assert "scaled by the model" in text and "Old Mill withdrawn" in text
+
+    def test_highlighted_items_are_drawn_darker_than_the_rest(self):
+        fig = slope_chart(_SLOPE_PANELS, highlight=["Airport Road"])
+        colors = {line.get_label(): line.get_color() for line in fig.axes[0].lines}
+        assert colors["Airport Road"] != colors["Rail Yard"]
+
+    def test_no_panels_is_refused(self):
+        with pytest.raises(ValueError, match="panels must not be empty"):
+            slope_chart({})
+
+
+class TestSpread:
+    def test_labels_already_apart_do_not_move(self):
+        assert _spread([0.1, 0.5, 0.9], 0.05, 0.0, 1.0) == pytest.approx([0.1, 0.5, 0.9])
+
+    def test_a_crowd_is_centred_on_the_values_it_names(self):
+        placed = _spread([0.696, 0.692, 0.2], 0.06, 0.0, 1.0)
+        assert placed[0] - placed[1] == pytest.approx(0.06)
+        assert (placed[0] + placed[1]) / 2 == pytest.approx(0.694)
+        assert placed[2] == pytest.approx(0.2)
+
+    def test_a_crowd_at_the_top_stays_inside_the_bounds(self):
+        placed = _spread([1.0, 0.99, 0.98], 0.05, 0.0, 1.0)
+        assert max(placed) <= 1.0 and sorted(placed)[1] - sorted(placed)[0] == pytest.approx(0.05)
+
+
+class TestDisplayOptions:
+    def test_slope_chart_formats_values_as_asked(self):
+        text = _texts(slope_chart({"p": {"a": {"x": 1234.5}, "b": {"x": 1500.0}}}, value_format="{:,.0f}"))
+        assert "1,234" in text and "1,500" in text and "1234.5" not in text
+
+    def test_slope_chart_with_one_column_labels_each_item_once(self):
+        fig = slope_chart({"p": {"only": {"x": 0.2, "y": 0.8}}})
+        labels = [t.get_text() for t in fig.axes[0].texts]
+        assert sum("x" in label for label in labels) == 1 and sum("y" in label and "only" not in label for label in labels) == 1
+
+    @pytest.mark.filterwarnings("ignore:Criterion .* has utility range")
+    def test_passage_chart_quiets_every_alternative_not_highlighted(self):
+        fig = passage_chart(MAUTScorer.from_yaml(_PASSAGE_MODEL), _PASSAGE_SITES, highlight=["Rail Yard"])
+        for ax in fig.axes:
+            colors = {line.get_color() for line in ax.lines if line.get_marker() == "o"}
+            assert len(colors) == 2, "one ink for the site followed, one for the rest"

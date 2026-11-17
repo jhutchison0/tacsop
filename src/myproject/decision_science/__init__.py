@@ -18,8 +18,10 @@ from src.myproject.decision_science.value_functions import (
     step,
 )
 from src.myproject.decision_science.visualization import (
+    passage_chart,
     radar_chart,
     rank_stability_heatmap,
+    slope_chart,
     tornado_plot,
 )
 
@@ -40,7 +42,9 @@ __all__ = [
     "logistic",
     "piecewise_linear",
     "step",
+    "passage_chart",
     "radar_chart",
     "rank_stability_heatmap",
+    "slope_chart",
     "tornado_plot",
 ]

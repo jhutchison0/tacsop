@@ -59,4 +59,7 @@ Findings are Critical, Warning or Note, each with the cell, the evidence and the
 - The lead re-runs each finished branch itself: the suite or its named tests, two timezones, two hash seeds, a clean tree, no remote, no product file changed.
 - A builder's finding is unconfirmed until its review lands. Two confidence findings relayed as results were wrong.
 - Per-repo defects go to the repo that owns them, and to a file outside every repo. The public hub holds only lessons that name no private thing.
-- The brief grows as reviews return. Builders re-read it at the end, not only at the start, and say which version of each test module they copied.
+- **Verify "no network" by counting blocked socket calls.** A rule inherited from an earlier session ("run the unit tests only") was taken as "no network" all through the rollout and was wrong; the lead's last re-run found it.
+- **Read before running** in a repo that drives hardware: every construction in the notebook, for the mock setting passed by name.
+- **The lead's own running notes are claims too.** The rollout's size was misreported all evening, and clock times were written as if measured.
+- The brief grows as reviews return. It reached 135 points and overlapped itself; this skill is its consolidated form, and a builder should need only the skill. Builders re-read it at the end, not only at the start, and say which version of each test module they copied.

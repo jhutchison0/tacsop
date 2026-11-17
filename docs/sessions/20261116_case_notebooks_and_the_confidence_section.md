@@ -140,3 +140,64 @@ Deviations caused by this session's agents: two builders wrote a script to one p
 4. One notebook built from the skill's six files alone, with no brief, and reviewed (gap G16), before the skill is called 1.0.0.
 5. `code-reviewer` reviews the hub's own case notebook and displays.
 6. The user decides whether the hub is pushed, and whether the two 2026-11-16 doctrine entries go to this box's consumers.
+
+---
+
+## Addendum, 2026-11-17: all thirteen finished, three levelled, and a rule that was wrong
+
+Written after the last agents returned, shortly after midnight. The Summary's table shows the state at 23:30 on 2026-11-16; this section supersedes its rows on branches.
+
+| Measure | Value | How measured |
+|---|---|---|
+| Hub suite | 688 passed, 1 warning | `.venv/bin/pytest -q`, after the last skill edit |
+| Branches built, reviewed, fixed, and re-run by the lead | 13 of 13 | the lead's own runs, one per branch; last lines in the file beside the worktrees |
+| Branches clean, on no remote | 13 of 13 | `git status --porcelain` and `git branch -r --contains HEAD` in each worktree, one command over all thirteen |
+| Branches on the current test file (0.7.2) | 6 of 13 | `grep 'Module version'` in each; the rest carry 0.6.0 to 0.7.0 |
+| Reviews holding a Critical | 10 of 13 | each review's final message |
+| Skill | 0.3.0, five sidecars, 674 lines | `wc -l` |
+
+### The levelling pass
+
+The three earliest branches predated the rule that an incident quotes its record. A read-only probe showed that was the only rule of the current test file each would fail, so each got a short pass scoped to it and to the own-data probe. In all three, opening the records corrected at least one sentence the builder had written. In two, the own-data probe failed on first use and found a real fault. The other seven branches on older copies were not levelled: each passed the rules of its day.
+
+### A rule that was wrong
+
+The standing rule for one sibling repo was "run the unit tests only; the integration suite makes live requests". All evening that was read as "no network". The lead's last re-run blocked and counted every socket call and found six existing unit tests looking up a public weather service, untouched by the branch; the suite passes either way because the code swallows the refusal. So the unblocked runs of that folder during the session, by a builder, a reviewer and the lead, very likely sent requests to that service. A second repo's suite does the same from one test, found the same way by its reviewer.
+
+The lead had told the user that the live-request suite was never run. That was true of the integration suite and was not the whole truth. The lesson is in `REVIEWING.md`: verify "no network" by counting blocked socket calls, never by a folder name, a marker, or a passing suite.
+
+### What the last reviews added
+
+- A case asserted the field a fix had made right, while two fields beside it still printed the naive answer. Search the whole output.
+- A direction was stated as settled, quoted accurately from a design doc, and was wrong: the same repo's gap register lists the claim as undecided.
+- One control on one field became a sentence about a class of input, and it was the sentence telling a reader a defect was small.
+- A user's own configuration reached a product through a cell that called it directly.
+- An assert on a glob of the working tree failed with a clean tree, where ignored files land.
+- In every repo where the quote rule was applied, it changed at least one sentence.
+
+### Claims, at the addendum
+
+| Claim | State | Evidence |
+|---|---|---|
+| The hub suite passes | tested | `.venv/bin/pytest -q` → `688 passed, 1 warning`, working tree of this commit |
+| Thirteen branches are finished and pass the lead's re-run | tested | per branch, the suite or its named tests and the two notebook test files under two timezones and two hash seeds; in the two repos whose suites reach the network, with socket calls blocked and counted |
+| Thirteen branches are clean and on no remote | observed | one command over the thirteen worktrees: `dirty=0 remote=0` on every line |
+| No product code changed in any of them | observed | per branch, `git diff <base>..HEAD --stat` over its source folders printed nothing |
+| No request left this machine during the session | REFUTED | the unblocked unit-test runs in one repo; see "A rule that was wrong" |
+| The whole suite passes in every branch | UNVERIFIED | in five the lead ran named tests only; the builders' and reviewers' whole-suite counts stand unrepeated |
+| The hub's own case notebook and displays are sound | UNVERIFIED | no second reader |
+
+Overclaims the user caught this session: 0
+
+Overclaims a reviewer caught this session: 2, as above.
+
+The lead's own corrections now number four: the rollout's size, the clock times, the two figures in its own notebook draft, and "the live-request suite was never run", which the lead's own last re-run showed was not the whole truth.
+
+### Next steps, replacing the list above
+
+1. The user reads the morning file beside the worktrees: thirteen opening items, the table, the per-repo entries.
+2. The user rules on the thirteen branches, and on the hub's five unpushed commits.
+3. One notebook built from the skill's six files alone, with no brief, and reviewed (gap G16).
+4. `code-reviewer` reviews the hub's own case notebook and displays.
+5. `test_notebooks.py` gains runs under two timezones and two hash seeds, as a correction entry.
+6. Seven branches carry an older copy of the case test file. Level them when each is merged, or accept them as they stand.

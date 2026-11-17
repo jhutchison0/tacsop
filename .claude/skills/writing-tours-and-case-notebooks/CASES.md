@@ -32,6 +32,8 @@ Each case is a text cell under a `## Case` heading, then one code cell, then one
 
 Most wrong answers raise no error, and saying so is the point of the case.
 
+**Follow the repo's answer to every field that restates it.** On the case's own fixture, search the product's whole output for the naive answer. One case asserted the field a fix had made right while two fields beside it still printed the naive answer. Read the heading alone, too: it should say what the tool does today, not state the naive outcome.
+
 ## The Naive Rule
 
 **It is one a competent person would write**, named for what it is: `splitlines()`, a spreadsheet's `SUMPRODUCT`, min-max scaling, the textbook formula. A rule nobody would write proves nothing. Where two wrong rules come to mind, run both.
@@ -98,7 +100,7 @@ Most cases in most repos are `Design:`. That is an honest label, and it tells th
 | **Limit** | `## Limit` | The repo cannot answer the question, and can say why | The test module |
 | **Tradeoff** | a numbered section | No rule is wrong; the answer moves with a parameter | Review |
 
-A **known defect** computes the repo's present answer under a `naive` name and the intended answer beside it; the text says outright that the naive side is the repo. Its pin asserts at the reported level, through the path the product takes: try one plausible fix in a scratch copy and report which pins failed, since a pin that still passes pinned something else. Fixing the defect fails the cell. Do not fix it; file the task the repo's rules ask for and put it at the top of the report. These are also known defects:
+A **known defect** computes the repo's present answer under a `naive` name and the intended answer beside it; the text says outright that the naive side is the repo. Say whose the intended rule is (a comment, a pillar, the builder's proposal) and search the repo for a precedent that disagrees. Where the obvious repair fixes one side of a defect and not the other, say so, and where no rule was chosen, show the candidates. Its pin asserts at the reported level, through the path the product takes: try one plausible fix in a scratch copy and report which pins failed, since a pin that still passes pinned something else. Fixing the defect fails the cell. Do not fix it; file the task the repo's rules ask for and put it at the top of the report. These are also known defects:
 
 - Two rules where one was meant, even when the intended one is not chosen. The cell shows the candidates beside the present behaviour.
 - A rule kept only by a notebook cell. If the product does nothing and a notebook compensates, the product has the gap.
@@ -123,6 +125,8 @@ grep -rn 'warnings.warn\|quarantine\|deprecated' src/   # the code marks its own
 
 Then sort by lens and by the level where the rules part. A first case notebook takes the construction lens and orders its cases along the tour's path.
 
+- Read every review and the open tasks, not one. An older review in one repo held six wrong answers from a real scan, each with a task, and none became a case.
+- A `Design:` source that says no record exists is checked against the file its cited test lives in: a test file that says it holds regressions for review findings is a record.
 - A fix log undercounts and can mislead. In a repo that is mostly another language it points away from the Python, and every case came from review files.
 - Before dropping an incident because its test is in another language, look for its twin on this side.
 - A crash is a bug report, not a case. Prefer a wrong answer that raised no error.

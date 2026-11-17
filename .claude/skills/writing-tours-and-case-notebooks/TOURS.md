@@ -39,12 +39,14 @@ Hermetic is more than offline. The rollout found each of these by a notebook bre
 
 | A cell's result must not depend on | How it got in | The check |
 |---|---|---|
-| The network | A lazy first-use download; a name lookup | Block `socket.connect` and `socket.getaddrinfo` and run |
+| The network | A lazy first-use download; a name lookup; an existing test that reaches out and swallows the refusal | Block every socket call and **count the attempts**. A check that only raises proves nothing where the code catches exceptions, and neither does a folder named `unit` |
 | An inherited `GIT_*` variable | A cell that runs `git` | Run with `GIT_DIR` pointed at a scratch repository; it gains no commit |
 | A per-user cache, config file or installed-package metadata | A library's default location | Run with an empty `HOME` |
 | **The host's timezone** | A library three calls down called `.timestamp()` on a naive datetime | Run under `TZ=UTC` and `TZ=Asia/Tokyo` |
 | **The hash seed** | The product iterated a set of strings | Run under `PYTHONHASHSEED=0` and `=1` and diff the printed output |
 | The wall clock, or how fast the machine is | A stamp of `now`; an age checked against a timeout | Set the clock in the cell; where a naive rule reads it, set both clocks |
+| The user's own config | A call into the product that reads `~/.gitconfig` or a per-user defaults file | Run with `HOME` at a scratch folder holding a config that changes behaviour |
+| A file the tree ignores | An assert on a `glob` or `exists` where ignored files land | Ask git which files are tracked |
 | The order rows come back in | A store, a dict, a set, a glob | Return rows in a random order and compare printed output across runs |
 | A patch from another cell | `patcher.start()` with a later `stop()` | Every patch is a `with` block inside one cell |
 
@@ -61,6 +63,7 @@ Rule 6 of the kernel is the one a test cannot hold, and reviews found it broken 
 - **A word that says how often carries a count.** "Usual", "ordinary", "rarely", "about one in twenty": the cell prints and asserts the count, or the word goes.
 - **"Nothing else changed" is asserted on what the report states** (a level, a rank, a pick) for every untouched item, not on an input to it.
 - A claim about when a slip is invisible needs its own assert, on the near side of the threshold as well as the far side.
+- **A sentence about a class of input** (infinity, NaN, out of range) **is asserted over every field that can hold it, or it names the field.** One control on one field became "infinity is rejected", which was false for another field, in the sentence that told a reader a defect was small.
 - A number a table states is pinned by an assert, or the table states only what the asserts hold. A loose band is called a tolerance, never an interval.
 - An assert pins behaviour or a record, never a comment or wording in a file someone may improve.
 - Where the package turns an exception into a warning, assert that the warnings are clean, or read them as the cell's subject. A test that expects an empty result also shows the thing it read was read.

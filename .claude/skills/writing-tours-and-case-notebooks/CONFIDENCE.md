@@ -32,8 +32,10 @@ These are the house's terms for a line of the common operating picture, applied 
 | **not known** | Nobody has looked, or nobody can | What would settle it, as a collector someone could run. It needs no range. A standing gap is also a `## Limit` |
 | **exact** | There is no doubt at this level | Exact in what, to what tolerance. "Deterministic over a closed input" is a reason |
 
-Eight traps, each sprung in the rollout:
+Ten traps, each sprung in the rollout:
 
+- **A direction stated as settled.** A direction is a claim. "Exact by construction" holds for a formula's monotonicity and never for a bound on the world. Where one number carries several biases, list each with its sign and give the net sign as `not known` unless measured.
+- **One figure where the repo holds two.** Before running a doubt at one figure, search for a second. Two figures for one quantity are a conflict row, and the cell runs both.
 - **`exact` on a formula.** `exact` means no doubt at this level. A row whose doubt is "this number is not what its name says" is `not known` or `estimated`, however exact its arithmetic. A comparison of floats with no tolerance is not exact: it is a measured doubt.
 - **`not known` without a search.** Before writing it, search the repo's code, docstrings, schema, tests and docs for the quantity. A `not known` the repo already answers is a false row. One section called a conflict's wrong side not known; the repo's own docstring named it and gave the cause.
 - **`measured` against an invented record.** A gap between a calculation and a number the fixture's author typed measures the calculation's path, never the outside source.
@@ -57,7 +59,7 @@ Run it at the shipped settings, through the product's own ordering and the call 
 - At a threshold, "does the verdict change within the tolerance" is always yes. Ask against the requirement the threshold protects.
 - Run the same doubt in both directions, and say which direction of error costs more wherever the product advises or decides for a person. Where that is the owner's call, say so. A second doubt that leans the other way is a different row, not the other direction.
 - **A structural unknown has a bound from the structure, and no sweep.** Where a value cannot be known until the product runs (a computed link, a runtime target), do not sweep invented values and count: state the bound the structure gives, such as "anywhere from 0 to N". A bound printed about a reader's data is tested on a fixture built to break it. One cell printed a lower bound that a story's own text refuted.
-- **Say which way it fails when unsure**, in asserted lines: with no number it refuses, or it acts. In a product that decides, this is the finding.
+- **Say which way it fails when unsure**, in asserted lines: with no number it refuses, or it acts. In a product that decides, this is the finding. Before writing the summary, search the notebook's own rows for its counter-examples: "with a doubtful number it acts" was contradicted by three rows in the same notebook. The honest form names the mechanism: it refuses on a missing value and on a doubt a field declares; it acts on a doubt no field carries and on a value a comparison cannot see.
 
 **What a result belongs to.** A fixture on a decision boundary shows the largest sensitivity there is. Run the doubt on two fixtures, one on the boundary and one off it, or say where the fixture sits. Separate two things one phrase tends to merge:
 
@@ -77,7 +79,7 @@ Where the doubt is a seed, a sample or a rerun:
 - Give an interval, not "plus or minus" one standard error. A rate of 0 or 1 has no normal interval.
 - State the threshold and **how many comparisons share it**.
 - **An order among several items needs every pair.** "Each is within two standard errors of the next" does not mean "no settled order": adjacent ties chain. Print each item's range of places and assert the ranges.
-- **Check the claim on a second, disjoint block of draws**, in the cell. An assert that holds on seeds 0 to 29 and in two of ten other blocks passed by luck, and negation cannot see that. If a claim needs more draws than the suite can afford, the cell claims less.
+- **Check the claim on a second, disjoint block of draws**, in the cell. Two blocks is a stopping rule, not a test: where they differ, claim only what holds in both, or draw more. An assert that holds on seeds 0 to 29 and in two of ten other blocks passed by luck, and negation cannot see that. If a claim needs more draws than the suite can afford, the cell claims less.
 - A small count offered as support says what it could tell apart: the rate before, the count after, and the chance of that count with no change.
 - A range used for scale is computed the same way as the number set beside it.
 - A bias has a direction. A value that moves one way as its input shrinks is shown against the input's size, not as a spread.
@@ -107,6 +109,8 @@ Each line is a fault a reviewer found in a built confidence section, with every 
 | The winner holds across seeds | In 179 of 200, on a scripted policy the section did not name |
 | `exact`: a second run replaces the first | Pinned over an input the product never builds; the product's own path pools the runs |
 | 13 of 24 single-run changes move the leader | The fixture sat at the smallest margin; of the eight smallest changes none flips it. The repo's own record of replicate spread went uncited |
+| The share is an upper bound, exact by construction | The repo's own gap register lists that claim as undecided; four of five error terms lean the other way |
+| The hole is narrow: only a NaN gets through | A value of plus infinity, or of 5.0, in another field got through too |
 | The orphan count lies between 2 and 3 | The true lower bound was 0; the link's target was not known, and an unknown cannot bound a count |
 
 What went right is as instructive. One section found that a solver's answer exists at a payoff of 2.0 and not at 2.0 plus 1e-15. One found that nothing reads an observation's age, so a thirty-day-old reading prints as current. One found an amended filing the store keeps and no report reads. Each came from asking, at one level, what the repo does when the data is doubtful, and finding the answer was nothing.

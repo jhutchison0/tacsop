@@ -238,6 +238,22 @@ These skills are portable to any software project. They contain no project names
 
 ---
 
+## Level 0 Drafts
+
+A skill below 1.0.0 that the hub is still testing on itself. It is not in the roster above, so `scripts/adopt_doctrine.py` does not copy it and no doctrine entry carries it. It moves into the roster, and into the copy list, in the commit that makes it 1.0.0.
+
+### writing-tours-and-case-notebooks (directory form, draft)
+
+**Path**: `.claude/skills/writing-tours-and-case-notebooks/SKILL.md` + 5 sidecars (`TOURS.md`, `CASES.md`, `CONFIDENCE.md`, `DISPLAYS.md`, `REVIEWING.md`).
+
+**Focus**: The notebooks that show how a repo works, both kinds run by the suite over committed fixtures: a tour walks the main path once, and a case notebook runs the obvious rule beside the repo's, asserts the difference, and says how sure the result is. Version 0.3.0, a draft: rewritten after a rollout to thirteen repos in which reviews found faults the suite could not see.
+
+**Key concepts**: tour for breadth and cases for depth, three levels (arrives, handled, reported), three lenses (construction, validity, scope), the parts of a case, three source kinds with an incident quoting its record, known defects and limits as shapes, a confidence section with five kinds of doubt and one doubt run through to the report, hermetic beyond offline (timezone, hash seed, clock, row order), negation as a floor, a second reader's protocol.
+
+**Use when**: Writing or reviewing a notebook under `notebooks/`, choosing a repo's next notebook, writing the section that says how sure, choosing a display for a notebook section, or briefing an agent to build or review one.
+
+---
+
 ## Level 1: Project-Specific Skills
 
 This template has no Level 1 skills yet. Project-specific skills would be added by downstream consumers based on their domain.

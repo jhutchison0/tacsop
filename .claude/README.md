@@ -46,6 +46,7 @@ This directory contains agent definitions, team templates, slash commands, and s
         ├── using-topic-branches/SKILL.md
         ├── writing-simple-and-direct/SKILL.md + 4 sidecars
         ├── designing-clear-data-displays/SKILL.md + 4 sidecars
+        ├── writing-tours-and-case-notebooks/SKILL.md + 5 sidecars
         ├── traversing-the-knowledge-base/SKILL.md
         ├── lake-conventions/SKILL.md + 3 sidecars
         ├── verifying-claims/SKILL.md + 1 sidecar

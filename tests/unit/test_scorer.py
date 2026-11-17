@@ -177,6 +177,19 @@ class TestRank:
         assert results[0].alternative == "B"
 
 
+    def test_a_utility_does_not_depend_on_which_other_alternatives_are_ranked(self):
+        # The scale is the model's, so withdrawing an alternative moves no one else's utility
+        # and cannot reorder the rest. Scaling to the alternatives present breaks both.
+        scorer = _make_scorer(_criterion("x", 0.5), _criterion("y", 0.5))
+        alternatives = {"a": {"x": 0.9, "y": 0.2}, "b": {"x": 0.4, "y": 0.8}, "c": {"x": 0.1, "y": 0.1}}
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            all_three = {r.alternative: r.utility for r in scorer.rank(alternatives)}
+            without_c = {r.alternative: r.utility for r in scorer.rank({k: alternatives[k] for k in "ab"})}
+        assert without_c == {name: all_three[name] for name in without_c}
+        assert list(without_c) == [name for name in all_three if name != "c"]
+
+
 class TestFromYaml:
     def test_loads_fixture(self):
         scorer = MAUTScorer.from_yaml(FIXTURES_DIR / "decision_model.yaml")

@@ -79,7 +79,7 @@ tacsop/
 │       ├── value_functions.py
 │       ├── sensitivity.py
 │       └── visualization.py
-├── notebooks/              # Tours: a walk through the code over committed fixtures
+├── notebooks/              # Tours and case notebooks, run by the suite over committed fixtures
 ├── .claude/                # Agent definitions, teams, commands, skills
 ├── scripts/                # Doctrine propagation tooling
 ├── config/project.yaml     # Project identity, phases, machines
@@ -94,7 +94,7 @@ tacsop/
 
 ## Take the Tour
 
-`notebooks/tour_from_a_model_to_a_ranking.ipynb` walks the decision science package from a YAML model to a ranking and three figures, over invented data in `tests/fixtures/tour/`. It ends with a cell to change, a cell that breaks on purpose, and a cell for your own model.
+`notebooks/tour_from_a_model_to_a_ranking.ipynb` walks the decision science package from a YAML model to a ranking and three figures, over invented data in `tests/fixtures/tour/`. It ends with a cell to change, a cell that breaks on purpose, and a cell for your own model. `notebooks/cases_how_a_ranking_goes_wrong.ipynb` goes deeper: four places where the obvious rule ranks the sites differently, each run beside the package's rule.
 
 ```bash
 uv pip install --python .venv -e ".[decision-science,notebook]"

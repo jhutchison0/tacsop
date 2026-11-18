@@ -287,6 +287,25 @@ def _spread(values: list[float], gap: float, low: float, high: float) -> list[fl
     return out
 
 
+def _beside(values: list[float], first: list[bool], diameter: float, units_per_point: float) -> list[float]:
+    """Sideways shifts, in points and never to the right, that keep marks at `values` from covering each other.
+
+    Marks that carry the reader's eye (`first`) keep the column; the others step left in turn
+    until they clear every mark already placed. A mark moves sideways only: its height is its value.
+    Returns the shifts in the order given.
+    """
+    placed: list[tuple[float, float]] = []  # (shift, height in points)
+    shifts = [0.0] * len(values)
+    for i in sorted(range(len(values)), key=lambda i: (not first[i], values[i])):
+        height = values[i] / units_per_point
+        shift = 0.0
+        while any(math.hypot(shift - x, height - y) < diameter for x, y in placed):
+            shift -= diameter / 2
+        placed.append((shift, height))
+        shifts[i] = shift
+    return shifts
+
+
 def passage_chart(
     scorer: MAUTScorer,
     alternatives: dict[str, dict[str, float]],
@@ -319,6 +338,7 @@ def passage_chart(
     """
     _require_matplotlib()
     import matplotlib.pyplot as plt
+    from matplotlib.transforms import ScaledTranslation
 
     results = scorer.rank(alternatives)
     criteria = scorer.criteria
@@ -376,9 +396,14 @@ def passage_chart(
 
     ax = fig.add_subplot(grid[0, -1])
     totals = [r.utility for r in results]
-    for result, y, height in zip(results, totals, _spread(totals, gap, 0.0, 1.0)):
+    points_high = fig.get_figheight() * 72 * ax.get_position().height  # the panel's height, spanning 1.08 of utility
+    sideways = _beside(totals, [r.alternative in loud for r in results], 4.2 + 1.0, 1.08 / points_high)
+    for result, y, height, shift in zip(results, totals, _spread(totals, gap, 0.0, 1.0), sideways):
         ink = _INK if result.alternative in loud else _QUIET
-        ax.plot([0], [y], marker="o", markersize=4.2, linestyle="none", color=ink, zorder=3)
+        ax.plot(
+            [0], [y], marker="o", markersize=4.2, linestyle="none", color=ink, zorder=3,
+            transform=ax.transData + ScaledTranslation(shift / 72, 0, fig.dpi_scale_trans),
+        )
         ax.annotate(
             f"{result.alternative}  {y:.3f}", (0, height), xytext=(7, 0), textcoords="offset points",
             ha="left", va="center", fontsize=7.5, color=ink,

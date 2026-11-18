@@ -1,9 +1,11 @@
 """Tests for decision_science.visualization."""
 
+import math
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+import yaml
 
 matplotlib = pytest.importorskip("matplotlib")
 import matplotlib.pyplot as plt  # noqa: E402
@@ -338,6 +340,20 @@ class TestPassageChart:
     def test_no_alternatives_is_refused(self):
         with pytest.raises(ValueError, match="No alternatives"):
             passage_chart(MAUTScorer.from_yaml(_PASSAGE_MODEL), {})
+
+    def test_no_mark_in_the_total_panel_covers_another(self):
+        """River Bend (0.696) and Rail Yard (0.692) sit 0.6 pt apart; two marks too close make a third, so one moves."""
+        sites = yaml.safe_load((_PASSAGE_MODEL.parent / "depot_sites.yaml").read_text())["alternatives"]
+        fig = passage_chart(MAUTScorer.from_yaml(_PASSAGE_MODEL), sites)
+        marks = [line for line in fig.axes[-1].lines if line.get_marker() == "o"]
+        assert len(marks) == len(sites)
+        centres = [line.get_transform().transform((float(line.get_xdata()[0]), float(line.get_ydata()[0]))) for line in marks]
+        diameter = (marks[0].get_markersize() + marks[0].get_markeredgewidth()) * fig.dpi / 72
+        for i, a in enumerate(centres):
+            for b in centres[i + 1:]:
+                assert math.dist(a, b) >= diameter - 1e-6, "two marks in the total panel overlap"
+        for line in marks:  # the vertical position is the total itself: a mark moves sideways only
+            assert float(line.get_ydata()[0]) in {r.utility for r in MAUTScorer.from_yaml(_PASSAGE_MODEL).rank(sites)}
 
 
 # ---------------------------------------------------------------------------

@@ -1,9 +1,12 @@
 """Tests for decision_science.visualization."""
 
+import math
+import random
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+import yaml
 
 matplotlib = pytest.importorskip("matplotlib")
 import matplotlib.pyplot as plt  # noqa: E402
@@ -339,6 +342,20 @@ class TestPassageChart:
         with pytest.raises(ValueError, match="No alternatives"):
             passage_chart(MAUTScorer.from_yaml(_PASSAGE_MODEL), {})
 
+    def test_no_mark_in_the_total_panel_covers_another(self):
+        """River Bend (0.696) and Rail Yard (0.692) sit 0.6 pt apart; two marks too close make a third, so one moves."""
+        sites = yaml.safe_load((_PASSAGE_MODEL.parent / "depot_sites.yaml").read_text())["alternatives"]
+        fig = passage_chart(MAUTScorer.from_yaml(_PASSAGE_MODEL), sites)
+        marks = [line for line in fig.axes[-1].lines if line.get_marker() == "o"]
+        assert len(marks) == len(sites)
+        centres = [line.get_transform().transform((float(line.get_xdata()[0]), float(line.get_ydata()[0]))) for line in marks]
+        diameter = (marks[0].get_markersize() + marks[0].get_markeredgewidth()) * fig.dpi / 72
+        for i, a in enumerate(centres):
+            for b in centres[i + 1:]:
+                assert math.dist(a, b) >= diameter - 1e-6, "two marks in the total panel overlap"
+        for line in marks:  # the vertical position is the total itself: a mark moves sideways only
+            assert float(line.get_ydata()[0]) in {r.utility for r in MAUTScorer.from_yaml(_PASSAGE_MODEL).rank(sites)}
+
 
 # ---------------------------------------------------------------------------
 # slope_chart: the same items under two or more conditions, panel beside panel
@@ -421,6 +438,26 @@ class TestSpread:
     def test_a_crowd_at_the_top_stays_inside_the_bounds(self):
         placed = _spread([1.0, 0.99, 0.98], 0.05, 0.0, 1.0)
         assert max(placed) <= 1.0 and sorted(placed)[1] - sorted(placed)[0] == pytest.approx(0.05)
+
+    def test_values_tied_at_a_bound_keep_the_gap(self):
+        placed = _spread([0, 0, 0, 0.13], 0.06, 0.0, 1.0)
+        assert min(b - a for a, b in zip(sorted(placed), sorted(placed)[1:])) >= 0.06 - 1e-9
+        assert min(placed) >= 0.0 and max(placed) <= 1.0
+
+    def test_any_crowd_the_range_can_hold_keeps_the_gap_and_the_bounds(self):
+        rng = random.Random(0)
+        for _ in range(2000):
+            values = [rng.choice([0.0, 1.0, rng.random()]) for _ in range(rng.randint(2, 8))]
+            placed = _spread(values, 0.06, 0.0, 1.0)  # 7 gaps of 0.06 fit in 0 to 1
+            ordered = sorted(placed)
+            assert min(b - a for a, b in zip(ordered, ordered[1:])) >= 0.06 - 1e-9, values
+            assert ordered[0] >= -1e-9 and ordered[-1] <= 1.0 + 1e-9, values
+            assert [placed[i] for i in sorted(range(len(values)), key=lambda i: values[i])] == pytest.approx(ordered)
+
+    def test_a_crowd_the_range_cannot_hold_is_spaced_evenly_across_the_range_in_the_order_of_its_values(self):
+        placed = _spread([0.5, 0.1, 0.5, 0.9], 0.4, 0.0, 1.0)  # 3 gaps of 0.4 need 1.2 of a range of 1.0
+        assert placed[1] == pytest.approx(0.0) and placed[3] == pytest.approx(1.0)
+        assert sorted(placed) == pytest.approx([0.0, 1 / 3, 2 / 3, 1.0])
 
 
 class TestDisplayOptions:

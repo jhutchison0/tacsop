@@ -78,6 +78,15 @@ class TestScore:
         result = scorer.score("alt1", {"x": 0.5, "y": 0.5})
         assert result.utility == pytest.approx(0.5)
 
+    def test_the_weight_applies_to_the_utility_and_not_to_the_raw_number(self):
+        # raw 0.2 on a falling curve is utility 0.8; a weighted sum of raw numbers would give 0.6*0.2 + 0.4*0.5 = 0.32
+        scorer = _make_scorer(
+            _criterion("x", 0.6, fn=lambda raw: 1 - raw),
+            _criterion("y", 0.4),
+        )
+        result = scorer.score("alt1", {"x": 0.2, "y": 0.5})
+        assert result.utility == pytest.approx(0.6 * 0.8 + 0.4 * 0.5)
+
     def test_breakdown_sums_to_utility(self):
         scorer = _make_scorer(
             _criterion("a", 0.7),

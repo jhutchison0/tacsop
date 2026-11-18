@@ -262,25 +262,37 @@ def _spread(values: list[float], gap: float, low: float, high: float) -> list[fl
     """Move label positions apart until each is `gap` from the next, kept inside [low, high].
 
     Labels that would collide form a group, and the group is centred on the mean of the
-    values it names, so no label drifts further from its mark than the crowd requires.
+    values it names, clamped to the bounds; a group pushed against a bound merges with the
+    neighbour it then touches, so no two labels end closer than `gap`. No label drifts
+    further from its mark than the crowd requires.
     Returns the positions in the order given. Labels move; the marks they name do not.
+
+    If the labels cannot fit (more than `(high - low) / gap` gaps between them), the gap is
+    given up and they are spaced evenly from `low` to `high`, in the order of their values.
     """
     order = sorted(range(len(values)), key=lambda i: values[i])
+    if len(values) > 1 and (len(values) - 1) * gap > high - low:
+        step = (high - low) / (len(values) - 1)
+        out = [0.0] * len(values)
+        for rank, i in enumerate(order):
+            out[i] = low + rank * step
+        return out
+
+    def start(total: float, count: int) -> float:
+        span = (count - 1) * gap
+        return min(max(total / count - span / 2, low), max(low, high - span))
+
     groups: list[list[float]] = []  # each: [sum of values, count]
     for i in order:
         groups.append([values[i], 1])
         while len(groups) > 1:
             (below_sum, below_n), (above_sum, above_n) = groups[-2], groups[-1]
-            top_of_below = below_sum / below_n + (below_n - 1) * gap / 2
-            bottom_of_above = above_sum / above_n - (above_n - 1) * gap / 2
-            if bottom_of_above - top_of_below >= gap:
+            if start(above_sum, above_n) - (start(below_sum, below_n) + (below_n - 1) * gap) >= gap - 1e-12:
                 break
             groups[-2:] = [[below_sum + above_sum, below_n + above_n]]
     placed: list[float] = []
     for total, count in groups:
-        span = (count - 1) * gap
-        start = min(max(total / count - span / 2, low), max(low, high - span))
-        placed.extend(start + n * gap for n in range(count))
+        placed.extend(start(total, count) + n * gap for n in range(int(count)))
     out = [0.0] * len(values)
     for position, i in zip(placed, order):
         out[i] = position

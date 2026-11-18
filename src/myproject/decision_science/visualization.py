@@ -327,6 +327,8 @@ def passage_chart(
 ):
     """The passage of every alternative through the model: raw value, utility, total.
 
+    Draft: added for the case notebooks, 2026-11; the signature may change.
+
     One panel per criterion, in the model's order. The horizontal axis is the raw
     measurement in its own unit; the curve is the criterion's value function; each
     alternative is a point on it. Every panel shares the vertical scale, utility from
@@ -446,6 +448,8 @@ def slope_chart(
     value_format: str = "{:.3f}",
 ):
     """The same items under two conditions, one panel per rule, every panel on one scale.
+
+    Draft: added for the case notebooks, 2026-11; the signature may change.
 
     Each panel is a slopegraph: a column per condition, a point per item at its value, a
     line joining an item's points, and the item's name and value written at both ends.

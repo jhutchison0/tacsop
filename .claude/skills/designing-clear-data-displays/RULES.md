@@ -12,7 +12,7 @@ The default failure is chartjunk: ink spent on decoration, frames, gradients, an
 
 The failure is the code and the darting, not the presence of words beside a figure. A number, a letter, or a color that means nothing until the reader finds it in a key sends the eye away from the data and back for every mark. VDQI p. 180 says to "integrate the caption and legend into the design so that the eye is not required to dart back and forth between textual material and the graphic" (secondary source; book text not fetched) and, on the same page, "Words and pictures belong together." The friendly-graphic table in VDQI puts it as a property of the graphic: "labels are placed on the graphic itself; no legend is required," against the unfriendly graphic where "Obscure codings require going back and forth between legend and graphic." Tufte's list of what is wrong with a default chart names the failure directly: "encoded legends, color without content" (edwardtufte.com, 2003-01-08). The positive form is *Beautiful Evidence* principle 4: "Completely integrate words, numbers, images, diagrams." A caption or list beside the figure that repeats the figure's words is that integration, not a key.
 
-Words on a graphic are data-ink (VDQI p. 180), so a title and a note are held to the figure as the marks are.
+Words on a graphic are data-ink (VDQI p. 180), so a title and a note are held to the figure as the marks are. The integration goes to the page: "Data graphics are paragraphs about data and should be treated as such", and "Tables and graphics should be run into the text whenever possible, avoiding the clumsy and diverting segregation of 'See Fig. 2'" (VDQI p. 181; matched against the book by the second reader, 2026-11-22). A figure sits at the sentence that makes its claim. **Second test**: is the figure within one screen of that sentence?
 
 **Test**: cover everything but the figure. Can a reader name every mark without decoding a number, letter, or color? Then take every number in the title and the note: each appears on the figure as a tick, a label or a mark, at its place.
 
@@ -86,4 +86,4 @@ What each rule rests on, and how each source was read. "Primary" means Tufte's o
 
 - `EXAMPLES.md`: every rule above shown in a before/after pair.
 - `REVIEWING.md`: how these tests become review findings.
-- `SKILL.md`: the kernel, the terms table, and the guardrails (not a persona, not a ban on all non-data ink, not a density rule in either direction, not a sweep).
+- `SKILL.md`: the kernel, the terms table, and the guardrails (not a persona, not a ban on all non-data ink, not a density floor and not a licence for empty space, not a sweep).

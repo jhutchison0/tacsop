@@ -8,7 +8,7 @@ version: "1.2.0"
 
 House style for data displays. Three goals: figures a reader can use without decoding, ink spent on data rather than decoration, and effects shown at their true size. This SKILL.md is the entry point; expansions, examples, and the review protocol live in sidecar files loaded on demand.
 
-Scope, stated once: a repo's UX rules and document schemas define **what** a display must contain. This skill defines **how** the ink goes. Never drop a required element to save ink. Before the eight: could a table or a sentence carry these numbers? Under about twenty, a table usually does (VDQI p. 56). Count the numbers behind the claim, not behind its summary: a mean of twenty thousand draws is twenty thousand numbers. Past twenty, or where the claim is a boundary or a structure that no sorted table shows, draw, and print the table beside the figure.
+Scope, stated once: a repo's UX rules and document schemas define **what** a display must contain. This skill defines **how** the ink goes. Never drop a required element to save ink. Before the eight: count the numbers behind the claim, not behind its summary. Two numbers, a sentence; up to about twenty, a table; more, or a boundary or structure no sorted table shows, a graphic (VDQI pp. 56, 178). A mean of twenty thousand draws is twenty thousand numbers. Where a figure is drawn, print its table beside it.
 
 **Philosophy**: *Show the data. Spend ink on nothing else, within reason.*
 
@@ -45,7 +45,7 @@ Eight rules. The ambient copy lives in CLAUDE.md (see `ADOPTION.md`); `RULES.md`
 | 1 + 1 = 3 | Two marks set close create a third shape between them. Albers' phrase, used by Tufte. | 4 |
 | Lie factor | Size of the effect in the graphic divided by size of the effect in the data. | 5 |
 | Small multiples | The same design repeated, one panel per case, on one scale. | 6 |
-| Sparkline | A word-sized line chart with no axes, set in the sentence it belongs to. | 2, 6 |
+| Sparkline | A word-sized graphic at the resolution of type, set where a word or number could go: a sentence, a table, a heading. The text beside it gives its scale. | 2, 6 |
 | Range-frame | An axis drawn only as far as the data run, with ticks where values were measured. | 1 |
 | Line weight as meaning | A heavier line is a data measure, never a style. | 3 |
 | Levels of detail | A display read once for the overview and again for the fine structure. | 8 |
@@ -76,7 +76,7 @@ Show-the-data usually means less ink, and the exceptions are instructive. In `EX
 
 Loaded on demand when this SKILL.md cites them. Read only the ones relevant to the task at hand.
 
-- [RULES.md](RULES.md): each kernel rule expanded with the failure it counters, the mechanism, its source, and the test that catches it. Read before drawing anything larger than a sparkline.
+- [RULES.md](RULES.md): each kernel rule expanded with the failure it counters, the mechanism, its source, and the test that catches it. Read before drawing anything, a sparkline included.
 - [EXAMPLES.md](EXAMPLES.md): six generic before/after pairs as specs and sketches, including the pair that grows. Read when a rule feels abstract.
 - [REVIEWING.md](REVIEWING.md): the review protocol for displays: pass order, finding format, severity mapping, what not to flag, mechanical checks. Read by the code reviewer before reviewing any figure.
 - [ADOPTION.md](ADOPTION.md): the CLAUDE.md kernel block, the reviewer checklist line, the index entries, the optional layout probe, and propagation notes. Read once per repo.

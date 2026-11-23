@@ -55,7 +55,7 @@ All data displays follow the designing-clear-data-displays skill. The kernel:
 8. Content counts most: simple design, intense content.
 
 Schemas and a repo's UX rules define what a display must contain; this defines how the ink goes.
-Before the eight: could a table or a sentence carry these numbers? Under about twenty, a table usually does (VDQI p. 56).
+Before the eight: count the numbers behind the claim, not behind its summary. Two numbers, a sentence; up to about twenty, a table; more, or a boundary or structure no sorted table shows, a graphic (VDQI pp. 56, 178).
 A UX rule that asks for a less dense display wins; state the override.
 
 ## Claim Style

@@ -17,7 +17,7 @@ Before the display skill's question (could a table carry these numbers?), ask wh
 | Who moves, who replies, and what is refused | A structure | The product's own diagram: a tree, a table with its best replies |
 | Two to about twenty numbers set side by side | Not a shape | A table sorted by the value the claim names. Points on one scale if the gaps are the point. Where a point is a mean over chance, the note says so and each point carries the range of single outcomes behind it |
 
-**Count the data behind the claim, not the summary.** Twenty thousand draws reduced to a mean and an interval are twenty thousand numbers. Eighty-one solved cases reduced to three counts are eighty-one. The line of about twenty numbers (VDQI p. 56) applies to what was computed. A claim about a shape is drawn when the data behind it exceed twenty, or when no table sorted by the claim's value shows it: a boundary, a structure of moves. Six rows of a value collapsing are a table.
+**Count the data behind the claim, not the summary.** Twenty thousand draws reduced to a mean and an interval are twenty thousand numbers. Eighty-one solved cases reduced to three counts are eighty-one. The line of about twenty numbers (VDQI p. 56) applies to what was computed. A claim about a shape is drawn when the data behind it exceed twenty, or when no table sorted by the claim's value shows it: a boundary, a structure of moves. Six rows of a value collapsing are a table. One override, the house's and not Tufte's: a proportion whose naive reading divides by the wrong group is drawn as a unit chart even at three counts, because the display sets the right denominator beside the wrong one.
 
 A figure never stands alone. Print the table beside it, to the precision the asserts use, so the second reader can check every mark.
 
@@ -41,7 +41,7 @@ A notebook imports no charting library, and `test_notebooks.py` fails one that d
 | Word-sized line | The same, inside a sentence | One vertex per value, heights in proportion, the size of a word, the colour of the text |
 | The product's own diagram | What does the product say? For a game: its table with best replies underlined and a naive reading dashed beside them, its tree with the path of play | The marks come from the solver the product calls, so the figure cannot disagree with it |
 
-A unit chart of expected counts says "expected" in its title, and its note says the group is a reference class and not a sample: a real group of that size would differ by chance. Choose the smallest group that makes every count whole, and never round a count to make a mark.
+A unit chart of expected counts says "expected" in its title, and its note says the group is a reference class and not a sample: a real group of that size would differ by chance. Choose a group of 100, or the smallest larger group that makes every count whole, and never round a count to make a mark.
 
 A display takes the product's object where it can and derives the rest. A tree that asks the caller for the path of play can be handed the wrong one; a tree that calls the solver cannot.
 
@@ -104,7 +104,7 @@ Give the distance in every doubtful input, in the units the input arrives in, an
 
 A map or a line over an assumed grid is `measured over an assumed range`, and its note says four things: that the author chose the grid, the range of each axis, every input held fixed with its value, and that the ring marks an invented value. A count of cells measures the grid as much as the model. Give the boundary's value as the size, and keep the count as a check on the figure. Place each case at its true input values: a grid of uneven steps drawn as even steps misstates every distance on it. Where the boundary has a formula, draw the formula and plot the cases over it; the two agreeing is a check, and an assert makes it one.
 
-Named failures, each an instance of display rule 5 (the effect at its true size). The test is rule 5's own: the width of the doubt as drawn or printed, divided by its width in the data.
+Named failures. Where a doubt has a width, the test is display rule 5's own: the width as drawn or printed, divided by its width in the data. The rest (a confidence word with no number, a mean of sources that disagree) are failures of rule 7: the display does not say what it rests on.
 
 - **False precision.** Digits past what the inputs bear. Print as many places as survive the doubt the section ran.
 - **An error bar that names nothing.** A bar is a range, a standard error, or a spread of draws; the note says which, over how many draws, and what the number is conditional on.

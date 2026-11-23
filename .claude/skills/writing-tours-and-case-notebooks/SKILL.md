@@ -113,6 +113,7 @@ So a build report leads with what was checked by a second reader, and treats its
 - [TOURS.md](TOURS.md): the shape of a tour, what every notebook owes, what "hermetic" covers, and the own-data cell. Read before writing any notebook.
 - [CASES.md](CASES.md): the parts of a case, the naive rule, the three source kinds, the four shapes, where to find cases, and the test module. Read before writing a case notebook.
 - [CONFIDENCE.md](CONFIDENCE.md): the section that says how sure: the table, the kinds, choosing the doubt to run, and the faults reviews found in it. Read before writing that section, every time.
+- [KIT.md](KIT.md): how to build a repo's display kit: the module, its helpers, each display's call and what its tests hold. Read before building or extending a kit.
 - [DISPLAYS.md](DISPLAYS.md): when a claim is drawn, the display kit, which display suits which level, comparison and doubt, words and pictures together, and colour. Read before writing any section that states a number.
 - [REVIEWING.md](REVIEWING.md): what a second reader checks that no test can, and how to brief a builder and a reviewer. Read before reviewing a notebook or sending an agent to build one.
 

@@ -29,7 +29,7 @@ A notebook imports no charting library, and `test_notebooks.py` fails one that d
 - The figure's rules (labels placed, one scale, a note) are held by tests that fail, as the notebook's cells are.
 - A reader's own data gets the same figure by passing it to the same function.
 
-**A figure costs a call.** A repo that carries notebooks carries a display kit: one module of general displays, each tested once, that any notebook calls with its own numbers. A new kind of display still costs a function and its tests; a new figure of an existing kind costs one call and one assert. The first kit was built in a sibling repo on 2026-11-22, one module with its own test file, and eight notebooks there call it; the hub's `passage_chart` and `slope_chart` are two more displays of the same kind.
+**A figure costs a call.** A repo that carries notebooks carries a display kit, built from [KIT.md](KIT.md): one module of general displays, each tested once, that any notebook calls with its own numbers. A new kind of display still costs a function and its tests; a new figure of an existing kind costs one call and one assert. The first kit was built in a sibling repo on 2026-11-22, one module with its own test file, and eight notebooks there call it; the hub's `passage_chart` and `slope_chart` are two more displays of the same kind.
 
 | Display | Answers | Its tests hold |
 |---|---|---|
@@ -136,7 +136,7 @@ Grey is the default: ink for the data, grey for what the reader is not following
 
 - **A colour names one thing.** It goes to a name drawn on the figure (a plan, a group, an action), and that name wears it in every figure of the notebook. The kit refuses a colour for a name that is not drawn.
 - **Prefer a colour that imitates the thing.** Flame for a plan that burns, water for a beach, blood for a killing. A reader decodes nothing: the colour is the thing's own. The kit carries a few such colours by name.
-- **At most two colours in a notebook**, on a field of ink and grey. A third meaning takes a label, not a hue. The cap is the house's, not Tufte's, and a reviewer holds it: no kit counts hues across a notebook.
+- **At most two colours in a notebook**, on a field of ink and grey. A third meaning takes a label, not a hue. The cap is the house's, not Tufte's, and a reviewer holds it: no kit counts hues across a notebook. The maintainer kept it on 2026-11-23 as a start that may prove too tight.
 - **Never colour alone.** Every coloured mark keeps its label, and the figure still reads printed in black and white: convert a render to grey and check that each coloured group can still be told from its neighbours. This also serves a reader who cannot tell red from green.
 - **No colour for good and bad, rank or mood.** Not red for the naive rule and green for the repo's. Weight and position carry emphasis. A colour means a thing in the story, and a quiet companion line (a prior, a baseline) is grey, which is not a colour.
 - **No colour key.** A colour explained in a legend is an encoded key (display rule 2).
@@ -176,8 +176,8 @@ A figure whose numbers appear nowhere as text fails the second reader. Print the
 
 ## What Is Not Settled
 
-- **Saved outputs.** A notebook is committed without outputs, so a reader on a code host sees no figure and no table until the notebook is run. Whether a notebook whose fixtures are all invented may commit its outputs, or a rendered copy beside it, is the maintainer's decision and is not made.
-- **The kit's home.** It was built in one repo. Its general displays are not yet in the hub's package, and a second repo has not used it.
+- **Saved outputs.** A notebook is committed without outputs, so a reader on a code host sees no figure and no table until the notebook is run. The maintainer ruled on 2026-11-23 that outputs stay out of git for now: a figure is reproduced by running the notebook.
+- **The kit's home.** It was built in one repo, and each repo builds its own from [KIT.md](KIT.md), by the maintainer's ruling of 2026-11-23. Its general displays are not in the hub's package, and a second repo has not yet built from the recipe.
 - **Displays not yet built.** One-way bars over several inputs, a table of flip values, cumulative curves for plans compared by a mean, a lineup, a unit chart for thousands of units, and a table that carries a mark per row. Each is prescribed or implied above and no kit holds it.
 - **Prose not yet shortened.** The first eight notebooks gained their figures and kept nearly all their text: 1,406 lines added, 17 removed.
 - **Second readers.** Three agents reviewed this file and the kit on 2026-11-22 (`docs/reviews/20261122_display_doubt_audit.md`, `docs/plans/20261122_display_skill_improvement_proposal.md`, and a second read of the display skill). No reviewer has yet read the seven notebooks built from it that night. The two hub displays were reviewed by their author alone.

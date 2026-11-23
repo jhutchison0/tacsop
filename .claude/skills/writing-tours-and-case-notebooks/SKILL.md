@@ -82,7 +82,7 @@ A repo with an output to defend has up to three case notebooks. The first is exp
 | 4 | `tests/unit/test_case_notebooks.py`: a naive answer a rule computed, set beside a second name in an assert. Review, for whether the naive rule is one a person would write and whether the second name is the repo's answer |
 | 5 | The same module: the source's kind, a cited test that exists, files and commits that exist, and for an incident a quotation found in its record. Review, for whether the record supports the sentence around the quotation, and whether the cited test fails under the naive rule |
 | 6 | Review, with every assert and every conjunct negated one at a time. Negation is a floor |
-| 7 | `test_notebooks.py` for the import; the display skill's review for the figure |
+| 7 | `test_notebooks.py` for the import; the kit's own tests for each display's structure; the display skill's review for the render |
 | 8 | Review |
 | 9 | `test_case_notebooks.py`: the section exists and a cell under it asserts something. Review, for everything inside it (`CONFIDENCE.md`) |
 | The own-data cell | `test_case_notebooks.py`: the branch finishes on a committed file. Review, by hand runs, for what it prints (`TOURS.md`) |

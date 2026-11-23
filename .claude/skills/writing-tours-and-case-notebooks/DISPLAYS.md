@@ -47,7 +47,7 @@ A display takes the product's object where it can and derives the rest. A tree t
 
 ## A Look at Every Level
 
-Kernel rule 2 asks for the data at three levels. Each level owes the reader one look, as a display.
+Notebook rule 2 asks for the data at three levels. Each level owes the reader one look, as a display.
 
 | Level | Also called | The look it owes | Avoid |
 |---|---|---|---|
@@ -73,7 +73,7 @@ A case sets two answers side by side. Rule 6 of the display skill asks "compared
 
 Every case prints its fixture record first, then both answers as two labelled rows of one table. A one-line `naive: [] | repo: [...]` is not a display.
 
-**One scale across the two rules.** Draw the naive answer and the repo's on the same scale even when one fills a small part of it. The scale is the whole range the value could take, named at both ends: ten people at a station, 0 to 1 for a chance. The white space is the comparison (display rule 5).
+**One scale across the two rules.** Draw the naive answer and the repo's on the same scale even when one fills a small part of it. The scale is the whole range the value could take, named at both ends: ten people at a station, 0 to 1 for a chance. The white space is the comparison (display rule 6: side by side, on one scale). Where the claim is the gap alone and not a share of a range, draw the gap.
 
 **Quiet what the reader is not following.** Draw it in grey, labelled. Use the smallest difference that still separates (display rule 3).
 
@@ -107,12 +107,10 @@ A map or a line over an assumed grid is `measured over an assumed range`, and it
 Named failures, each an instance of display rule 5 (the effect at its true size). The test is rule 5's own: the width of the doubt as drawn or printed, divided by its width in the data.
 
 - **False precision.** Digits past what the inputs bear. Print as many places as survive the doubt the section ran.
-- **An order among ties.** A ranked list imposes one. "Each is within two standard errors of the next" does not mean "no settled order": adjacent ties chain.
 - **An error bar that names nothing.** A bar is a range, a standard error, or a spread of draws; the note says which, over how many draws, and what the number is conditional on.
-- **A confidence word with no number.** "Likely", "fairly sure", "usually". Hedge with numbers or not at all.
+- **A confidence word with no number.** "Likely", "fairly sure", "usually". Hedge with numbers or not at all (prose rule 6).
 - **A mean of sources that disagree.** The disagreement was the data.
-- **A bias shown as a spread.** A value that moves one way as its input shrinks has a direction, and a range hides it.
-- **A yardstick scored another way.** A range used for scale is computed by the same procedure as the number set beside it.
+- **Ties, yardsticks and biases.** `CONFIDENCE.md`, "Statistics Over Draws", holds the rules; they are not repeated here.
 - **A mean with its draws left out.** A simulated mean beside an exact value shows the two agree. It does not show that single outcomes lie far from both.
 - **An interval too thin to see, drawn anyway.** Where the interval is narrower than the mark, say so in the note and give it in the table.
 - **An interval of the mean read as the spread.** At 5,000 draws the interval of the mean is 71 times narrower than the range that holds 95% of the outcomes. Print both and name each.
@@ -126,7 +124,7 @@ Named failures, each an instance of display rule 5 (the effect at its true size)
 Galileo's first letter on sunspots, dated 4 May 1612 and printed in Rome in 1613 (*Istoria e dimostrazioni intorno alle macchie solari*), set two small drawings of Saturn inside the sentences that described it. Tufte treats the page as a forerunner of the sparkline, a word-sized graphic (edwardtufte.com, "Saturn embedded in Galileo's text"; *Beautiful Evidence*, the sparklines chapter), and makes the integration of words, numbers and images a principle of analytical design. The maintainer cites *Seeing with Fresh Eyes*, p. 59, for the reproduction; that page was not checked here. A notebook's cell boundary works against this: prose in one cell, code in the next, output under that. Four habits close the gap.
 
 - **A figure cell follows its sentence and holds little else.** Keep the asserts that pin a case in the case's cell; give the figure a short cell of its own with the one or two asserts that say what the figure holds.
-- **The title is the finding, built from the values.** `title=f"Of the {failing} who fail the check, {things} are Things"` cannot drift from the cell. A title typed as a string is a sentence no assert reaches (kernel rule 6).
+- **The title is the finding, built from the values.** `title=f"Of the {failing} who fail the check, {things} are Things"` cannot drift from the cell. A title typed as a string is a sentence no assert reaches (notebook rule 6), and a title is a claim (the verifying-claims skill).
 - **Set a word-sized graphic in the sentence.** A cell's last line can be a computed sentence with a small line in it: "falls from 1.0 ⟍ to 0.2, which is the prior". The sentence gives the numbers at the line's ends, so the line needs no axis. Print the same sentence as plain text for a reader without a front end.
 - **No decoration.** No emoji, no icon, no picture that carries no datum. A word-sized graphic is data at the size of a word.
 
@@ -138,8 +136,8 @@ Grey is the default: ink for the data, grey for what the reader is not following
 
 - **A colour names one thing.** It goes to a name drawn on the figure (a plan, a group, an action), and that name wears it in every figure of the notebook. The kit refuses a colour for a name that is not drawn.
 - **Prefer a colour that imitates the thing.** Flame for a plan that burns, water for a beach, blood for a killing. A reader decodes nothing: the colour is the thing's own. The kit carries a few such colours by name.
-- **At most two colours in a notebook**, on a field of ink and grey. A third meaning takes a label, not a hue. The cap is the house's, not Tufte's.
-- **Never colour alone.** Every coloured mark keeps its label, and the figure still reads printed in black and white: a kit colour is darker than the mid grey beside it. This also serves a reader who cannot tell red from green.
+- **At most two colours in a notebook**, on a field of ink and grey. A third meaning takes a label, not a hue. The cap is the house's, not Tufte's, and a reviewer holds it: no kit counts hues across a notebook.
+- **Never colour alone.** Every coloured mark keeps its label, and the figure still reads printed in black and white: convert a render to grey and check that each coloured group can still be told from its neighbours. This also serves a reader who cannot tell red from green.
 - **No colour for good and bad, rank or mood.** Not red for the naive rule and green for the repo's. Weight and position carry emphasis. A colour means a thing in the story, and a quiet companion line (a prior, a baseline) is grey, which is not a colour.
 - **No colour key.** A colour explained in a legend is an encoded key (display rule 2).
 
@@ -153,7 +151,7 @@ A notebook about a scene, a site or a device may be easier to write with a refer
 
 ## For Two Readers
 
-Rule 8 of the kernel, applied to a display. A reader new to the repo should get the section's point from its heading and the display. A reader who doubts it should find everything needed to check it one layer down.
+Notebook rule 8, applied to a display. A reader new to the repo should get the section's point from its heading and the display. A reader who doubts it should find everything needed to check it one layer down.
 
 | Layer | Carries |
 |---|---|
@@ -171,6 +169,7 @@ A figure whose numbers appear nowhere as text fails the second reader. Print the
 - Run the display skill's `REVIEWING.md` protocol on it, as for any figure.
 - Test that no label overlaps another, with the renderer's own text extents, ties included. Move a crowded label; do not shrink the type (display rule 4).
 - Assert in the notebook cell that the figure has what the text says it has: the count of panels, or of marks in each group.
+- Test that no label lies over a mark, with the renderer's extents for both, and that every label lies inside the canvas. Convert one render to grey and look at it.
 - Check that every item has its own form. Two regions marked O and Q are one region to the eye.
 - Check that every number in the title is on the figure, as a tick, a label or a mark at its place. A title built from values can drift from the picture as easily as from the cell.
 - Check that each annotation touches the mark it describes, or is joined to it by a short leader. Words that float between two marks describe neither.

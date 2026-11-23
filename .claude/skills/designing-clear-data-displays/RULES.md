@@ -12,7 +12,9 @@ The default failure is chartjunk: ink spent on decoration, frames, gradients, an
 
 The failure is the code and the darting, not the presence of words beside a figure. A number, a letter, or a color that means nothing until the reader finds it in a key sends the eye away from the data and back for every mark. VDQI p. 180 says to "integrate the caption and legend into the design so that the eye is not required to dart back and forth between textual material and the graphic" (secondary source; book text not fetched) and, on the same page, "Words and pictures belong together." The friendly-graphic table in VDQI puts it as a property of the graphic: "labels are placed on the graphic itself; no legend is required," against the unfriendly graphic where "Obscure codings require going back and forth between legend and graphic." Tufte's list of what is wrong with a default chart names the failure directly: "encoded legends, color without content" (edwardtufte.com, 2003-01-08). The positive form is *Beautiful Evidence* principle 4: "Completely integrate words, numbers, images, diagrams." A caption or list beside the figure that repeats the figure's words is that integration, not a key.
 
-**Test**: cover everything but the figure. Can a reader name every mark without decoding a number, letter, or color?
+Words on a graphic are data-ink (VDQI p. 180), so a title and a note are held to the figure as the marks are. The integration goes to the page: "Data graphics are paragraphs about data and should be treated as such", and "Tables and graphics should be run into the text whenever possible, avoiding the clumsy and diverting segregation of 'See Fig. 2'" (VDQI p. 181; matched against the book by the second reader, 2026-11-22). A figure sits at the sentence that makes its claim. **Second test**: is the figure within one screen of that sentence?
+
+**Test**: cover everything but the figure. Can a reader name every mark without decoding a number, letter, or color? Then take every number in the title and the note: each appears on the figure as a tick, a label or a mark, at its place.
 
 ## 3. The Smallest Effective Difference
 
@@ -20,17 +22,21 @@ The failure is contrast spent where it separates nothing: a black grid behind gr
 
 **Test**: for each non-data distinction, lighten it until it just still reads. For each data distinction, ask whether it is the smallest that still separates the two things.
 
+**Colour is a distinction**, the strongest one, and this rule governs it. Tufte's first rule for colour is "Above all, do no harm" (*Envisioning Information*, ch. 5, "Color and Information"; secondary source, page not found). He gives colour four uses: to label, to measure, to represent or imitate reality, and to enliven or decorate (secondary: reading notes; check the fourth against the book). Notes on the chapter attribute two habits to him: keep pure, bright colour for small spots and muted colour for large fields, and prefer colours found in nature (secondary). The house reading: grey is the field, and a strong hue is one small spot that names a thing. A hue that imitates its subject (flame, water) beats one that must be learned, since the reader decodes nothing.
+
+**Test for colour**: print the figure in greyscale; every claim must still read. Name what each hue stands for in one phrase; a hue with no name goes. Each hue is named by a label on the figure and never by a key (rule 2). One hue means one thing across every figure of a document.
+
 ## 4. Two Marks Too Close Make a Third
 
 The failure is two marks, or two labels, set so close that a third shape appears between them: an overprint, a smear, a false object. Tufte cites Albers' "1 + 1 = 3" in *Envisioning Information* ch. 3, Layering and Separation: elements set together interact and create "non-informative patterns and texture simply through their combined presence" (secondary source; book text not fetched). The same chapter states the stance: "Confusion and clutter are failures of design, not attributes of information" (p. 53). The clutter is the designer's, not the data's. For labels on maps the placement rules come from Imhof, "Positioning Names on Maps" (*The American Cartographer*, 1975), whom Tufte cites in *Envisioning Information*; verify that citation against the book, since the journal page and the book's pages were not fetched.
 
-**Test**: compute each label's footprint: anchor, height, and width at 0.55 em per glyph for proportional sans-serif or 0.6 em per glyph for monospace. Any overlap is a placement fault. Fix in this order: flip the anchor; move the baseline; add a leader line; drop the picture label to a caption that carries the same word. Shrink last, and never below what the target screen can read. Shrinking both labels delays the collision and buys nothing.
+**Test**: compute each label's footprint: anchor, height, and width at 0.55 em per glyph for proportional sans-serif or 0.6 em per glyph for monospace. Any overlap is a placement fault. Fix in this order: flip the anchor; move the baseline; add a leader line; drop the picture label to a caption that carries the same word. Shrink last, and never below what the target screen can read. Shrinking both labels delays the collision and buys nothing. An annotation is a layer too: set it in the quietest ink that still reads, and keep it touching the mark it describes or joined to it by a leader no longer than the label. Words that float between two marks describe neither.
 
 ## 5. The Lie Factor
 
 The failure is a picture whose visual magnitude misstates the data's magnitude: a truncated axis, an area used to encode a length, a decoration that changes apparent size. VDQI p. 57 defines the lie factor as the size of the effect shown in the graphic divided by the size of the effect in the data. Lie factors above 1.05 or below 0.95 indicate substantial distortion (secondary source; book text not fetched). Above 1 exaggerates; below 1 obscures.
 
-**Test**: measure both effects and divide. Outside 0.95 to 1.05 is a finding. If the true difference matters and is small, draw the difference itself in its own panel, labeled as a difference. Then redraw with the whole available series and the baseline at zero (or at the origin the reader assumes). If the effect reverses or vanishes, the finding is the window, not the ratio, and the redraw is that chart (VDQI p. 74, "Compared to what?").
+**Test**: measure both effects and divide. Outside 0.95 to 1.05 is a finding. A doubt has a size too: the width of an interval or a range as drawn or printed, divided by its width in the data. An interval of a mean printed beside a spread of single outcomes, and not named, understates the spread by the square root of the count. If the true difference matters and is small, draw the difference itself in its own panel, labeled as a difference. Then redraw with the whole available series and the baseline at zero (or at the origin the reader assumes). A bar or an area starts at zero; a line may start where its data do, if the axis says so, and where the claim is a share of a whole range the scale is that range. If the effect reverses or vanishes, the finding is the window, not the ratio, and the redraw is that chart (VDQI p. 74, "Compared to what?").
 
 ## 6. Compared to What?
 
@@ -38,17 +44,21 @@ The failure is one chart in isolation when the reader's question is a comparison
 
 **Test**: name the comparison the display exists for. If the reader must hold a second page in their head to make it, redesign toward small multiples or a shared axis. One figure per case, side by side, on one scale, already is small multiples; a fix for crowding must not merge them.
 
+A table is a display and answers the same question. Order its rows by the value the claim names: "There are nearly always better sequences than alphabetical" (VDQI p. 178; read by the proposer, 2026-11-22). A table may carry a mark per row. **Test for a table**: sort by the claim's value. If the claim shows in the top, the bottom or a gap, a table carries it.
+
 ## 7. Document the Display
 
 The failure is a figure that cannot be trusted or read on its own: no title, no source, no units, no scale, so the reader guesses at all four. *Beautiful Evidence* principle 5: "Thoroughly describe the evidence. Provide a detailed title, indicate the authors and sponsors, document the data sources, show complete measurement scales, point out relevant issues." Tufte's course teaches "how to assess the credibility of a presentation and its presenter, how to detect cherry-picking, how to reason about alternative explanations" (edwardtufte.com/online-course/). Documentation on the figure is what a reader assesses credibility from.
 
-**Test**: cover the caption and the surrounding page. Can a reader name the units and the scale from the figure alone?
+**Test**: cover the caption and the surrounding page. Can a reader name the units, the scale, the source and its date from the figure alone?
 
 ## 8. Content Counts Most
 
 The failure comes in two forms: a design that spends its budget looking sophisticated instead of showing the data, and a design so bare the reader cannot find the point. *Beautiful Evidence* principle 6, under the heading Content Counts Most of All: "Analytical presentations ultimately stand or fall depending on the quality, relevance and integrity of their content." The Feynman-Tufte principle gives the short form, "simple design, intense content" (edwardtufte.com, 2005-03-15; quoted here without the dashes the post sets around it). Tufte's stance on who decides: "Content-driven design requires a radical shift in power and control" (edwardtufte.com, 2002-12-04).
 
 **Test**: name one element you could remove. If none, name one datum you could add.
+
+**Second test**: shrink the figure until its smallest label reaches the floor rule 4 sets. Space that survives the cut and holds no mark, no label and no comparison is a finding. So is a summary drawn where the data behind it would fit (VDQI p. 168: "Low-information designs are suspect: what is left out, what is hidden, why are we shown so little?").
 
 ## Scope Notes
 
@@ -59,7 +69,9 @@ The failure comes in two forms: a design that spends its budget looking sophisti
 What each rule rests on, and how each source was read. "Primary" means Tufte's own words: his own site, or the book's text where a chapter was fetched (VDQI ch. 2 and 5, the course PDF at lmscontent.embanet.com). "Secondary" means another page quoting the book; the book text itself was not fetched.
 
 - Rule 1: VDQI ch. 4 (data-ink ratio; the two erasing principles, secondary: holistics.io); chartjunk page ranges (primary: edwardtufte.com/notebook/chartjunk/); the interior-decoration quote, Bateman et al. 2010, Few, Kosara (secondary: en.wikipedia.org/wiki/Chartjunk); "Above all else show the data" (secondary: goodreads.com; qahiccupps.blogspot.com gives p. 92); the p. 120 sentence (primary: the VDQI ch. 5 text, the course PDF; secondary with page: benjaminleroy.github.io, LeRoy's review).
-- The pre-question: VDQI p. 56 (primary: the ch. 2 text; LeRoy's review gives pp. 20 and 178, his own, not fetched from the book).
+- The pre-question: VDQI p. 56 (primary: the ch. 2 text; LeRoy's review gives pp. 20 and 178, his own, not fetched from the book). The sentence in full: "Tables usually outperform graphics in reporting on small data sets of 20 numbers or less. The special power of graphics comes in the display of large data sets." The count is of the data behind a claim: twenty thousand draws reduced to a mean are twenty thousand numbers.
+- The VDQI quotations in rules 1, 2 and 5 (pp. 57, 74, 96, 100, 107, 120, 168, 180, 183) were matched word for word against the second edition's text by the second reader on 2026-11-22 (`docs/reviews/20261122_display_skill_second_review.md`, N1); read their "secondary source; book text not fetched" markers as superseded by that check. The *Envisioning Information* and *Visual Explanations* markers stand.
+- Colour, word-sized graphics and tables: checked on 2026-11-22 (`docs/plans/20261122_display_skill_improvement_proposal.md`, section 1, lists each source as primary, secondary or not found). Sparklines as "data-intense, design-simple, word-sized graphics" is primary (edwardtufte.com, "Sparkline theory and practice"). The colour passages of *Envisioning Information* are secondary throughout and want a check against the book.
 - Rule 2: VDQI p. 180 (secondary: the caption-and-legend sentence appears verbatim in web search results; no fetched page carried it; qahiccupps.blogspot.com gives "Words and pictures belong together" at p. 180); the friendly-graphic table (secondary: en.wikipedia.org, How to create charts for Wikipedia articles); "encoded legends, color without content" (primary: the cancer-survival thread, 2003-01-08); principle 4 (secondary: philogb.github.io/notes/Minard; eyemagazine.com, Barringer, 2012-06-28).
 - Rule 3: the smallest effective difference (secondary: blas.com/visual-explanations); its placement in *Visual Explanations* (primary: the analytical-design thread, 2006-03-06); *Envisioning Information* ch. 5 states "Above all, do no harm", Tufte's own sentence, Imhof's color rules following it (secondary: blas.com; the docs.google reading notes, which set Imhof's color rules under their own heading).
 - Rule 4: Albers' "1 + 1 = 3" and the combined-presence phrase (secondary: jessepollak's Escaping Flatland post; the chapter 3 placement per reading notes found by search, not fetched); "Confusion and clutter" p. 53 (secondary: robnagler.com book notes); Imhof 1975 (the journal page returned 403; Google Books reports one page of *Envisioning Information* matching "Positioning Names", page not shown; verify the page against the book).
@@ -74,4 +86,4 @@ What each rule rests on, and how each source was read. "Primary" means Tufte's o
 
 - `EXAMPLES.md`: every rule above shown in a before/after pair.
 - `REVIEWING.md`: how these tests become review findings.
-- `SKILL.md`: the kernel, the terms table, and the guardrails (not a persona, not a ban on all non-data ink, not a density rule in either direction, not a sweep).
+- `SKILL.md`: the kernel, the terms table, and the guardrails (not a persona, not a ban on all non-data ink, not a density floor and not a licence for empty space, not a sweep).

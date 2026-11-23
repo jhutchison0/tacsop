@@ -1,14 +1,14 @@
 ---
 name: designing-clear-data-displays
 description: House figure style distilled from Edward Tufte's books and course. Eight kernel rules with tests, before/after pairs, and a review protocol for every chart, figure, map, table, or data-bearing layout. Use when drawing or reviewing any data display.
-version: "1.1.0"
+version: "1.2.0"
 ---
 
 # Designing Clear Data Displays
 
 House style for data displays. Three goals: figures a reader can use without decoding, ink spent on data rather than decoration, and effects shown at their true size. This SKILL.md is the entry point; expansions, examples, and the review protocol live in sidecar files loaded on demand.
 
-Scope, stated once: a repo's UX rules and document schemas define **what** a display must contain. This skill defines **how** the ink goes. Never drop a required element to save ink. Before the eight: could a table or a sentence carry these numbers? Under about twenty, a table usually does (VDQI p. 56).
+Scope, stated once: a repo's UX rules and document schemas define **what** a display must contain. This skill defines **how** the ink goes. Never drop a required element to save ink. Before the eight: count the numbers behind the claim, not behind its summary. Two numbers, a sentence; up to about twenty, a table; more, or a boundary or structure no sorted table shows, a graphic (VDQI pp. 56, 178). A mean of twenty thousand draws is twenty thousand numbers. Where a figure is drawn, print its table beside it.
 
 **Philosophy**: *Show the data. Spend ink on nothing else, within reason.*
 
@@ -45,16 +45,20 @@ Eight rules. The ambient copy lives in CLAUDE.md (see `ADOPTION.md`); `RULES.md`
 | 1 + 1 = 3 | Two marks set close create a third shape between them. Albers' phrase, used by Tufte. | 4 |
 | Lie factor | Size of the effect in the graphic divided by size of the effect in the data. | 5 |
 | Small multiples | The same design repeated, one panel per case, on one scale. | 6 |
-| Sparkline | A word-sized line chart with no axes, set in the sentence it belongs to. | 2, 6 |
+| Sparkline | A word-sized graphic at the resolution of type, set where a word or number could go: a sentence, a table, a heading. The text beside it gives its scale. | 2, 6 |
+| Range-frame | An axis drawn only as far as the data run, with ticks where values were measured. | 1 |
+| Line weight as meaning | A heavier line is a data measure, never a style. | 3 |
+| Levels of detail | A display read once for the overview and again for the fine structure. | 8 |
+| Colour | A distinction at its strongest. Grey is the field; a strong hue is one small spot that names a thing, and imitates it where it can. | 3 |
 | Six principles of analytical design | Comparisons; causality; multivariate data; integration of words and images; documentation; content counts most. | 2, 6, 7, 8 |
 
 ### Chartjunk Starter List (rule 1)
 
-Heavy grids; encoded keys; gratuitous 3-D; gradients and shadows on data marks; decorative icons inside marks; moiré fills (hatching that vibrates). Each is ink that changes when the designer's taste changes, not when the data does. Library defaults are not neutral: a plotting library draws a legend and a grid unasked, and both are chartjunk or an encoded key until a rule above approves them.
+Heavy grids; encoded keys; gratuitous 3-D; gradients and shadows on data marks; decorative icons inside marks; moiré fills (hatching that vibrates); words set on their side; colour that stands for nothing. Each is ink that changes when the designer's taste changes, not when the data does. Library defaults are not neutral: a plotting library draws a legend and a grid unasked, and both are chartjunk or an encoded key until a rule above approves them.
 
 ### Named Failures
 
-- **Pie chart** (rules 6, 8). Tufte's reason: no order along a visual dimension, low density. A table beats it almost always; more than one pie is worse, since the reader compares wedges across pies in spatial disarray (VDQI p. 178). Use a table or an ordered bar.
+- **Pie chart** (rules 6, 8). Tufte's reason: no order along a visual dimension, low density. Tufte's conclusion is "pie charts should never be used" (VDQI p. 178); more than one pie is worse, since the reader compares wedges across pies in spatial disarray (VDQI p. 178). Use a table or an ordered bar.
 - **Dual y-axes** (rules 5, 6). Two independent scales are two free parameters the designer picks; the crossing point and the slopes can be tuned to tell either story, and no single lie factor catches it. This is the skill's own reasoning, not Tufte's. Use a shared axis or two small multiples instead.
 
 ## Ink Economy
@@ -65,14 +69,14 @@ Show-the-data usually means less ink, and the exceptions are instructive. In `EX
 
 - **Not a persona.** "Draw like Tufte" is the roleplay that design principle 5 forbids. These are named rules with sources and tests, applied like any other schema.
 - **Not a ban on all ink that carries no datum.** Rule 1 keeps Tufte's "within reason". Figure-ground fill that makes the data legible (a panel under light labels on a dark page) is exempt. A caption beside a figure that repeats the figure's words is words and pictures together (Beautiful Evidence, principle 4), not a key.
-- **Not a density rule in either direction.** Tufte's "maximize data density ... within reason" (VDQI p. 168) and his shrink principle in the same chapter are not adopted as a floor; a repo's own UX rules can require a less dense display for its readers. Either way: state the override in the review; do not ignore the rule.
+- **Not a density floor, and not a licence for empty space.** Tufte's principle is "Maximize data density and the size of the data matrix, within reason" (VDQI p. 168), and his Shrink Principle is "Graphics can be shrunk way down" (p. 169). The skill sets no number for either. It adopts their test under rule 8: a display that shows a summary where the data would fit, or holds a band of space that separates nothing, gets a finding with the redraw that fills it or trims it. A repo's own UX rules can require a less dense display for its readers; state the override.
 - **Not a sweep.** Adoption re-reviews nothing. A figure a change touches, or a task names, is in scope in full; a display the app still renders is not a record.
 
 ## Sidecar Files
 
 Loaded on demand when this SKILL.md cites them. Read only the ones relevant to the task at hand.
 
-- [RULES.md](RULES.md): each kernel rule expanded with the failure it counters, the mechanism, its source, and the test that catches it. Read before drawing anything larger than a sparkline.
+- [RULES.md](RULES.md): each kernel rule expanded with the failure it counters, the mechanism, its source, and the test that catches it. Read before drawing anything, a sparkline included.
 - [EXAMPLES.md](EXAMPLES.md): six generic before/after pairs as specs and sketches, including the pair that grows. Read when a rule feels abstract.
 - [REVIEWING.md](REVIEWING.md): the review protocol for displays: pass order, finding format, severity mapping, what not to flag, mechanical checks. Read by the code reviewer before reviewing any figure.
 - [ADOPTION.md](ADOPTION.md): the CLAUDE.md kernel block, the reviewer checklist line, the index entries, the optional layout probe, and propagation notes. Read once per repo.
@@ -87,3 +91,5 @@ Loaded on demand when this SKILL.md cites them. Read only the ones relevant to t
 - Edward Tufte's online course (edwardtufte.com/online-course/): fundamental design strategies for all information displays; credibility of a presentation and its presenter; standards of comparison.
 - Distilled here, not transcribed. `RULES.md` lists what each rule rests on and which sources were read.
 - The writing-simple-and-direct skill: the prose-side twin of this skill. Findings about figures are prose and follow its kernel.
+- The writing-tours-and-case-notebooks skill, a draft: its `DISPLAYS.md` says when a notebook's claim is drawn, which display suits which claim and which doubt, and how a kit of tested displays makes a figure cost one call. Its `CONFIDENCE.md` says what a display of doubt must state. This skill says how the ink goes in each of those figures.
+- The verifying-claims skill: a figure's title and every number drawn on it are claims. Build them from the values the figure plots, or check them against those values.

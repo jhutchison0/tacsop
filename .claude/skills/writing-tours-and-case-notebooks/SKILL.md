@@ -1,7 +1,7 @@
 ---
 name: writing-tours-and-case-notebooks
 description: House rule for the notebooks that show how a repo works. Two kinds, both run by the test suite over committed fixtures. A tour walks the main path once; a case notebook stops where the obvious rule gives a different answer, runs it beside the repo's, and says how sure the result is. Use when writing or reviewing a notebook under notebooks/, choosing what a repo's next notebook should be, or choosing the display for a notebook section.
-version: "0.3.0"
+version: "0.4.0"
 ---
 
 # Writing Tours and Case Notebooks
@@ -12,7 +12,7 @@ Scope, stated once: `shift-left-testing` governs how code is tested, `designing-
 
 **Philosophy**: *Show the data at every level, show the wrong answer beside the right one, and say how sure.*
 
-**Status**: 0.3.0, a draft kept out of propagation. The tour rules rest on thirteen reviewed first tours and three doctrine entries (2026-11-14 to 2026-11-16). The case rules rest on a rollout to thirteen repos on 2026-11-16, each notebook built by one agent and reviewed by another. That rollout changed this skill more than it confirmed it: see "What the Suite Cannot See". The test module stands at 0.7.2.
+**Status**: 0.4.0, a draft kept out of propagation. 0.4.0 rewrote `DISPLAYS.md` after the maintainer found the first notebooks drew almost nothing: a claim about a shape is now drawn, from a display kit, with the table beside it. The tour rules rest on thirteen reviewed first tours and three doctrine entries (2026-11-14 to 2026-11-16). The case rules rest on a rollout to thirteen repos on 2026-11-16, each notebook built by one agent and reviewed by another. That rollout changed this skill more than it confirmed it: see "What the Suite Cannot See". The test module stands at 0.7.2.
 
 ## When to Use
 
@@ -44,7 +44,7 @@ Nine rules. The sidecars expand them.
 4. A case runs the naive rule beside the repo's and asserts the difference between them.
 5. Every case names its source, and an incident quotes its record.
 6. An assert must fail if the sentence above it were false. A sentence no assert reaches is cut, or cited.
-7. A figure comes from the package, never from a cell. Under about twenty numbers, print a table.
+7. A figure comes from the package, never from a cell. Draw a claim about a shape, and print its table beside it.
 8. Write for two readers: the heading and the display carry the argument; the cell, the assert and the source let it be checked.
 9. Say how sure. At each level name the doubt, its kind and its size, and run one doubt through to the report.
 
@@ -82,7 +82,7 @@ A repo with an output to defend has up to three case notebooks. The first is exp
 | 4 | `tests/unit/test_case_notebooks.py`: a naive answer a rule computed, set beside a second name in an assert. Review, for whether the naive rule is one a person would write and whether the second name is the repo's answer |
 | 5 | The same module: the source's kind, a cited test that exists, files and commits that exist, and for an incident a quotation found in its record. Review, for whether the record supports the sentence around the quotation, and whether the cited test fails under the naive rule |
 | 6 | Review, with every assert and every conjunct negated one at a time. Negation is a floor |
-| 7 | `test_notebooks.py` for the import; the display skill's review for the figure |
+| 7 | `test_notebooks.py` for the import; the kit's own tests for each display's structure; the display skill's review for the render |
 | 8 | Review |
 | 9 | `test_case_notebooks.py`: the section exists and a cell under it asserts something. Review, for everything inside it (`CONFIDENCE.md`) |
 | The own-data cell | `test_case_notebooks.py`: the branch finishes on a committed file. Review, by hand runs, for what it prints (`TOURS.md`) |
@@ -104,7 +104,7 @@ So a build report leads with what was checked by a second reader, and treats its
 
 - **Not a place for analysis.** Exploration and one-off analysis live outside `notebooks/`, with their outputs, under whatever rule the repo has for records.
 - **Not a second test suite.** A case notebook shows a rule a test already holds, and names the test. A rule no test holds gets its test first.
-- **Not a gallery.** A figure appears because a level or a comparison needs it. A notebook that draws nothing is complete if its tables carry the numbers.
+- **Not a gallery.** A figure appears because a level, a comparison or a doubt needs it. A notebook that draws nothing is complete only if none of its claims is about a shape (`DISPLAYS.md`).
 - **Not a generator's output.** The `.ipynb` is the source. A script that first wrote it is a session tool and is not kept.
 - **Not an assurance.** A notebook runs a product's logic over invented data. It says nothing about whether a real output is right, and where the product advises or decides for a person it says so in its opening cell.
 
@@ -113,7 +113,8 @@ So a build report leads with what was checked by a second reader, and treats its
 - [TOURS.md](TOURS.md): the shape of a tour, what every notebook owes, what "hermetic" covers, and the own-data cell. Read before writing any notebook.
 - [CASES.md](CASES.md): the parts of a case, the naive rule, the three source kinds, the four shapes, where to find cases, and the test module. Read before writing a case notebook.
 - [CONFIDENCE.md](CONFIDENCE.md): the section that says how sure: the table, the kinds, choosing the doubt to run, and the faults reviews found in it. Read before writing that section, every time.
-- [DISPLAYS.md](DISPLAYS.md): which display suits which level, which comparison and which doubt. Read before a notebook section gets a figure.
+- [KIT.md](KIT.md): how to build a repo's display kit: the module, its helpers, each display's call and what its tests hold. Read before building or extending a kit.
+- [DISPLAYS.md](DISPLAYS.md): when a claim is drawn, the display kit, which display suits which level, comparison and doubt, words and pictures together, and colour. Read before writing any section that states a number.
 - [REVIEWING.md](REVIEWING.md): what a second reader checks that no test can, and how to brief a builder and a reviewer. Read before reviewing a notebook or sending an agent to build one.
 
 ## References

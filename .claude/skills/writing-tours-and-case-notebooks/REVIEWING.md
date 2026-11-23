@@ -28,7 +28,8 @@ A reviewer writes one file, the report, inside the repo that owns the notebook, 
 7. **The confidence section.** `CONFIDENCE.md`, row by row: is each a real doubt at that level, with an honest kind and a size? Was the repo searched before each `not known`? Does the cell follow the doubt that could change a decision, and name it? Does the result belong to the method or to the fixture? Would a decision scientist accept how the doubt is stated?
 8. **The own-data cell.** Could it execute, publish, fetch, or mis-score what a reader gives it? Does it print anything the product's report withholds, or anything from the reader's data that the repo's rules forbid? Run it.
 9. **Defects.** Confirm or refute each with a probe that can fail. For a known-defect pin, try one plausible fix and see whether the pin fails.
-10. **Readability.** Would a reader new to the repo get each case's point from its heading and its table alone?
+10. **Each figure.** Render it in a real kernel and look at it. Run the display skill's `REVIEWING.md` on the render, pass by pass, and the two checks a test cannot make: a label over a mark, and the render converted to grey. Check the title's numbers against the cell's asserts, and the figure's marks against the table printed beside it. Ask of each stated doubt what it is a doubt of (`DISPLAYS.md`, "Three doubts, three marks").
+11. **Readability.** Would a reader new to the repo get each case's point from its heading and its display alone? Does any paragraph walk through numbers a figure now shows?
 
 Findings are Critical, Warning or Note, each with the cell, the evidence and the fix. A result that differs by machine is a Critical. So is a notebook that fails intermittently, a number the product's report withholds printed by the own-data cell, and a private or real-world term in a public repo. The report ends with a verdict (merge, merge after fixes, do not merge) and a section on where this skill or the test module was wrong, silent or too strict.
 
@@ -50,7 +51,7 @@ Findings are Critical, Warning or Note, each with the cell, the evidence and the
 
 **What it must not change.** Product code. A defect is pinned, filed as the repo's rules ask, and put at the top of the report.
 
-**What it reports.** The result (built, or not ready); each command with its last line; the candidate table with what was dropped and why; the cases; defects; the confidence table; the figure it would add; where this skill did not fit; questions for the owner, each answerable in a line. It leads with what a second reader should check, not with its negation count.
+**What it reports.** The result (built, or not ready); each command with its last line; the candidate table with what was dropped and why; the cases; defects; the confidence table; each figure it drew, with its render; where this skill did not fit; questions for the owner, each answerable in a line. It leads with what a second reader should check, not with its negation count.
 
 **Order of work.** Read the repo's own rules; mine candidates and count them against the gate; take the newest `test_notebooks.py` alone as a first commit; copy `test_case_notebooks.py` and see it fail; write any missing test first; build; run the own-data branch by hand; break it; run the suite after `git add`, since a tripwire may read tracked files; re-copy the test modules before the final run and say their version.
 

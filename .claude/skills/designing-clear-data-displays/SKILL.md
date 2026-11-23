@@ -1,14 +1,14 @@
 ---
 name: designing-clear-data-displays
 description: House figure style distilled from Edward Tufte's books and course. Eight kernel rules with tests, before/after pairs, and a review protocol for every chart, figure, map, table, or data-bearing layout. Use when drawing or reviewing any data display.
-version: "1.1.0"
+version: "1.2.0"
 ---
 
 # Designing Clear Data Displays
 
 House style for data displays. Three goals: figures a reader can use without decoding, ink spent on data rather than decoration, and effects shown at their true size. This SKILL.md is the entry point; expansions, examples, and the review protocol live in sidecar files loaded on demand.
 
-Scope, stated once: a repo's UX rules and document schemas define **what** a display must contain. This skill defines **how** the ink goes. Never drop a required element to save ink. Before the eight: could a table or a sentence carry these numbers? Under about twenty, a table usually does (VDQI p. 56).
+Scope, stated once: a repo's UX rules and document schemas define **what** a display must contain. This skill defines **how** the ink goes. Never drop a required element to save ink. Before the eight: could a table or a sentence carry these numbers? Under about twenty, a table usually does (VDQI p. 56). Count the numbers behind the claim, not behind its summary: a mean of twenty thousand draws is twenty thousand numbers. Past twenty, or where the claim is a boundary or a structure that no sorted table shows, draw, and print the table beside the figure.
 
 **Philosophy**: *Show the data. Spend ink on nothing else, within reason.*
 
@@ -46,6 +46,7 @@ Eight rules. The ambient copy lives in CLAUDE.md (see `ADOPTION.md`); `RULES.md`
 | Lie factor | Size of the effect in the graphic divided by size of the effect in the data. | 5 |
 | Small multiples | The same design repeated, one panel per case, on one scale. | 6 |
 | Sparkline | A word-sized line chart with no axes, set in the sentence it belongs to. | 2, 6 |
+| Colour | A distinction at its strongest. Grey is the field; a strong hue is one small spot that names a thing, and imitates it where it can. | 3 |
 | Six principles of analytical design | Comparisons; causality; multivariate data; integration of words and images; documentation; content counts most. | 2, 6, 7, 8 |
 
 ### Chartjunk Starter List (rule 1)
@@ -87,3 +88,5 @@ Loaded on demand when this SKILL.md cites them. Read only the ones relevant to t
 - Edward Tufte's online course (edwardtufte.com/online-course/): fundamental design strategies for all information displays; credibility of a presentation and its presenter; standards of comparison.
 - Distilled here, not transcribed. `RULES.md` lists what each rule rests on and which sources were read.
 - The writing-simple-and-direct skill: the prose-side twin of this skill. Findings about figures are prose and follow its kernel.
+- The writing-tours-and-case-notebooks skill, a draft: its `DISPLAYS.md` says when a notebook's claim is drawn, which display suits which claim and which doubt, and how a kit of tested displays makes a figure cost one call. Its `CONFIDENCE.md` says what a display of doubt must state. This skill says how the ink goes in each of those figures.
+- The verifying-claims skill: a figure's title is a claim, and an assert or a test holds it.

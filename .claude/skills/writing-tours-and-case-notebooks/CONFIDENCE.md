@@ -27,10 +27,10 @@ These are the house's terms for a line of the common operating picture, applied 
 | Kind | Means | Carries |
 |---|---|---|
 | **measured** | The doubt has been run and counted | The number and the cell that gives it. Nothing assumed: a step function's jump at the fixture's own value is measured |
-| **measured over an assumed range** | The cell counted over values it chose | The range, marked as an assumption in a comment. Any size computed from invented values is this kind, two invented endpoints included. The row also owes the size on real data, or `not known` |
+| **measured over an assumed range** | The cell counted over values it chose | The range, marked as an assumption in a comment. Any size computed from invented values is this kind, two invented endpoints included. Every input held fixed is named with its value. A count of cells measures the grid: the size is the value at the boundary. The row also owes the size on real data, or `not known` |
 | **estimated** | A range someone judged, or a statistic under a model | The range, its basis, and what would prove it wrong. A standard error is estimated, and the cell tests it |
-| **not known** | Nobody has looked, or nobody can | What would settle it, as a collector someone could run. It needs no range. A standing gap is also a `## Limit` |
-| **exact** | There is no doubt at this level | Exact in what, to what tolerance. "Deterministic over a closed input" is a reason |
+| **not known** | Nobody has looked, or nobody can | What would settle it, as a collector someone could run. It needs no range. A standing gap is also a `## Limit`. In a figure it gets no point and no interval. Where it is an input, the row gives the value at which the answer changes, so a reader can say which side they believe |
+| **exact** | There is no doubt at this level | Exact in what, to what tolerance. "Deterministic over a closed input" is a reason. Draws that all agree are not `exact`: n agreeing draws bound the rate of anything else at 3/n |
 
 Ten traps, each sprung in the rollout:
 
@@ -49,7 +49,7 @@ Ten traps, each sprung in the rollout:
 
 ## The Cell
 
-After the table, one cell takes one doubt and carries it to the report: vary the doubtful input across its range, or swap the disputed source or procedure, and print what the report does. Assert what survives the doubt and what does not. A counting cell comes first where the table states numbers, to pin each one.
+After the table, one cell takes one doubt and carries it to the report, and one display shows how far the fixture sits from the place where the answer changes (`DISPLAYS.md`, "Showing Doubt"): vary the doubtful input across its range, or swap the disputed source or procedure, and print what the report does. Assert what survives the doubt and what does not. A counting cell comes first where the table states numbers, to pin each one.
 
 Run it at the shipped settings, through the product's own ordering and the call the product makes. Name each setting changed and each fixture value built to make the result happen. Reversing a list can reach an order the product never produces.
 
@@ -61,7 +61,7 @@ Run it at the shipped settings, through the product's own ordering and the call 
 - **A structural unknown has a bound from the structure, and no sweep.** Where a value cannot be known until the product runs (a computed link, a runtime target), do not sweep invented values and count: state the bound the structure gives, such as "anywhere from 0 to N". A bound printed about a reader's data is tested on a fixture built to break it. One cell printed a lower bound that a story's own text refuted.
 - **Say which way it fails when unsure**, in asserted lines: with no number it refuses, or it acts. In a product that decides, this is the finding. Before writing the summary, search the notebook's own rows for its counter-examples: "with a doubtful number it acts" was contradicted by three rows in the same notebook. The honest form names the mechanism: it refuses on a missing value and on a doubt a field declares; it acts on a doubt no field carries and on a value a comparison cannot see.
 
-**What a result belongs to.** A fixture on a decision boundary shows the largest sensitivity there is. Run the doubt on two fixtures, one on the boundary and one off it, or say where the fixture sits. Separate two things one phrase tends to merge:
+**What a result belongs to.** A fixture on a decision boundary shows the largest sensitivity there is. Run the doubt on two fixtures, one on the boundary and one off it, or say where the fixture sits. Give the margin in each doubtful input, in the units the input arrives in. A margin in a derived quantity (a posterior, a score) is carried back to the inputs that produce it. Separate two things one phrase tends to merge:
 
 | | Often | Example |
 |---|---|---|
@@ -76,7 +76,8 @@ Where the doubt is a seed, a sample or a rerun:
 
 - Give the number of draws, the statistic, and what makes the draws independent. Overlapping windows of one text are not independent: say they overlap, and call their range a floor.
 - Say what the number is **conditional on**: the policy, the fixture, who plays the other side.
-- Give an interval, not "plus or minus" one standard error. A rate of 0 or 1 has no normal interval.
+- Give an interval, not "plus or minus" one standard error, and name what it is an interval of. An interval of a mean says how well the draws know the mean. It says nothing about where one outcome falls: give the range that holds 95% of the draws for that. A normal interval needs about 30 draws and both ends on the scale. A rate takes a Wilson interval; at 0 of n the bound is 3/n.
+- **Draws do not touch an invented input.** Every draw holds the fixture's inputs fixed. Name them beside the interval, and show how far the statistic moves when the most doubtful one moves by an amount a reader might believe. Where that move is wider than the interval, the interval is not the size of the doubt, and the row says so.
 - State the threshold and **how many comparisons share it**.
 - **An order among several items needs every pair.** "Each is within two standard errors of the next" does not mean "no settled order": adjacent ties chain. Print each item's range of places and assert the ranges.
 - **Check the claim on a second, disjoint block of draws**, in the cell. Two blocks is a stopping rule, not a test: where they differ, claim only what holds in both, or draw more. An assert that holds on seeds 0 to 29 and in two of ten other blocks passed by luck, and negation cannot see that. If a claim needs more draws than the suite can afford, the cell claims less.

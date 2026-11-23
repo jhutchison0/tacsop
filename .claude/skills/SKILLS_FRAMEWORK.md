@@ -246,7 +246,7 @@ A skill below 1.0.0 that the hub is still testing on itself. It is not in the ro
 
 **Path**: `.claude/skills/writing-tours-and-case-notebooks/SKILL.md` + 5 sidecars (`TOURS.md`, `CASES.md`, `CONFIDENCE.md`, `DISPLAYS.md`, `REVIEWING.md`).
 
-**Focus**: The notebooks that show how a repo works, both kinds run by the suite over committed fixtures: a tour walks the main path once, and a case notebook runs the obvious rule beside the repo's, asserts the difference, and says how sure the result is. Version 0.3.0, a draft: rewritten after a rollout to thirteen repos in which reviews found faults the suite could not see.
+**Focus**: The notebooks that show how a repo works, both kinds run by the suite over committed fixtures: a tour walks the main path once, and a case notebook runs the obvious rule beside the repo's, asserts the difference, and says how sure the result is. Version 0.4.0, a draft: rewritten after a rollout to thirteen repos in which reviews found faults the suite could not see, and again on 2026-11-22 so that a claim about a shape is drawn from a display kit.
 
 **Key concepts**: tour for breadth and cases for depth, three levels (arrives, handled, reported), three lenses (construction, validity, scope), the parts of a case, three source kinds with an incident quoting its record, known defects and limits as shapes, a confidence section with five kinds of doubt and one doubt run through to the report, hermetic beyond offline (timezone, hash seed, clock, row order), negation as a floor, a second reader's protocol.
 
